@@ -1,0 +1,16 @@
+
+*.vsidx
+/.vs
+*.sln
+*.vcxproj
+*.filters
+*.user
+*.obj
+*.recipe
+*.ilk
+*.log
+*.tlog
+*.idb
+*.pdb
+*.exe
+*.dll
