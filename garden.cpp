@@ -67,7 +67,7 @@ void Garden::generate_world() {
 
 	std::random_device rd;
 	std::mt19937 g(rd());
-	std::uniform_int_distribution<int> dist(0, Zen::TERRAIN_WIDTH);
+	std::uniform_int_distribution<int> dist(0, Zen::TERRAIN_WIDTH-1);
 	std::shuffle(pixels.begin(), pixels.end(), g);
 
 	/*****************************************
@@ -88,20 +88,19 @@ void Garden::generate_world() {
 
 		// DIRT PIXEL PLACEMENT
 		while (i == Zen::PIXEL_TYPE::DIRT) {
-			if (x_val != 0) {
-				if (cells[x_val - 1][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
-					x_val--;
-					//cells[x_val - 1][y + 1] = Zen::PIXEL_TYPE::DIRT;
-					//pixels.erase(pixels.begin());
-					continue;
-				}
+			unsigned int bottom_left = std::max(x_val-1, 0);
+			unsigned int bottom_right = std::min(x_val+1, Zen::TERRAIN_WIDTH-1);
+			if (cells[x_val][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
+				y++;
+				continue;
 			}
-			else if (x_val != Zen::TERRAIN_WIDTH) {
-				if (cells[x_val + 1][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
-					x_val++;
-					//cells[x_val + 1][y + 1] = Zen::PIXEL_TYPE::DIRT;
-					continue;
-				}
+			else if (cells[bottom_left][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
+				x_val--;
+				continue;
+			}
+			else if (cells[bottom_right][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
+				x_val++;
+				continue;
 			}
 			else {
 				cells[x_val][y] = Zen::PIXEL_TYPE::DIRT;
@@ -110,8 +109,8 @@ void Garden::generate_world() {
 		}
 		//CLAY PIXEL PLACEMENT
 		if (i == Zen::PIXEL_TYPE::CLAY) {
-			if (x_val != 0 && x_val != Zen::TERRAIN_WIDTH) {
-				if (cells[x_val - 1][y] == cells[x_val + 1][y] == Zen::PIXEL_TYPE::DIRT) {
+			if (x_val != 0 && x_val != Zen::TERRAIN_WIDTH-1) {
+				if (cells[x_val - 1][y] == Zen::PIXEL_TYPE::DIRT && cells[x_val + 1][y] == Zen::PIXEL_TYPE::DIRT) {
 					cells[x_val - 1][y] = cells[x_val + 1][y] = cells[x_val][y] = Zen::PIXEL_TYPE::CLAY;
 				}
 			}
@@ -134,6 +133,10 @@ void Garden::generate_world() {
 		}
 	}
 	SDL_RenderPresent(renderer);
+	//for (int x = 0; x < Zen::TERRAIN_HEIGHT; x++)
+		//delete[] cells[x];
+	delete[] cells;
+	pixels.clear();
 	update();
 }
 
@@ -158,14 +161,14 @@ void Garden::set_pixel_color(Zen::PIXEL_TYPE p)
 }
 
 void Garden::render() {
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+	/*SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 136, 140, 141, 0);
 	/*for (int i = 0; i < screen_width / 8; i++) {
 		SDL_RenderFillRect(renderer, &grid.at(i).at((screen_height / 8) - 1));
 	}
-	*/
-	SDL_RenderPresent(renderer);
+	
+	SDL_RenderPresent(renderer);*/
 }
 
 void Garden::input() {

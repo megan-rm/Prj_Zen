@@ -8,20 +8,20 @@
 #include <random>
 
 namespace Zen {
-	const int TERRAIN_WIDTH = 640;
-	const int TERRAIN_HEIGHT = 200;
-	const int TOTAL_PIXELS = TERRAIN_WIDTH * TERRAIN_HEIGHT * 0.8;
-	const float DIRT_RATIO = 0.7f;
-	const float CLAY_RATIO = 0.2f;
-	const float STONE_RATIO = 0.1f;
-	const int DIRT_PIXELS = TOTAL_PIXELS * DIRT_RATIO;
-	const int CLAY_PIXELS = TOTAL_PIXELS * CLAY_RATIO;
-	const int STONE_PIXELS = TOTAL_PIXELS * STONE_RATIO;
+	static const int TERRAIN_WIDTH = 6000;
+	static const int TERRAIN_HEIGHT = 200;
+	static const int TOTAL_PIXELS = TERRAIN_WIDTH * TERRAIN_HEIGHT * 0.8;
+	static const float DIRT_RATIO = 0.7f;
+	static const float CLAY_RATIO = 0.2f;
+	static const float STONE_RATIO = 0.1f;
+	static const int DIRT_PIXELS = TOTAL_PIXELS * DIRT_RATIO;
+	static const int CLAY_PIXELS = TOTAL_PIXELS * CLAY_RATIO;
+	static const int STONE_PIXELS = TOTAL_PIXELS * STONE_RATIO;
 	enum PIXEL_TYPE{EMPTY=0, DIRT, CLAY, STONE};
 	
-	SDL_Color DIRT_COLOR = { 140, 70, 20, 255 };
-	SDL_Color CLAY_COLOR = { 210, 180, 140, 255 };
-	SDL_Color STONE_COLOR = { 128, 128, 128, 255 };
+	static SDL_Color DIRT_COLOR = { 140, 70, 20, 255 };
+	static SDL_Color CLAY_COLOR = { 197, 95, 64, 255 };
+	static SDL_Color STONE_COLOR = { 128, 128, 128, 255 };
 }
 
 class Garden
