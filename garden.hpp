@@ -8,7 +8,7 @@
 #include <random>
 
 namespace Zen {
-	static const int TERRAIN_WIDTH = 6000;
+	static const int TERRAIN_WIDTH = 10000;
 	static const int TERRAIN_HEIGHT = 200;
 	static const int TOTAL_PIXELS = TERRAIN_WIDTH * TERRAIN_HEIGHT * 0.8;
 	static const float DIRT_RATIO = 0.7f;
@@ -36,6 +36,10 @@ public:
 	void update();
 	void generate_world();
 	void generate_spritesheet();
+	void place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct);
+	void place_lake(Zen::PIXEL_TYPE** cells, int center, int h_radius, int w_radius);
+	void place_mountain(Zen::PIXEL_TYPE** cells, int center, int height);
+
 	void set_pixel_color(Zen::PIXEL_TYPE);
 private:
 	SDL_Window* window;
