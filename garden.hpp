@@ -9,14 +9,19 @@
 
 namespace Zen {
 	static const int TERRAIN_WIDTH = 10000;
-	static const int TERRAIN_HEIGHT = 200;
+	static const int TERRAIN_HEIGHT = 1200;
 	static const int TOTAL_PIXELS = TERRAIN_WIDTH * TERRAIN_HEIGHT * 0.8;
-	static const float DIRT_RATIO = 0.7f;
-	static const float CLAY_RATIO = 0.2f;
-	static const float STONE_RATIO = 0.1f;
-	static const int DIRT_PIXELS = TOTAL_PIXELS * DIRT_RATIO;
-	static const int CLAY_PIXELS = TOTAL_PIXELS * CLAY_RATIO;
-	static const int STONE_PIXELS = TOTAL_PIXELS * STONE_RATIO;
+	
+	static const int MOUNTAIN_HEIGHT = 1000; // 200 for terrain, 800 above terrain?
+	static const int MOUNTAIN_WIDTH = 500; // we'll add some randomness to this? I'm unsure.
+	static int mountain_start_x;
+	static int mountain_end_x;
+	static int mountain_end_y; // for river formation, we only need the intercept at the end
+	static int river_start_x;
+	static int river_end_x;
+	static int lake_start_x;
+	static int lake_end_x;
+
 	enum PIXEL_TYPE{EMPTY=0, DIRT, CLAY, STONE};
 	
 	static SDL_Color DIRT_COLOR = { 140, 70, 20, 255 };
@@ -37,8 +42,8 @@ public:
 	void generate_world();
 	void generate_spritesheet();
 	void place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct);
-	void place_lake(Zen::PIXEL_TYPE** cells, int center, int h_radius, int w_radius);
-	void place_mountain(Zen::PIXEL_TYPE** cells, int center, int height);
+	void place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int h_radius, int w_radius);
+	void place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height);
 
 	void set_pixel_color(Zen::PIXEL_TYPE);
 private:
