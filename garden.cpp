@@ -126,20 +126,36 @@ void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int ce
 	int width = (int)(Zen::MOUNTAIN_WIDTH * r_dist(g));
 	center = width * 0.3333;
 	int x = 0;
-	int horizontal_chance = center / Zen::MOUNTAIN_HEIGHT;
-	for (int y = Zen::TERRAIN_HEIGHT; y < (Zen::TERRAIN_HEIGHT - Zen::MOUNTAIN_HEIGHT); y--) { // change screen_height => Zen::TERRAIN_HEIGHT;
+	int horizontal_chance = (center * 100) / Zen::MOUNTAIN_HEIGHT;
+	for (int y = Zen::TERRAIN_HEIGHT; y > (Zen::TERRAIN_HEIGHT - Zen::MOUNTAIN_HEIGHT); y--) { // change screen_height => Zen::TERRAIN_HEIGHT;
 		int movement = i_dist(g);
 		//place all stone below as stone
 		for (int i = y; i < Zen::TERRAIN_HEIGHT; i++) {
 			cells[x][i] = Zen::PIXEL_TYPE::STONE;
 		}
 		if (movement <= horizontal_chance) {
-			
+			x++;
 		}
 		else {
-
+			y--;
 		}
 	}
+	center = width * 0.6666;
+	horizontal_chance = (center * 100) / Zen::MOUNTAIN_HEIGHT;
+	for (int y = Zen::MOUNTAIN_HEIGHT; y > Zen::TERRAIN_HEIGHT; y++) { // change screen_height => Zen::TERRAIN_HEIGHT;
+		int movement = i_dist(g);
+		//place all stone below as stone
+		for (int i = y; i < Zen::TERRAIN_HEIGHT; i++) {
+			cells[x][i] = Zen::PIXEL_TYPE::STONE;
+		}
+		if (movement <= horizontal_chance) {
+			x++;
+		}
+		else {
+			y++;
+		}
+	}
+
 }
 
 void Garden::generate_world() {

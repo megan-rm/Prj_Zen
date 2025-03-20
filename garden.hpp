@@ -8,12 +8,12 @@
 #include <random>
 
 namespace Zen {
-	static const int TERRAIN_WIDTH = 10000;
-	static const int TERRAIN_HEIGHT = 1200;
-	static const int TOTAL_PIXELS = TERRAIN_WIDTH * TERRAIN_HEIGHT * 0.8;
+	constexpr int TERRAIN_WIDTH = 10000;
+	constexpr int TERRAIN_HEIGHT = 1200;
+	constexpr int TOTAL_PIXELS = TERRAIN_WIDTH * TERRAIN_HEIGHT * 0.8;
 	
-	static const int MOUNTAIN_HEIGHT = 1000; // 200 for terrain, 800 above terrain?
-	static const int MOUNTAIN_WIDTH = 500; // we'll add some randomness to this? I'm unsure.
+	constexpr int MOUNTAIN_HEIGHT = 1000; // 200 for terrain, 800 above terrain?
+	constexpr int MOUNTAIN_WIDTH = 500; // we'll add some randomness to this? I'm unsure.
 	static int mountain_start_x;
 	static int mountain_end_x;
 	static int mountain_end_y; // for river formation, we only need the intercept at the end
