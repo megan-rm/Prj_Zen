@@ -140,9 +140,20 @@ void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int ce
 			y--;
 		}
 	}
+
+	//round out the top
+	for (int y = 0; y < 50; y++) {
+		std::uniform_real_distribution<double> r(0.99, 1.01);
+		int dy = (Zen::TERRAIN_HEIGHT - Zen::MOUNTAIN_HEIGHT) * r(g);
+		for (int i = dy; i < Zen::TERRAIN_HEIGHT; i++) {
+			cells[x][i] = Zen::PIXEL_TYPE::STONE;
+		}
+		x++;
+	}
+
 	center = width * 0.6666;
 	horizontal_chance = (center * 100) / Zen::MOUNTAIN_HEIGHT;
-	for (int y = Zen::MOUNTAIN_HEIGHT; y > Zen::TERRAIN_HEIGHT; y++) { // change screen_height => Zen::TERRAIN_HEIGHT;
+	for (int y = (Zen::TERRAIN_HEIGHT - Zen::MOUNTAIN_HEIGHT); y < Zen::TERRAIN_HEIGHT; y++) { // change screen_height => Zen::TERRAIN_HEIGHT;
 		int movement = i_dist(g);
 		//place all stone below as stone
 		for (int i = y; i < Zen::TERRAIN_HEIGHT; i++) {
@@ -176,7 +187,7 @@ void Garden::generate_world() {
 	place_terrain(cells, 40, 0.3, 0.5, 0.2); // bedrock top
 	place_terrain(cells, 130, 0.4, 0.55, 0.05); // subsoil
 	place_terrain(cells, 20, 0.8, 0.15, 0.05); //topsoil
-	place_mountain(cells, 200, 0);
+	place_mountain(cells, 500, 0);
 	SDL_RenderClear(renderer);
 	//render the generated terrain to the screen
 	for (int x = 0; x < Zen::TERRAIN_WIDTH; x++) {

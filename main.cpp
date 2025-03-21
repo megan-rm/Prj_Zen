@@ -4,7 +4,7 @@
 
 int main(int argc, char* args[])
 {
-	Garden zen("Project Zen", 640, 480);
+	Garden zen("Project Zen", 1280, 960);
 	zen.run();
 	return 0;
 }

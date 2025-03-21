@@ -12,8 +12,8 @@ namespace Zen {
 	constexpr int TERRAIN_HEIGHT = 1200;
 	constexpr int TOTAL_PIXELS = TERRAIN_WIDTH * TERRAIN_HEIGHT * 0.8;
 	
-	constexpr int MOUNTAIN_HEIGHT = 1000; // 200 for terrain, 800 above terrain?
-	constexpr int MOUNTAIN_WIDTH = 500; // we'll add some randomness to this? I'm unsure.
+	constexpr int MOUNTAIN_HEIGHT = 800; // 200 for terrain, 800 above terrain?
+	constexpr int MOUNTAIN_WIDTH = 800; // we'll add some randomness to this? I'm unsure.
 	static int mountain_start_x;
 	static int mountain_end_x;
 	static int mountain_end_y; // for river formation, we only need the intercept at the end
