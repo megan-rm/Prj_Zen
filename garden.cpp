@@ -114,9 +114,84 @@ void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int app
 	}
 }
 
-void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height) {
+void Garden::place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
+	Zen::lake_start_x = Zen::river_end_x;
+	Zen::lake_end_x = Zen::lake_start_x + Zen::LAKE_WIDTH;
+	//debug purposes
+	Zen::lake_start_x = Zen::river_start_x + 20;
+	Zen::lake_end_x = Zen::lake_start_x + Zen::LAKE_WIDTH;
 
-	//start our ascent. this is mountain left side screen->right side screen, however.
+	int center_x = (Zen::lake_end_x + Zen::lake_start_x) / 2;
+	int center_y = 0;
+	for (int y = 0; y < Zen::TERRAIN_HEIGHT; y++) {
+		if (cells[center_x][y] != Zen::PIXEL_TYPE::EMPTY) {
+			center_y = y - 30;
+			break;
+		}
+	}
+
+	for (int x = Zen::lake_start_x; x < Zen::lake_end_x; x++) {
+		for (int y = center_y - Zen::LAKE_DEPTH; y < center_y + Zen::LAKE_DEPTH; y++) {
+			double ellipse_val = (pow(x - center_x, 2) / pow(Zen::LAKE_WIDTH / 2, 2)) + (pow(y - center_y, 2) / pow(Zen::LAKE_DEPTH, 2));
+			if (ellipse_val <= 1.0) {
+				cells[x][y] = Zen::PIXEL_TYPE::EMPTY;
+			}
+		}
+	}
+	int clay_pixels = Zen::LAKE_WIDTH * 7;
+	int stone_pixels = Zen::LAKE_WIDTH * 2;
+
+	std::vector<Zen::PIXEL_TYPE> pixels(clay_pixels + stone_pixels);
+	std::fill_n(pixels.begin(), clay_pixels, Zen::PIXEL_TYPE::CLAY);
+	std::fill_n(pixels.begin() + clay_pixels, stone_pixels, Zen::PIXEL_TYPE::STONE);
+
+	std::random_device rd;
+	std::mt19937 g(rd());
+	float range_start = Zen::LAKE_WIDTH / 2.0f;
+	float range_end = Zen::LAKE_WIDTH / 4.0f;
+	std::normal_distribution<double> dist(range_start, range_end);
+	std::shuffle(pixels.begin(), pixels.end(), g);
+	for (auto i : pixels) {
+		int x = dist(g) + Zen::lake_start_x;
+		for (int y = center_y + 45; y < Zen::TERRAIN_HEIGHT; y++) {
+			if (cells[x][y + 1] != Zen::PIXEL_TYPE::EMPTY && cells[x][y] == Zen::PIXEL_TYPE::EMPTY) {
+				cells[x][y] = i;
+				break;
+			}
+		}
+	}
+}
+
+void Garden::place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction) {
+	int ty = Zen::mountain_end_y - 10; // this is from where we'll iterate down
+	std::random_device rd;
+	std::mt19937 g(rd());
+	std::uniform_int_distribution<int> rand(0, 69); // Darren I swear I asked Tyler what number to randomize between, he chose this.
+	std::uniform_int_distribution<int> riverbed_dist(20, 30);
+	//river moving -> right
+	Zen::river_end_x = Zen::river_start_x + Zen::MOUNTAIN_WIDTH + rand(g);
+	Zen::lake_start_x = Zen::river_end_x;
+	for (int x = Zen::river_start_x; x < Zen::river_end_x; x++) {
+		int tr = riverbed_dist(g);
+		for (int y = ty; y < (ty + tr); y++) {
+			if (cells[x][y] != Zen::PIXEL_TYPE::EMPTY && cells[x][y] != Zen::PIXEL_TYPE::STONE) {
+				int r = rand(g);
+				if (r > 34) {
+					cells[x][y] = Zen::PIXEL_TYPE::CLAY;
+				}
+				else if (r < 10) {
+					cells[x][y] = Zen::PIXEL_TYPE::STONE;
+				}
+			}
+		}
+	}
+	place_lake(cells);
+}
+
+void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height) {
+	// TODO: WE NEED TO REFACTOR THIS, AND CLEAN UP A LOT OF GARBAGE. Width? Center? We can do better
+	//		 Also going to allow random chance which side the mountain / ocean form on
+	// start our ascent. this is mountain left side screen->right side screen, however.
 	// we'll need to alter to allow random far side of screen generation
 	std::random_device rd;
 	std::mt19937 g(rd());
@@ -124,10 +199,9 @@ void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int ce
 	std::uniform_int_distribution<int> i_dist(0, 100);
 
 	int width = (int)(Zen::MOUNTAIN_WIDTH * r_dist(g));
-	center = width * 0.3333;
 	int x = 0;
 	int horizontal_chance = (center * 100) / Zen::MOUNTAIN_HEIGHT;
-	for (int y = Zen::TERRAIN_HEIGHT; y > (Zen::TERRAIN_HEIGHT - Zen::MOUNTAIN_HEIGHT); y--) { // change screen_height => Zen::TERRAIN_HEIGHT;
+	/*for (int y = Zen::TERRAIN_HEIGHT; y > (Zen::TERRAIN_HEIGHT - Zen::MOUNTAIN_HEIGHT); y--) { // change screen_height => Zen::TERRAIN_HEIGHT;
 		int movement = i_dist(g);
 		//place all stone below as stone
 		for (int i = y; i < Zen::TERRAIN_HEIGHT; i++) {
@@ -139,7 +213,7 @@ void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int ce
 		else {
 			y--;
 		}
-	}
+	}*/
 
 	//round out the top
 	for (int y = 0; y < 50; y++) {
@@ -151,8 +225,8 @@ void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int ce
 		x++;
 	}
 
-	center = width * 0.6666;
-	horizontal_chance = (center * 100) / Zen::MOUNTAIN_HEIGHT;
+	center = width;// *0.6666;
+	horizontal_chance = (center * 85) / Zen::MOUNTAIN_HEIGHT;
 	for (int y = (Zen::TERRAIN_HEIGHT - Zen::MOUNTAIN_HEIGHT); y < Zen::TERRAIN_HEIGHT; y++) { // change screen_height => Zen::TERRAIN_HEIGHT;
 		int movement = i_dist(g);
 		//place all stone below as stone
@@ -165,7 +239,13 @@ void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int ce
 		else {
 			y++;
 		}
+		if (cells[x+1][y] != Zen::PIXEL_TYPE::EMPTY && Zen::mountain_end_y == 0) {
+			Zen::mountain_end_x = x + 1;
+			Zen::mountain_end_y = y;
+			Zen::river_start_x = Zen::mountain_end_x;
+		}
 	}
+	place_river(cells, false);
 
 }
 
@@ -185,7 +265,7 @@ void Garden::generate_world() {
 	}
 	place_terrain(cells, 10, 0.0, 0.0, 1.0); // bedrock bottom
 	place_terrain(cells, 40, 0.3, 0.5, 0.2); // bedrock top
-	place_terrain(cells, 130, 0.4, 0.55, 0.05); // subsoil
+	place_terrain(cells, 130, 0.45, 0.52, 0.03); // subsoil
 	place_terrain(cells, 20, 0.8, 0.15, 0.05); //topsoil
 	place_mountain(cells, 500, 0);
 	SDL_RenderClear(renderer);

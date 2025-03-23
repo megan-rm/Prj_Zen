@@ -6,21 +6,24 @@
 #include <SDL.h>
 #include <algorithm>
 #include <random>
+#include <math.h>
 
 namespace Zen {
 	constexpr int TERRAIN_WIDTH = 10000;
 	constexpr int TERRAIN_HEIGHT = 1200;
-	constexpr int TOTAL_PIXELS = TERRAIN_WIDTH * TERRAIN_HEIGHT * 0.8;
 	
-	constexpr int MOUNTAIN_HEIGHT = 800; // 200 for terrain, 800 above terrain?
+	constexpr int MOUNTAIN_HEIGHT = 800; // 200 for terrain, 600 above terrain?
 	constexpr int MOUNTAIN_WIDTH = 800; // we'll add some randomness to this? I'm unsure.
-	static int mountain_start_x;
-	static int mountain_end_x;
-	static int mountain_end_y; // for river formation, we only need the intercept at the end
-	static int river_start_x;
-	static int river_end_x;
-	static int lake_start_x;
-	static int lake_end_x;
+	constexpr int LAKE_WIDTH = 600;
+	constexpr int LAKE_DEPTH = 120;
+
+	static int mountain_start_x = 0;
+	static int mountain_end_x = 0;
+	static int mountain_end_y = 0; // for river formation, we only need the intercept at the end
+	static int river_start_x = 0;
+	static int river_end_x = 0;
+	static int lake_start_x = 0;
+	static int lake_end_x = 0;
 
 	enum PIXEL_TYPE{EMPTY=0, DIRT, CLAY, STONE};
 	
@@ -42,9 +45,9 @@ public:
 	void generate_world();
 	void generate_spritesheet();
 	void place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct);
-	void place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int h_radius, int w_radius);
+	void place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]);
 	void place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height);
-
+	void place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
 	void set_pixel_color(Zen::PIXEL_TYPE);
 private:
 	SDL_Window* window;
