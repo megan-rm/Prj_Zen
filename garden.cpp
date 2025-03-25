@@ -282,6 +282,7 @@ void Garden::generate_world() {
 	SDL_RenderPresent(renderer);
 	delete[] cells;
 	//pixels.clear();
+	std::cout << SDL_GetTicks();
 	update();
 }
 
