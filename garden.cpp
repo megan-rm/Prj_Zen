@@ -115,6 +115,11 @@ void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int app
 }
 
 void Garden::place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
+	/*************************************************************************
+	TODO:
+		* Bleed clay into lake bed
+		* Balance clay placed on top of lake bed
+	**************************************************************************/
 	Zen::lake_start_x = Zen::river_end_x;
 	Zen::lake_end_x = Zen::lake_start_x + Zen::LAKE_WIDTH;
 	//debug purposes
@@ -163,6 +168,11 @@ void Garden::place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 }
 
 void Garden::place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction) {
+	/*************************************************************************
+	TODO:
+		* River goes according to mountain gen (use bool direction)
+		* Bleed clay bed better
+	**************************************************************************/
 	int ty = Zen::mountain_end_y - 10; // this is from where we'll iterate down
 	std::random_device rd;
 	std::mt19937 g(rd());
@@ -189,10 +199,11 @@ void Garden::place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool dire
 }
 
 void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height) {
-	// TODO: WE NEED TO REFACTOR THIS, AND CLEAN UP A LOT OF GARBAGE. Width? Center? We can do better
-	//		 Also going to allow random chance which side the mountain / ocean form on
-	// start our ascent. this is mountain left side screen->right side screen, however.
-	// we'll need to alter to allow random far side of screen generation
+	/********************************************************************
+	TODO:
+		* Randomize side of screen to generate mountain on
+		* Fix width generation to make it appropriate
+	********************************************************************/
 	std::random_device rd;
 	std::mt19937 g(rd());
 	std::uniform_real_distribution<double> r_dist(0.95, 1.05);
@@ -250,6 +261,19 @@ void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int ce
 }
 
 void Garden::generate_world() {
+	/***************************************************************
+	TODO:
+		* Create a RGBA texture, render to that instead
+		* Convert texture to surface, break surface into 8x8 chunks
+		* Hash the 8x8 chunks into a tilemap to check for dupes
+		* Generate a tilemap and save tile info on:
+			* Moisture
+			* Saturation Point
+			* Porosity
+			* Temperature
+			* TileID (for tilemap purposes)
+	***************************************************************/
+
 	auto cells = new Zen::PIXEL_TYPE[Zen::TERRAIN_WIDTH][Zen::TERRAIN_HEIGHT];
 	for (int i = 0; i < Zen::TERRAIN_WIDTH; i++) {
 		for (int j = 0; j < Zen::TERRAIN_HEIGHT; j++) {
@@ -269,6 +293,7 @@ void Garden::generate_world() {
 	place_terrain(cells, 20, 0.8, 0.15, 0.05); //topsoil
 	place_mountain(cells, 500, 0);
 	SDL_RenderClear(renderer);
+	std::cout << SDL_GetTicks() << std::endl;
 	//render the generated terrain to the screen
 	for (int x = 0; x < Zen::TERRAIN_WIDTH; x++) {
 		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y++)
