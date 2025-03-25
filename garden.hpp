@@ -12,16 +12,25 @@ namespace Zen {
 	constexpr int TERRAIN_WIDTH = 10000;
 	constexpr int TERRAIN_HEIGHT = 1200;
 	
+	constexpr int TILESIZE = 8;
+
 	constexpr int MOUNTAIN_HEIGHT = 800; // 200 for terrain, 600 above terrain?
 	constexpr int MOUNTAIN_WIDTH = 800; // we'll add some randomness to this? I'm unsure.
+	
 	constexpr int LAKE_WIDTH = 600;
 	constexpr int LAKE_DEPTH = 120;
+
+	constexpr float DIRT_PERMIABILITY = 0.65f;
+	constexpr float CLAY_PERMIABILITY = 0.25f;
+	constexpr float STONE_PERMIABILITY = 0.0f;
 
 	static int mountain_start_x = 0;
 	static int mountain_end_x = 0;
 	static int mountain_end_y = 0; // for river formation, we only need the intercept at the end
+	
 	static int river_start_x = 0;
 	static int river_end_x = 0;
+	
 	static int lake_start_x = 0;
 	static int lake_end_x = 0;
 
