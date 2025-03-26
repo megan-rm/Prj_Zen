@@ -9,6 +9,11 @@ Garden::Garden() {
 
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	running = true;
+
+	camera.w = screen_width;
+	camera.h = screen_height;
+	camera.x = 0;
+	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
 }
 
 Garden::Garden(std::string st, int sw, int sh) {
@@ -24,6 +29,11 @@ Garden::Garden(std::string st, int sw, int sh) {
 	// THIS NEED BE SET DIFFERENT
 	int w = sw;
 	int h = sh;
+	camera.w = screen_width;
+	camera.h = screen_height;
+	camera.x = 0;
+	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
+
 	grid.resize(w / 8);
 	for (int i = 0; i < w / 8; i++) {
 		grid.at(i).resize(h / 8);
@@ -43,6 +53,10 @@ Garden::Garden(std::string st, int sw, int sh) {
 Garden::~Garden() {
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
+}
+
+void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
+
 }
 
 void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct) {

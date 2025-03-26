@@ -7,6 +7,10 @@
 #include <algorithm>
 #include <random>
 #include <math.h>
+#include <fstream>
+#include <unordered_map>
+#include <sstream>
+
 
 namespace Zen {
 	constexpr int TERRAIN_WIDTH = 10000;
@@ -52,7 +56,7 @@ public:
 	void render();
 	void update();
 	void generate_world();
-	void generate_spritesheet();
+	void generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]);
 	void place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct);
 	void place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]);
 	void place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height);
@@ -66,5 +70,6 @@ private:
 	bool running;
 	int screen_width;
 	int screen_height;
+	SDL_Rect camera;
 	std::string window_title;
 };
