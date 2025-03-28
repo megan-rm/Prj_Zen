@@ -3,7 +3,6 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <SDL.h>
 #include <algorithm>
 #include <random>
 #include <math.h>
@@ -11,6 +10,8 @@
 #include <unordered_map>
 #include <sstream>
 
+#include <SDL.h>
+#include <SDL_image.H>
 
 namespace Zen {
 	constexpr int TERRAIN_WIDTH = 10000;

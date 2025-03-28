@@ -51,12 +51,39 @@ Garden::Garden(std::string st, int sw, int sh) {
 }
 
 Garden::~Garden() {
+	grid.clear();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 }
 
 void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
-
+	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, Zen::TERRAIN_WIDTH, Zen::TERRAIN_HEIGHT);
+	SDL_SetRenderTarget(renderer, texture);
+	SDL_RenderClear(renderer);
+	std::cout << SDL_GetTicks() << std::endl;
+	//render the generated terrain to the screen
+	for (int x = 0; x < Zen::TERRAIN_WIDTH; x++) {
+		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y++)
+		{
+			int tx = x;
+			int ty = screen_height - Zen::TERRAIN_HEIGHT + y;
+			set_pixel_color(cells[x][y]);
+			SDL_RenderDrawPoint(renderer, tx, ty);
+		}
+	}
+	SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, Zen::TERRAIN_WIDTH, Zen::TERRAIN_HEIGHT, 32, SDL_PIXELFORMAT_RGBA32);
+	if (!surface) {
+		std::cout << "couldn't create surface for tilemap..." << std::endl;
+		//close SDL and free resources;
+		return;
+	}
+	if (SDL_RenderReadPixels(renderer, nullptr, SDL_PIXELFORMAT_RGBA32, surface->pixels, surface->pitch) != 0) {
+		std::cout << "couldn't read the renderer into the surface..." << std::endl;
+		//close SDL and free resources;
+		return;
+	}
+	//SDL_RenderPresent(renderer);
+	IMG_SavePNG(surface, "test.png");
 }
 
 void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct) {
@@ -306,21 +333,9 @@ void Garden::generate_world() {
 	place_terrain(cells, 130, 0.45, 0.52, 0.03); // subsoil
 	place_terrain(cells, 20, 0.8, 0.15, 0.05); //topsoil
 	place_mountain(cells, 500, 0);
-	SDL_RenderClear(renderer);
-	std::cout << SDL_GetTicks() << std::endl;
-	//render the generated terrain to the screen
-	for (int x = 0; x < Zen::TERRAIN_WIDTH; x++) {
-		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y++)
-		{
-			int tx = x;
-			int ty = screen_height - Zen::TERRAIN_HEIGHT + y;
-			set_pixel_color(cells[x][y]);
-			SDL_RenderDrawPoint(renderer, tx, ty);
-		}
-	}
-	SDL_RenderPresent(renderer);
+
+	generate_tilemap(cells);
 	delete[] cells;
-	//pixels.clear();
 	std::cout << SDL_GetTicks();
 	update();
 }
