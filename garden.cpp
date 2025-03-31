@@ -60,17 +60,21 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, Zen::TERRAIN_WIDTH, Zen::TERRAIN_HEIGHT);
 	SDL_SetRenderTarget(renderer, texture);
 	SDL_RenderClear(renderer);
-	std::cout << SDL_GetTicks() << std::endl;
-	//render the generated terrain to the screen
-	for (int x = 0; x < Zen::TERRAIN_WIDTH; x++) {
-		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y++)
-		{
-			int tx = x;
-			int ty = screen_height - Zen::TERRAIN_HEIGHT + y;
-			set_pixel_color(cells[x][y]);
-			SDL_RenderDrawPoint(renderer, tx, ty);
+	std::unordered_map<std::string, SDL_Surface*> unique_tiles;
+	/*for (int x = 0; x < Zen::TERRAIN_WIDTH; x += Zen::TERRAIN_WIDTH) {
+		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y += Zen::TERRAIN_HEIGHT) {
+			std::string hash;
+			SDL_Surface* tile;
+			for (int tx = 0; tx < 8; tx++) {
+				for (int ty = 0; ty < 8; ty++) {
+					hash += cells[x * tx][y * ty];
+					//tile->pixels = 
+				}
+			}
+			//unique_tiles +=
 		}
-	}
+	}*/
+	//render the generated terrain to the screen
 	SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, Zen::TERRAIN_WIDTH, Zen::TERRAIN_HEIGHT, 32, SDL_PIXELFORMAT_RGBA32);
 	if (!surface) {
 		std::cout << "couldn't create surface for tilemap..." << std::endl;
@@ -82,8 +86,37 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 		//close SDL and free resources;
 		return;
 	}
+	for (int x = 0; x < Zen::TERRAIN_WIDTH; x++) {
+		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y++)
+		{
+			SDL_Color color;
+			switch (cells[x][y]) {
+			case Zen::PIXEL_TYPE::EMPTY:
+				color = Zen::MAGENTA_COLOR;
+				break;
+			case Zen::PIXEL_TYPE::DIRT:
+				color = Zen::DIRT_COLOR;
+				break;
+			case Zen::PIXEL_TYPE::CLAY:
+				color = Zen::CLAY_COLOR;
+				break;
+			case Zen::PIXEL_TYPE::STONE:
+				color = Zen::STONE_COLOR;
+				break;
+
+			}
+			int tx = x; // do we need tx?
+			int ty = screen_height - Zen::TERRAIN_HEIGHT + y;
+			
+			//set_pixel_color(cells[x][y]);
+			//SDL_RenderDrawPoint(renderer, tx, ty);
+		}
+	}
 	//SDL_RenderPresent(renderer);
 	IMG_SavePNG(surface, "test.png");
+	SDL_FreeSurface(surface);
+	SDL_DestroyTexture(texture);
+	std::cout << SDL_GetTicks() << std::endl;
 }
 
 void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct) {

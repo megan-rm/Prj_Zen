@@ -44,6 +44,7 @@ namespace Zen {
 	static SDL_Color DIRT_COLOR = { 140, 70, 20, 255 };
 	static SDL_Color CLAY_COLOR = { 197, 95, 64, 255 };
 	static SDL_Color STONE_COLOR = { 128, 128, 128, 255 };
+	static SDL_Color MAGENTA_COLOR = { 255, 0, 255, 255 };
 }
 
 class Garden
@@ -63,6 +64,7 @@ public:
 	void place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height);
 	void place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
 	void set_pixel_color(Zen::PIXEL_TYPE);
+	void place_pixel(SDL_Surface* surface, int x, int y, SDL_Color color); // new method to drawing the world
 private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
