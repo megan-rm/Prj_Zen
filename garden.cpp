@@ -87,10 +87,15 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 		return;
 	}
 	Uint32* pixels = (Uint32*)surface->pixels;
+	SDL_Color color;
+
+	if (SDL_MUSTLOCK(surface)) {
+		SDL_LockSurface(surface);
+	}
+
 	for (int x = 0; x < Zen::TERRAIN_WIDTH; x++) {
 		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y++)
 		{
-			SDL_Color color;
 			switch (cells[x][y]) {
 			case Zen::PIXEL_TYPE::EMPTY:
 				color = Zen::MAGENTA_COLOR;
@@ -106,18 +111,17 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 				break;
 
 			}
-			int tx = x; // do we need tx?
-			int ty = screen_height - Zen::TERRAIN_HEIGHT + y; // i dont think we should be using screen here anymore
-
-			//set_pixel_color(cells[x][y]);
-			//SDL_RenderDrawPoint(renderer, tx, ty);
+			pixels[(y * surface->w) + x] = SDL_MapRGB(surface->format, color.r, color.g, color.b);
 		}
+	}
+	if (SDL_MUSTLOCK(surface)) {
+		SDL_UnlockSurface(surface);
 	}
 	//SDL_RenderPresent(renderer);
 	IMG_SavePNG(surface, "test.png");
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);
-	std::cout << SDL_GetTicks() << std::endl;
+	std::cout << std::endl << SDL_GetTicks() << std::endl;
 }
 
 void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct) {
@@ -368,9 +372,9 @@ void Garden::generate_world() {
 	place_terrain(cells, 20, 0.8, 0.15, 0.05); //topsoil
 	place_mountain(cells, 500, 0);
 
+	std::cout << SDL_GetTicks();
 	generate_tilemap(cells);
 	delete[] cells;
-	std::cout << SDL_GetTicks();
 	update();
 }
 
