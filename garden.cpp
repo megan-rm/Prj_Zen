@@ -86,6 +86,7 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 		//close SDL and free resources;
 		return;
 	}
+	Uint32* pixels = (Uint32*)surface->pixels;
 	for (int x = 0; x < Zen::TERRAIN_WIDTH; x++) {
 		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y++)
 		{
@@ -106,8 +107,8 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 
 			}
 			int tx = x; // do we need tx?
-			int ty = screen_height - Zen::TERRAIN_HEIGHT + y;
-			
+			int ty = screen_height - Zen::TERRAIN_HEIGHT + y; // i dont think we should be using screen here anymore
+
 			//set_pixel_color(cells[x][y]);
 			//SDL_RenderDrawPoint(renderer, tx, ty);
 		}
