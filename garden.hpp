@@ -17,7 +17,7 @@ namespace Zen {
 	constexpr int TERRAIN_WIDTH = 10000;
 	constexpr int TERRAIN_HEIGHT = 1200;
 	
-	constexpr int TILESIZE = 8;
+	constexpr int TILE_SIZE = 8;
 
 	constexpr int MOUNTAIN_HEIGHT = 800; // 200 for terrain, 600 above terrain?
 	constexpr int MOUNTAIN_WIDTH = 800; // we'll add some randomness to this? I'm unsure.
@@ -60,11 +60,9 @@ public:
 	void generate_world();
 	void generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]);
 	void place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct);
-	void place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]);
+	void place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
 	void place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height);
 	void place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
-	void set_pixel_color(Zen::PIXEL_TYPE);
-	void place_pixel(SDL_Surface* surface, int x, int y, SDL_Color color); // new method to drawing the world
 private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;

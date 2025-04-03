@@ -1,4 +1,5 @@
-#include "Garden.hpp"
+#include "garden.hpp"
+#include "tile.hpp"
 
 Garden::Garden() {
 	window_title = "App";
@@ -26,24 +27,24 @@ Garden::Garden(std::string st, int sw, int sh) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	running = true;
 
-	// THIS NEED BE SET DIFFERENT
-	int w = sw;
-	int h = sh;
+	int w = Zen::TERRAIN_WIDTH;
+	int h = Zen::TERRAIN_HEIGHT;
+
 	camera.w = screen_width;
 	camera.h = screen_height;
 	camera.x = 0;
 	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
 
-	grid.resize(w / 8);
-	for (int i = 0; i < w / 8; i++) {
-		grid.at(i).resize(h / 8);
+	grid.resize(w / Zen::TILE_SIZE);
+	for (int i = 0; i < w / Zen::TILE_SIZE; i++) {
+		grid.at(i).resize(h / Zen::TILE_SIZE);
 	}
-	for (int i = 0; i < w / 8; i++) {
-		for (int j = 0; j < h / 8; j++) {
-			grid.at(i).at(j).w = 8;
-			grid.at(i).at(j).h = 8;
-			grid.at(i).at(j).x = i * 8;
-			grid.at(i).at(j).y = j * 8;
+	for (int i = 0; i < w / Zen::TILE_SIZE; i++) {
+		for (int j = 0; j < h / Zen::TILE_SIZE; j++) {
+			grid.at(i).at(j).w = Zen::TILE_SIZE;
+			grid.at(i).at(j).h = Zen::TILE_SIZE;
+			grid.at(i).at(j).x = i * Zen::TILE_SIZE;
+			grid.at(i).at(j).y = j * Zen::TILE_SIZE;
 		}
 	}
 	generate_world();
@@ -60,7 +61,7 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	SDL_Texture* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET, Zen::TERRAIN_WIDTH, Zen::TERRAIN_HEIGHT);
 	SDL_SetRenderTarget(renderer, texture);
 	SDL_RenderClear(renderer);
-	std::unordered_map<std::string, SDL_Surface*> unique_tiles;
+	std::unordered_map<std::string, tilemap_tile*> unique_tiles;
 	/*for (int x = 0; x < Zen::TERRAIN_WIDTH; x += Zen::TERRAIN_WIDTH) {
 		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y += Zen::TERRAIN_HEIGHT) {
 			std::string hash;
@@ -68,13 +69,13 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 			for (int tx = 0; tx < 8; tx++) {
 				for (int ty = 0; ty < 8; ty++) {
 					hash += cells[x * tx][y * ty];
-					//tile->pixels = 
+					//tile->pixels =
 				}
 			}
 			//unique_tiles +=
 		}
 	}*/
-	//render the generated terrain to the screen
+
 	SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, Zen::TERRAIN_WIDTH, Zen::TERRAIN_HEIGHT, 32, SDL_PIXELFORMAT_RGBA32);
 	if (!surface) {
 		std::cout << "couldn't create surface for tilemap..." << std::endl;
@@ -117,6 +118,53 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	if (SDL_MUSTLOCK(surface)) {
 		SDL_UnlockSurface(surface);
 	}
+
+	std::ofstream file;
+	file.open("world.zen");
+	// generate tilemap
+	for (int x = 0; x < Zen::TERRAIN_WIDTH; x += Zen::TILE_SIZE) {
+		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y += Zen::TILE_SIZE) {
+			std::string hash = "";
+			float permeability;
+			float max_saturation;
+			for (int tx = 0; tx < 8; tx++) {
+				for (int ty = 0; ty < 8; ty++) {
+					hash += '0' + cells[x + tx][y + ty];
+					switch (cells[x + tx][y + ty]) {
+					case Zen::PIXEL_TYPE::EMPTY:
+						max_saturation += (64.0 / 100.0);
+						break;
+					case Zen::PIXEL_TYPE::DIRT:
+						permeability += Zen::DIRT_PERMIABILITY;
+						max_saturation += (1.0 - Zen::DIRT_PERMIABILITY);
+						break;
+					case Zen::PIXEL_TYPE::CLAY:
+						permeability += Zen::CLAY_PERMIABILITY;
+						max_saturation += (1.0 - Zen::CLAY_PERMIABILITY);
+						break;
+					case Zen::PIXEL_TYPE::STONE:
+						permeability += Zen::STONE_PERMIABILITY;
+						max_saturation += 0.0;
+						break;
+					}
+				}
+			}
+			max_saturation
+			if (auto i = unique_tiles.find(hash) == unique_tiles.end()){
+				tilemap_tile* new_tile = new tilemap_tile;
+				new_tile->id = unique_tiles.size();
+				new_tile->tile = SDL_CreateRGBSurfaceWithFormat(0, Zen::TILE_SIZE, Zen::TILE_SIZE, 32, SDL_PIXELFORMAT_RGBA32);
+				SDL_Rect src;
+				src.x = x;
+				src.y = y;
+				src.w = Zen::TILE_SIZE;
+				src.h = Zen::TILE_SIZE;
+				SDL_BlitSurface(surface, &src, new_tile->tile, NULL);
+				unique_tiles[hash] = new_tile;
+			}
+			
+		}
+	}
 	//SDL_RenderPresent(renderer);
 	IMG_SavePNG(surface, "test.png");
 	SDL_FreeSurface(surface);
@@ -158,8 +206,8 @@ void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int app
 
 		// DIRT PIXEL PLACEMENT
 		while (i == Zen::PIXEL_TYPE::DIRT) {
-			unsigned int bottom_left = std::max(x_val - 1, 0);
-			unsigned int bottom_right = std::min(x_val + 1, Zen::TERRAIN_WIDTH - 1);
+			const unsigned int bottom_left = std::max(x_val - 1, 0);
+			const unsigned int bottom_right = std::min(x_val + 1, Zen::TERRAIN_WIDTH - 1);
 			if (cells[x_val][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
 				y++;
 				continue;
@@ -177,7 +225,7 @@ void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int app
 				break;
 			}
 		}
-		//CLAY PIXEL PLACEMENT
+		//CLAY PIXEL PLACEMENT -- if left & right neighbors are dirt, turn them to clay - we want clay 'paddies'
 		if (i == Zen::PIXEL_TYPE::CLAY) {
 			if (x_val != 0 && x_val != Zen::TERRAIN_WIDTH - 1) {
 				if (cells[x_val - 1][y] == Zen::PIXEL_TYPE::DIRT && cells[x_val + 1][y] == Zen::PIXEL_TYPE::DIRT) {
@@ -193,16 +241,12 @@ void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int app
 	}
 }
 
-void Garden::place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
+void Garden::place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction) {
 	/*************************************************************************
 	TODO:
 		* Bleed clay into lake bed
-		* Balance clay placed on top of lake bed
 	**************************************************************************/
-	Zen::lake_start_x = Zen::river_end_x;
-	Zen::lake_end_x = Zen::lake_start_x + Zen::LAKE_WIDTH;
-	//debug purposes
-	Zen::lake_start_x = Zen::river_start_x + 20;
+	Zen::lake_start_x = Zen::river_end_x - 24;
 	Zen::lake_end_x = Zen::lake_start_x + Zen::LAKE_WIDTH;
 
 	int center_x = (Zen::lake_end_x + Zen::lake_start_x) / 2;
@@ -217,7 +261,7 @@ void Garden::place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	for (int x = Zen::lake_start_x; x < Zen::lake_end_x; x++) {
 		for (int y = center_y - Zen::LAKE_DEPTH; y < center_y + Zen::LAKE_DEPTH; y++) {
 			double ellipse_val = (pow(x - center_x, 2) / pow(Zen::LAKE_WIDTH / 2, 2)) + (pow(y - center_y, 2) / pow(Zen::LAKE_DEPTH, 2));
-			if (ellipse_val <= 1.0) {
+			if (ellipse_val <= 1.0 && y > 120) {
 				cells[x][y] = Zen::PIXEL_TYPE::EMPTY;
 			}
 		}
@@ -232,12 +276,22 @@ void Garden::place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	std::random_device rd;
 	std::mt19937 g(rd());
 	float range_start = Zen::LAKE_WIDTH / 2.0f;
-	float range_end = Zen::LAKE_WIDTH / 4.0f;
+	float range_end = Zen::LAKE_WIDTH / 3.0f;
 	std::normal_distribution<double> dist(range_start, range_end);
 	std::shuffle(pixels.begin(), pixels.end(), g);
 	for (auto i : pixels) {
 		int x = dist(g) + Zen::lake_start_x;
 		for (int y = center_y + 45; y < Zen::TERRAIN_HEIGHT; y++) {
+			if (cells[x][y + 1] != Zen::PIXEL_TYPE::EMPTY) {
+				if (cells[x - 1][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
+					x--;
+					continue;
+				}
+				else if (cells[x + 1][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
+					x++;
+					continue;
+				}
+			}
 			if (cells[x][y + 1] != Zen::PIXEL_TYPE::EMPTY && cells[x][y] == Zen::PIXEL_TYPE::EMPTY) {
 				cells[x][y] = i;
 				break;
@@ -274,14 +328,13 @@ void Garden::place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool dire
 			}
 		}
 	}
-	place_lake(cells);
+	place_lake(cells, false);
 }
 
 void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height) {
 	/********************************************************************
 	TODO:
 		* Randomize side of screen to generate mountain on
-		* Fix width generation to make it appropriate
 	********************************************************************/
 	std::random_device rd;
 	std::mt19937 g(rd());
@@ -315,9 +368,9 @@ void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int ce
 		x++;
 	}
 
-	center = width;// *0.6666;
+	center = width;
 	horizontal_chance = (center * 85) / Zen::MOUNTAIN_HEIGHT;
-	for (int y = (Zen::TERRAIN_HEIGHT - Zen::MOUNTAIN_HEIGHT); y < Zen::TERRAIN_HEIGHT; y++) { // change screen_height => Zen::TERRAIN_HEIGHT;
+	for (int y = (Zen::TERRAIN_HEIGHT - Zen::MOUNTAIN_HEIGHT); y < Zen::TERRAIN_HEIGHT; y++) {
 		int movement = i_dist(g);
 		//place all stone below as stone
 		for (int i = y; i < Zen::TERRAIN_HEIGHT; i++) {
@@ -382,31 +435,8 @@ void Garden::update() {
 
 }
 
-void Garden::set_pixel_color(Zen::PIXEL_TYPE p)
-{
-	if (p == Zen::PIXEL_TYPE::DIRT) {
-		SDL_SetRenderDrawColor(renderer, Zen::DIRT_COLOR.r, Zen::DIRT_COLOR.g, Zen::DIRT_COLOR.b, 255);
-	}
-	else if (p == Zen::PIXEL_TYPE::CLAY) {
-		SDL_SetRenderDrawColor(renderer, Zen::CLAY_COLOR.r, Zen::CLAY_COLOR.g, Zen::CLAY_COLOR.b, 255);
-	}
-	else if (p == Zen::PIXEL_TYPE::STONE) {
-		SDL_SetRenderDrawColor(renderer, Zen::STONE_COLOR.r, Zen::STONE_COLOR.g, Zen::STONE_COLOR.b, 255);
-	}
-	else {
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	}
-}
-
 void Garden::render() {
-	/*SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-	SDL_RenderClear(renderer);
-	SDL_SetRenderDrawColor(renderer, 136, 140, 141, 0);
-	/*for (int i = 0; i < screen_width / 8; i++) {
-		SDL_RenderFillRect(renderer, &grid.at(i).at((screen_height / 8) - 1));
-	}
-	
-	SDL_RenderPresent(renderer);*/
+
 }
 
 void Garden::input() {
