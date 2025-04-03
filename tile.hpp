@@ -17,6 +17,12 @@ private:
 	int tile_id;
 };
 
+/******************************************
+*
+*	This is used only for generating
+*	a tilemap for the newly created world
+*
+******************************************/
 struct tilemap_tile {
 	int id = 0;
 	SDL_Surface* tile = nullptr;

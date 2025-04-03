@@ -25,9 +25,10 @@ namespace Zen {
 	constexpr int LAKE_WIDTH = 600;
 	constexpr int LAKE_DEPTH = 120;
 
-	constexpr float DIRT_PERMIABILITY = 0.65f;
-	constexpr float CLAY_PERMIABILITY = 0.25f;
-	constexpr float STONE_PERMIABILITY = 0.0f;
+	//using ints below to prevent water loss with rounding errors in floats
+	constexpr int DIRT_PERMIABILITY = 65; // divide by 100 aka 0.65;
+	constexpr int CLAY_PERMIABILITY = 25; // divide by 100 ; aka  0.25 ; 10000 => 100.00 
+	constexpr int STONE_PERMIABILITY = 0;
 
 	static int mountain_start_x = 0;
 	static int mountain_end_x = 0;

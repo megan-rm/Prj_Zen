@@ -121,38 +121,41 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 
 	std::ofstream file;
 	file.open("world.zen");
+	file << "[WORLD_TILES]" << std::endl;
 	// generate tilemap
-	for (int x = 0; x < Zen::TERRAIN_WIDTH; x += Zen::TILE_SIZE) {
-		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y += Zen::TILE_SIZE) {
+	for (int x = 0; x < Zen::TERRAIN_WIDTH-1; x += Zen::TILE_SIZE) {
+		for (int y = 0; y < Zen::TERRAIN_HEIGHT-1; y += Zen::TILE_SIZE) {
 			std::string hash = "";
-			float permeability;
-			float max_saturation;
-			for (int tx = 0; tx < 8; tx++) {
-				for (int ty = 0; ty < 8; ty++) {
+			int permeability = 0;
+			int max_saturation = 0;
+			int id = 0;
+			for (int tx = 0; tx < Zen::TILE_SIZE; tx++) {
+				for (int ty = 0; ty < Zen::TILE_SIZE; ty++) {
 					hash += '0' + cells[x + tx][y + ty];
 					switch (cells[x + tx][y + ty]) {
 					case Zen::PIXEL_TYPE::EMPTY:
-						max_saturation += (64.0 / 100.0);
+						max_saturation += (float(100.0/64.0)*100);
 						break;
 					case Zen::PIXEL_TYPE::DIRT:
 						permeability += Zen::DIRT_PERMIABILITY;
-						max_saturation += (1.0 - Zen::DIRT_PERMIABILITY);
+						max_saturation += (100 - Zen::DIRT_PERMIABILITY);
 						break;
 					case Zen::PIXEL_TYPE::CLAY:
 						permeability += Zen::CLAY_PERMIABILITY;
-						max_saturation += (1.0 - Zen::CLAY_PERMIABILITY);
+						max_saturation += (100 - Zen::CLAY_PERMIABILITY);
 						break;
 					case Zen::PIXEL_TYPE::STONE:
 						permeability += Zen::STONE_PERMIABILITY;
-						max_saturation += 0.0;
+						max_saturation += 0;
 						break;
 					}
 				}
 			}
-			max_saturation
+
 			if (auto i = unique_tiles.find(hash) == unique_tiles.end()){
 				tilemap_tile* new_tile = new tilemap_tile;
 				new_tile->id = unique_tiles.size();
+				id = unique_tiles.size();
 				new_tile->tile = SDL_CreateRGBSurfaceWithFormat(0, Zen::TILE_SIZE, Zen::TILE_SIZE, 32, SDL_PIXELFORMAT_RGBA32);
 				SDL_Rect src;
 				src.x = x;
@@ -162,14 +165,34 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 				SDL_BlitSurface(surface, &src, new_tile->tile, NULL);
 				unique_tiles[hash] = new_tile;
 			}
+			else {
+				id = unique_tiles.find(hash)->second->id;
+			}
+			file << id << "," << permeability << "," << (max_saturation + 16) << "," << "0" << std::endl;
 			
 		}
 	}
+	SDL_Surface* tilemap = SDL_CreateRGBSurfaceWithFormat(0, 2048, 2048, 32, SDL_PIXELFORMAT_RGBA32);
+	//copy the unique tiles over to tilemap
+	const int tiles_per_row = tilemap->w / Zen::TILE_SIZE;
+
+	for (auto i : unique_tiles) {
+		SDL_Rect dst;
+		dst.x = (i.second->id % tiles_per_row) * Zen::TILE_SIZE;
+		dst.y = (i.second->id / tiles_per_row) * Zen::TILE_SIZE;
+		dst.w = Zen::TILE_SIZE;
+		dst.h = Zen::TILE_SIZE;
+		SDL_BlitSurface(i.second->tile, NULL, tilemap, &dst);
+	}
 	//SDL_RenderPresent(renderer);
-	IMG_SavePNG(surface, "test.png");
+	IMG_SavePNG(tilemap, "test.png");
+	file.close();
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);
 	std::cout << std::endl << SDL_GetTicks() << std::endl;
+	for (auto i : unique_tiles) {
+		SDL_FreeSurface(i.second->tile);
+	}
 }
 
 void Garden::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int appx_height, float dirt_pct, float clay_pct, float stone_pct) {
@@ -414,7 +437,7 @@ void Garden::generate_world() {
 	}
 
 	//base layer stone for water retention
-	for (int i = Zen::TERRAIN_HEIGHT - 8; i < Zen::TERRAIN_HEIGHT; i++) {
+	for (int i = Zen::TERRAIN_HEIGHT - Zen::TILE_SIZE; i < Zen::TERRAIN_HEIGHT; i++) {
 		for (int j = 0; j < Zen::TERRAIN_WIDTH; j++) {
 			cells[j][i] = Zen::PIXEL_TYPE::STONE;
 		}
