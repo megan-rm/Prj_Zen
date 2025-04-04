@@ -13,6 +13,8 @@
 #include <SDL.h>
 #include <SDL_image.H>
 
+#include "tile.hpp"
+
 namespace Zen {
 	constexpr int TERRAIN_WIDTH = 10000;
 	constexpr int TERRAIN_HEIGHT = 1200;
@@ -64,11 +66,12 @@ public:
 	void place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
 	void place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height);
 	void place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
+	void load_world();
 private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_Event events;
-	std::vector<std::vector<SDL_Rect>> grid; // 2d array of 8x8px 'blocks' in the garden
+	std::vector<std::vector<Tile>> world; // 2d array of 8x8px 'blocks' in the garden
 	bool running;
 	int screen_width;
 	int screen_height;

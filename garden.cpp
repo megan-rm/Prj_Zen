@@ -52,7 +52,7 @@ Garden::Garden(std::string st, int sw, int sh) {
 }
 
 Garden::~Garden() {
-	grid.clear();
+	world.clear();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 }
@@ -120,11 +120,15 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	}
 
 	std::ofstream file;
+	int buffer_size = 131072;
+	std::vector<char> buffer;
+	buffer.resize(buffer_size);
+	file.rdbuf()->pubsetbuf(&buffer[0], buffer_size);
 	file.open("world.zen");
 	file << "[WORLD_TILES]" << std::endl;
 	// generate tilemap
-	for (int x = 0; x < Zen::TERRAIN_WIDTH-1; x += Zen::TILE_SIZE) {
-		for (int y = 0; y < Zen::TERRAIN_HEIGHT-1; y += Zen::TILE_SIZE) {
+	for (int y = 0; y < Zen::TERRAIN_HEIGHT-1; y += Zen::TILE_SIZE) {
+		for (int x = 0; x < Zen::TERRAIN_WIDTH-1; x += Zen::TILE_SIZE) {
 			std::string hash = "";
 			int permeability = 0;
 			int max_saturation = 0;
@@ -134,7 +138,7 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 					hash += '0' + cells[x + tx][y + ty];
 					switch (cells[x + tx][y + ty]) {
 					case Zen::PIXEL_TYPE::EMPTY:
-						max_saturation += (float(100.0/64.0)*100);
+						max_saturation += ((100.0/64.0)*100);
 						break;
 					case Zen::PIXEL_TYPE::DIRT:
 						permeability += Zen::DIRT_PERMIABILITY;
@@ -168,9 +172,10 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 			else {
 				id = unique_tiles.find(hash)->second->id;
 			}
-			file << id << "," << permeability << "," << (max_saturation + 16) << "," << "0" << std::endl;
-			
+			max_saturation += 16;
+			file << id << "," << permeability << "," << max_saturation << "," << "0" << "|";
 		}
+		file << std::endl;
 	}
 	SDL_Surface* tilemap = SDL_CreateRGBSurfaceWithFormat(0, 2048, 2048, 32, SDL_PIXELFORMAT_RGBA32);
 	//copy the unique tiles over to tilemap
@@ -185,13 +190,25 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 		SDL_BlitSurface(i.second->tile, NULL, tilemap, &dst);
 	}
 	//SDL_RenderPresent(renderer);
-	IMG_SavePNG(tilemap, "test.png");
+	IMG_SavePNG(tilemap, "tilemap.png");
 	file.close();
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);
+	SDL_FreeSurface(tilemap);
 	std::cout << std::endl << SDL_GetTicks() << std::endl;
 	for (auto i : unique_tiles) {
 		SDL_FreeSurface(i.second->tile);
+	}
+}
+
+void Garden::load_world() {
+	std::ifstream file;
+	file.open("world.zen");
+	if (file.is_open()) {
+
+	}
+	else {
+
 	}
 }
 
