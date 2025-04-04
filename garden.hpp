@@ -66,7 +66,7 @@ public:
 	void place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
 	void place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height);
 	void place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
-	void load_world();
+	bool load_world();
 private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;

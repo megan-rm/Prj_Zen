@@ -35,18 +35,18 @@ Garden::Garden(std::string st, int sw, int sh) {
 	camera.x = 0;
 	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
 
-	grid.resize(w / Zen::TILE_SIZE);
+	world.resize(w / Zen::TILE_SIZE);
 	for (int i = 0; i < w / Zen::TILE_SIZE; i++) {
-		grid.at(i).resize(h / Zen::TILE_SIZE);
+		world.at(i).resize(h / Zen::TILE_SIZE);
 	}
-	for (int i = 0; i < w / Zen::TILE_SIZE; i++) {
+	/*for (int i = 0; i < w / Zen::TILE_SIZE; i++) {
 		for (int j = 0; j < h / Zen::TILE_SIZE; j++) {
-			grid.at(i).at(j).w = Zen::TILE_SIZE;
-			grid.at(i).at(j).h = Zen::TILE_SIZE;
-			grid.at(i).at(j).x = i * Zen::TILE_SIZE;
-			grid.at(i).at(j).y = j * Zen::TILE_SIZE;
+			world.at(i).at(j).w = Zen::TILE_SIZE;
+			world.at(i).at(j).h = Zen::TILE_SIZE;
+			world.at(i).at(j).x = i * Zen::TILE_SIZE;
+			world.at(i).at(j).y = j * Zen::TILE_SIZE;
 		}
-	}
+	}*/
 	generate_world();
 
 }
@@ -62,19 +62,6 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	SDL_SetRenderTarget(renderer, texture);
 	SDL_RenderClear(renderer);
 	std::unordered_map<std::string, tilemap_tile*> unique_tiles;
-	/*for (int x = 0; x < Zen::TERRAIN_WIDTH; x += Zen::TERRAIN_WIDTH) {
-		for (int y = 0; y < Zen::TERRAIN_HEIGHT; y += Zen::TERRAIN_HEIGHT) {
-			std::string hash;
-			SDL_Surface* tile;
-			for (int tx = 0; tx < 8; tx++) {
-				for (int ty = 0; ty < 8; ty++) {
-					hash += cells[x * tx][y * ty];
-					//tile->pixels =
-				}
-			}
-			//unique_tiles +=
-		}
-	}*/
 
 	SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, Zen::TERRAIN_WIDTH, Zen::TERRAIN_HEIGHT, 32, SDL_PIXELFORMAT_RGBA32);
 	if (!surface) {
@@ -172,7 +159,9 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 			else {
 				id = unique_tiles.find(hash)->second->id;
 			}
-			max_saturation += 16;
+			if (max_saturation > 0) {
+				max_saturation += 16;
+			}
 			file << id << "," << permeability << "," << max_saturation << "," << "0" << "|";
 		}
 		file << std::endl;
@@ -201,14 +190,23 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	}
 }
 
-void Garden::load_world() {
+bool Garden::load_world() {
 	std::ifstream file;
 	file.open("world.zen");
 	if (file.is_open()) {
-
+		std::stringstream sline;
+		std::string line;
+		std::getline(file, line);
+		if (line == "[WORLD_TILES]") {
+			while (!file.eof() && line.at(0) != '[') {
+				std::getline(file, line, '|');
+				sline.str() = line;
+			}
+		}
+		return true;
 	}
 	else {
-
+		return false;
 	}
 }
 
@@ -435,15 +433,6 @@ void Garden::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int ce
 void Garden::generate_world() {
 	/***************************************************************
 	TODO:
-		* Create a RGBA texture, render to that instead
-		* Convert texture to surface, break surface into 8x8 chunks
-		* Hash the 8x8 chunks into a tilemap to check for dupes
-		* Generate a tilemap and save tile info on:
-			* Moisture
-			* Saturation Point
-			* Porosity
-			* Temperature
-			* TileID (for tilemap purposes)
 	***************************************************************/
 
 	auto cells = new Zen::PIXEL_TYPE[Zen::TERRAIN_WIDTH][Zen::TERRAIN_HEIGHT];
