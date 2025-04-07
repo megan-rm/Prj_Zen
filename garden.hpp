@@ -71,6 +71,8 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_Event events;
+	SDL_Texture* terrain_atlas;
+
 	std::vector<std::vector<Tile>> world; // 2d array of 8x8px 'blocks' in the garden
 	bool running;
 	int screen_width;

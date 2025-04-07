@@ -12,6 +12,10 @@ Tile::Tile() {
 	mask.w = Zen::TILE_SIZE;
 	mask.h = Zen::TILE_SIZE;
 
+	img_src.x = 0;
+	img_src.y = 0;
+	img_src.w = Zen::TILE_SIZE;
+	img_src.h = Zen::TILE_SIZE;
 	max_saturation = 0;
 	saturation = 0;
 	permeability = 0;
@@ -19,4 +23,40 @@ Tile::Tile() {
 
 Tile::~Tile() {
 
+}
+
+
+void Tile::set_pos(int x, int y) {
+	tile.x = x;
+	tile.y = y;
+
+	mask.x = x;
+	mask.y = y;
+}
+
+void Tile::set_permeability(int perm) {
+	permeability = perm;
+}
+
+void Tile::set_max_saturation(int max_sat) {
+	max_saturation = max_sat;
+}
+
+
+void Tile::set_saturation(int sat){
+	saturation = sat;
+}
+
+void Tile::set_tile_id(int img_id) {
+	tile_id = img_id;
+	const int img_width = 2048;
+	const int x_pos = img_id * 8 % img_width;
+	const int y_pos = img_id * 8 / img_width;
+	img_src.x = x_pos;
+	img_src.y = y_pos;
+
+}
+
+void Tile::register_image(SDL_Texture* tex) {
+	texture = tex;
 }

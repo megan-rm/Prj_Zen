@@ -66,16 +66,24 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	SDL_Surface* surface = SDL_CreateRGBSurfaceWithFormat(0, Zen::TERRAIN_WIDTH, Zen::TERRAIN_HEIGHT, 32, SDL_PIXELFORMAT_RGBA32);
 	if (!surface) {
 		std::cout << "couldn't create surface for tilemap..." << std::endl;
-		//close SDL and free resources;
+		world.clear();
+		SDL_FreeSurface(surface);
+		SDL_DestroyRenderer(renderer);
+		SDL_DestroyWindow(window);
+		SDL_Quit();
 		return;
 	}
 	if (SDL_RenderReadPixels(renderer, nullptr, SDL_PIXELFORMAT_RGBA32, surface->pixels, surface->pitch) != 0) {
 		std::cout << "couldn't read the renderer into the surface..." << std::endl;
-		//close SDL and free resources;
+		world.clear();
+		SDL_FreeSurface(surface);
+		SDL_DestroyRenderer(renderer);
+		SDL_DestroyWindow(window);
+		SDL_Quit();
 		return;
 	}
 	Uint32* pixels = (Uint32*)surface->pixels;
-	SDL_Color color;
+	SDL_Color color{ 0,0,0,0 };
 
 	if (SDL_MUSTLOCK(surface)) {
 		SDL_LockSurface(surface);
@@ -188,24 +196,57 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	for (auto i : unique_tiles) {
 		SDL_FreeSurface(i.second->tile);
 	}
+	load_world();
 }
 
 bool Garden::load_world() {
+	int x = 0;
+	int y = 0;
 	std::ifstream file;
 	file.open("world.zen");
 	if (file.is_open()) {
-		std::stringstream sline;
 		std::string line;
 		std::getline(file, line);
 		if (line == "[WORLD_TILES]") {
+			std::getline(file, line);
 			while (!file.eof() && line.at(0) != '[') {
+				std::stringstream s_stream(line);
+				while (std::getline(s_stream, line, '|')) {
+					std::string value{};
+					std::stringstream tile_stream(line);
+					
+					std::getline(tile_stream, line, ',');
+					int tile_id = std::stoi(line);
+					std::getline(tile_stream, line, ',');
+					int permeability = std::stoi(line);
+					std::getline(tile_stream, line, ',');
+					int max_saturation = std::stoi(line);
+					std::getline(tile_stream, line, ',');
+					int saturation = std::stoi(line);
+
+					world.at(x).at(y).register_image(terrain_atlas);
+					world.at(x).at(y).set_tile_id(tile_id);
+					world.at(x).at(y).set_permeability(permeability);
+					world.at(x).at(y).set_max_saturation(max_saturation);
+					world.at(x).at(y).set_saturation(saturation);
+					world.at(x).at(y).set_pos(x * Zen::TILE_SIZE, y * Zen::TILE_SIZE);
+
+					x++;
+					if (x > Zen::TERRAIN_WIDTH / 8) {
+						x = 0;
+						y++;
+					}
+					if (y > Zen::TERRAIN_HEIGHT / 8) { // just a failsafe
+						y = Zen::TERRAIN_HEIGHT;
+					}
+				}
 				std::getline(file, line, '|');
-				sline.str() = line;
 			}
 		}
 		return true;
 	}
 	else {
+		std::cout << "Error loading world.zen..." << std::endl;
 		return false;
 	}
 }
