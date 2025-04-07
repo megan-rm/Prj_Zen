@@ -50,8 +50,9 @@ void Tile::set_saturation(int sat){
 void Tile::set_tile_id(int img_id) {
 	tile_id = img_id;
 	const int img_width = 2048;
-	const int x_pos = img_id * 8 % img_width;
-	const int y_pos = img_id * 8 / img_width;
+	const int tiles_per_row = img_width / Zen::TILE_SIZE;
+	const int x_pos = img_id * 8 % tiles_per_row;
+	const int y_pos = img_id * 8 / tiles_per_row;
 	img_src.x = x_pos;
 	img_src.y = y_pos;
 

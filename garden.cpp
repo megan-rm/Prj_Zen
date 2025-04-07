@@ -196,6 +196,7 @@ void Garden::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT]) {
 	for (auto i : unique_tiles) {
 		SDL_FreeSurface(i.second->tile);
 	}
+	terrain_atlas = IMG_LoadTexture(renderer, "tilemap.png");
 	load_world();
 }
 
@@ -232,11 +233,11 @@ bool Garden::load_world() {
 					world.at(x).at(y).set_pos(x * Zen::TILE_SIZE, y * Zen::TILE_SIZE);
 
 					x++;
-					if (x > Zen::TERRAIN_WIDTH / 8) {
+					if (x >= Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) {
 						x = 0;
 						y++;
 					}
-					if (y > Zen::TERRAIN_HEIGHT / 8) { // just a failsafe
+					if (y > Zen::TERRAIN_HEIGHT / Zen::TILE_SIZE) { // just a failsafe
 						y = Zen::TERRAIN_HEIGHT;
 					}
 				}
@@ -506,7 +507,13 @@ void Garden::update() {
 }
 
 void Garden::render() {
+	const int tiles_per_row = (Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) - 1;
+	const int tiles_per_column = (Zen::TERRAIN_HEIGHT / Zen::TILE_SIZE) - 1;
+	for (int x = 0; x < tiles_per_row; x++) {
+		for (int y = 0; y < tiles_per_row; y++) {
 
+		}
+	}
 }
 
 void Garden::input() {
