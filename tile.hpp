@@ -1,8 +1,15 @@
 #pragma once
 #include <SDL.h>
+#include "utils.hpp"
 
-class Tile
-{
+struct Tile {
+	int saturation;
+	int max_saturation;
+	int permeability;
+	int img_id; // used in tile_renderer to extract which image in the atlas
+};
+
+/*class Tile {
 public:
 	Tile();
 	~Tile();
@@ -24,7 +31,7 @@ private:
 	int max_saturation; // = 100+porosity?
 	int tile_id;
 };
-
+*/
 /******************************************
 *
 *	This is used only for generating
