@@ -5,7 +5,7 @@
 
 class Tile_Renderer {
 public:
-	Tile_Renderer(SDL_Texture* atlas, int tile_size);
+	Tile_Renderer(SDL_Texture* atlas);
 	~Tile_Renderer();
 
 	void render(int tile_id, SDL_Renderer* renderer, int x, int y);

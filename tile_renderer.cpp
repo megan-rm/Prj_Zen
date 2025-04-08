@@ -1,6 +1,6 @@
 #include "tile_renderer.hpp"
 
-Tile_Renderer::Tile_Renderer(SDL_Texture* atlas, int tile_size) {
+Tile_Renderer::Tile_Renderer(SDL_Texture* atlas) {
 	this->atlas = atlas;
 	this->tile_size = tile_size;
 	SDL_QueryTexture(atlas, nullptr, nullptr, &atlas_width, &atlas_height);
