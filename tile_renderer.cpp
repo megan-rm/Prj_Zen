@@ -1,6 +1,6 @@
 #include "tile_renderer.hpp"
 
-Tile_Renderer::Tile_Renderer(SDL_Texture* atlas) {
+Tile_Renderer::Tile_Renderer(SDL_Texture* atlas, int tile_size) {
 	this->atlas = atlas;
 	this->tile_size = tile_size;
 	SDL_QueryTexture(atlas, nullptr, nullptr, &atlas_width, &atlas_height);
@@ -18,8 +18,11 @@ SDL_Rect Tile_Renderer::tile_src_rect(int tile_id) {
 	return SDL_Rect{ x, y, tile_size, tile_size };
 }
 
-void Tile_Renderer::render(int tile_id, SDL_Renderer* renderer, int x, int y) {
-	SDL_Rect src = tile_src_rect(tile_id);
-	SDL_Rect dst{ x * tile_size, y * tile_size, tile_size, tile_size };
-	SDL_RenderCopy(renderer, atlas, &src, &dst);
+void Tile_Renderer::render(const std::vector<std::vector<Tile>>& world, SDL_Renderer* renderer, const SDL_Rect& camera) {
+
+	for (int x = 0; x < world.size(); x++){
+		for (int y = 0; y < world.at(x).size(); y++) {
+			world.at(x).at(y).
+		}
+	}
 }

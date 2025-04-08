@@ -3,12 +3,14 @@
 #include "SDL_image.h"
 #include "tile.hpp"
 
+#include <vector>
+
 class Tile_Renderer {
 public:
 	Tile_Renderer(SDL_Texture* atlas);
 	~Tile_Renderer();
 
-	void render(int tile_id, SDL_Renderer* renderer, int x, int y);
+	void render(const std::vector<std::vector<Tile>>& world, SDL_Renderer* renderer, const SDL_Rect& camera);
 
 private:
 	SDL_Texture* atlas;
