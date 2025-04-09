@@ -1,5 +1,4 @@
 #include "garden.hpp"
-#include "tile.hpp"
 
 Garden::Garden() {
 	window_title = "App";
@@ -15,6 +14,10 @@ Garden::Garden() {
 	camera.h = screen_height;
 	camera.x = 0;
 	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
+
+	Garden_Generator* garden_generator = new Garden_Generator();
+	garden_generator->generate_world(renderer);
+
 }
 
 Garden::Garden(std::string st, int sw, int sh) {
@@ -39,6 +42,13 @@ Garden::Garden(std::string st, int sw, int sh) {
 	for (int i = 0; i < w / Zen::TILE_SIZE; i++) {
 		world.at(i).resize(h / Zen::TILE_SIZE);
 	}
+
+	Garden_Generator* garden_generator = new Garden_Generator();
+	garden_generator->generate_world(renderer);
+	world_renderer = new World_Renderer(renderer);
+
+	load_world();
+	world_renderer->register_tile_atlas("tilemap.png");
 }
 
 Garden::~Garden() {
@@ -104,13 +114,9 @@ void Garden::update() {
 }
 
 void Garden::render() {
-	const int tiles_per_row = (Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) - 1;
-	const int tiles_per_column = (Zen::TERRAIN_HEIGHT / Zen::TILE_SIZE) - 1;
-	for (int x = 0; x < tiles_per_row; x++) {
-		for (int y = 0; y < tiles_per_row; y++) {
-
-		}
-	}
+	SDL_RenderClear(renderer);
+	world_renderer->render_tiles(world, renderer, camera);
+	SDL_RenderPresent(renderer);
 }
 
 void Garden::input() {

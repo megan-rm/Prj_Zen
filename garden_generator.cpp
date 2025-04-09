@@ -40,7 +40,7 @@ bool Garden_Generator::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEI
 				break;
 
 			}
-			pixels[(y * surface->w) + x] = SDL_MapRGB(surface->format, color.r, color.g, color.b);
+			pixels[(y * surface->w) + x] = SDL_MapRGBA(surface->format, color.r, color.g, color.b, color.a);
 		}
 	}
 	if (SDL_MUSTLOCK(surface)) {

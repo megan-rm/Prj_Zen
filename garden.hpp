@@ -15,6 +15,8 @@
 
 #include "tile.hpp"
 #include "utils.hpp"
+#include "world_renderer.hpp"
+#include "garden_generator.hpp"
 
 class Garden {
 public:
@@ -37,4 +39,5 @@ private:
 	int screen_height;
 	SDL_Rect camera;
 	std::string window_title;
+	World_Renderer* world_renderer;
 };

@@ -32,7 +32,7 @@ namespace Zen {
 	static SDL_Color DIRT_COLOR = { 140, 70, 20, 255 };
 	static SDL_Color CLAY_COLOR = { 197, 95, 64, 255 };
 	static SDL_Color STONE_COLOR = { 128, 128, 128, 255 };
-	static SDL_Color MAGENTA_COLOR = { 255, 0, 255, 255 };
+	static SDL_Color MAGENTA_COLOR = { 255, 0, 255, 0 };
 
 	struct Vector2D {
 		int x, y;
