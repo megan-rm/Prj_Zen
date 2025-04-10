@@ -1,6 +1,10 @@
 #include "world_renderer.hpp"
 
 World_Renderer::World_Renderer() {
+	tile_atlas = nullptr;
+	tile_atlas_width = 0;
+	tile_atlas_height = 0;
+	tile_size = 0;
 }
 
 World_Renderer::~World_Renderer() {
@@ -33,7 +37,7 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world, S
 			SDL_Rect src = tile_src_rect(world.at(x).at(y).img_id);
 			SDL_Rect dst{ global_x - camera.x, global_y - camera.y, tile_size, tile_size };
 			SDL_RenderCopy(renderer, tile_atlas, &src, &dst);
-			SDL_Rect water_level{ x, y, tile_size, world.at(x).at(y).saturation / world.at(x).at(y).max_saturation };
+			SDL_Rect water_level{ x, y, tile_size, tile_size * ( world.at(x).at(y).saturation / world.at(x).at(y).max_saturation) };
 			SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
 			SDL_RenderDrawRect(renderer, &water_level);
 		}

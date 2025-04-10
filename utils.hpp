@@ -1,4 +1,8 @@
 #pragma once
+#ifdef _DEBUG_
+int drawn_tiles = 0;
+
+#endif
 
 namespace Zen {
 	constexpr int TERRAIN_WIDTH = 10000;

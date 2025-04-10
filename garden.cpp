@@ -11,6 +11,7 @@ Garden::Garden() {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	running = true;
 
+	world_renderer = new World_Renderer();
 	camera.w = screen_width;
 	camera.h = screen_height;
 	camera.x = 0;
@@ -37,7 +38,7 @@ Garden::Garden(std::string st, int sw, int sh) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	running = true;
 
-	world_renderer = new World_Renderer(renderer);
+	world_renderer = new World_Renderer();
 
 	int w = Zen::TERRAIN_WIDTH;
 	int h = Zen::TERRAIN_HEIGHT;
@@ -66,6 +67,7 @@ Garden::Garden(std::string st, int sw, int sh) {
 }
 
 Garden::~Garden() {
+	delete world_renderer;
 	world.clear();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
