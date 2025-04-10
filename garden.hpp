@@ -24,9 +24,9 @@ public:
 	Garden(std::string st, int sw, int sh);
 	~Garden();
 	void run();
-	void input();
-	void render();
-	void update();
+	void input(float delta);
+	void render(float delta);
+	void update(float delta	);
 	bool load_world();
 private:
 	SDL_Window* window;
@@ -40,4 +40,6 @@ private:
 	SDL_Rect camera;
 	std::string window_title;
 	World_Renderer* world_renderer;
+	static constexpr float camera_speed = Zen::TERRAIN_WIDTH / 60.0f;
+	bool up_key, down_key, left_key, right_key;
 };

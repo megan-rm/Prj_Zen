@@ -4,6 +4,7 @@ Garden::Garden() {
 	window_title = "App";
 	screen_width = 640;
 	screen_height = 480;
+	up_key = down_key = left_key = right_key = false;
 
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);
 
@@ -14,21 +15,29 @@ Garden::Garden() {
 	camera.h = screen_height;
 	camera.x = 0;
 	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
-
-	Garden_Generator* garden_generator = new Garden_Generator();
-	garden_generator->generate_world(renderer);
-
+	std::ifstream file("World.zen");
+	if (!file.good()) {
+		Garden_Generator* garden_generator = new Garden_Generator();
+		garden_generator->generate_world(renderer);
+	}
+	else {
+		load_world();
+		world_renderer->register_tile_atlas(renderer, "tilemap.png");
+	}
+	file.close();
 }
 
 Garden::Garden(std::string st, int sw, int sh) {
 	window_title = st;
 	screen_width = sw;
 	screen_height = sh;
-
+	up_key = down_key = left_key = right_key = false;
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);
 	
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	running = true;
+
+	world_renderer = new World_Renderer(renderer);
 
 	int w = Zen::TERRAIN_WIDTH;
 	int h = Zen::TERRAIN_HEIGHT;
@@ -43,12 +52,17 @@ Garden::Garden(std::string st, int sw, int sh) {
 		world.at(i).resize(h / Zen::TILE_SIZE);
 	}
 
-	Garden_Generator* garden_generator = new Garden_Generator();
-	garden_generator->generate_world(renderer);
-	world_renderer = new World_Renderer(renderer);
+	std::ifstream file("World.zen");
+	if ( !file.good() ) {
+		Garden_Generator* garden_generator = new Garden_Generator();
+		garden_generator->generate_world(renderer);
+	}
+	else {
+		load_world();
+		world_renderer->register_tile_atlas(renderer, "tilemap.png");
+	}
+	file.close();
 
-	load_world();
-	world_renderer->register_tile_atlas("tilemap.png");
 }
 
 Garden::~Garden() {
@@ -109,23 +123,23 @@ bool Garden::load_world() {
 	}
 }
 
-void Garden::update() {
+void Garden::update(float delta) {
 
 }
 
-void Garden::render() {
+void Garden::render(float delta) {
 	SDL_RenderClear(renderer);
 	world_renderer->render_tiles(world, renderer, camera);
 	SDL_RenderPresent(renderer);
 }
 
-void Garden::input() {
+void Garden::input(float delta) {
 	while (SDL_PollEvent(&events)) {
 		if (events.type == SDL_QUIT) {
 			running = false;
 			continue;
 		}
-		else if (events.type = SDL_KEYDOWN)
+		else if (events.type == SDL_KEYDOWN)
 		{
 			switch (events.key.keysym.sym) {
 			case SDLK_ESCAPE:
@@ -134,20 +148,72 @@ void Garden::input() {
 			case SDLK_SPACE:
 				break;
 			case SDLK_RIGHT:
+				right_key = true;
 				break;
 			case SDLK_LEFT:
+				left_key = true;
+				break;
+			case SDLK_UP:
+				up_key = true;
+				break;
+			case SDLK_DOWN:
+				down_key = true;
 				break;
 			}
 		}
+		else if (events.type == SDL_KEYUP) {
+			switch (events.key.keysym.sym) {
+			case SDLK_RIGHT:
+				right_key = false;
+				break;
+			case SDLK_LEFT:
+				left_key = false;
+				break;
+			case SDLK_UP:
+				up_key = false;
+				break;
+			case SDLK_DOWN:
+				down_key = false;
+				break;
+			}
+		}
+	}
+	
+	/****************************************
+	*	key press handling
+	*
+	****************************************/
+	if (up_key) {
+		camera.y -= camera_speed * delta;
+		camera.y = std::max(camera.y, 0);
+	}
+	if (down_key) {
+		camera.y += camera_speed * delta;
+		camera.y = std::min(camera.y, (Zen::TERRAIN_HEIGHT - camera.y + camera.h));
+	}
+	if (right_key) {
+		camera.x += camera_speed * delta;
+		camera.x = std::min(camera.x, (Zen::TERRAIN_WIDTH - camera.x + camera.w)); // you know, in my head this sounds right
+	}
+	if (left_key) {
+		camera.x -= camera_speed * delta;
+		camera.x = std::max(camera.x, 0); // seriously? I don't know about this chief.
 	}
 }
 
 void Garden::run()
 {
-	while (running) {
-		input();
-		update();
-		render();
+	auto last_time = SDL_GetTicks();
+	const int fps = 60;
+	const int frame_delay = 1000 / fps;
 
+	while (running) {
+		auto current_time = SDL_GetTicks();
+		float delta = (current_time - last_time) / 1000.0f;
+		last_time = current_time;
+		input(delta);
+		update(delta);
+		render(delta);
+		SDL_Delay(16);
 	}
 }
