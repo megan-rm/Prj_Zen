@@ -1,6 +1,7 @@
 #pragma once
 #include "tile.hpp"
 
+#include <random>
 #include <vector>
 
 class Water_System {
@@ -11,10 +12,10 @@ public:
 		
 	}
 	~Water_System() = default;
-	void update_saturation();
+	void update_saturation(int delta);
 private:
 	std::vector<std::vector<Tile>>& world_reference;
 	int update_count;
 	int update_mod;
-	void check_neighbor(Tile& self, Tile& tile);
+	void calculate_flow(Tile& self, Tile& tile, int delta);
 };
