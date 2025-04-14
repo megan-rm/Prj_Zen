@@ -18,4 +18,5 @@ private:
 	int update_count;
 	int update_mod;
 	void calculate_flow(Tile& self, Tile& tile, int delta);
+	Uint64 place_water(std::vector<std::vector<Tile>>& world, float relative_pct);
 };

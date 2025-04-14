@@ -13,10 +13,12 @@
 #include <SDL.h>
 #include <SDL_image.H>
 
+#include "garden_generator.hpp"
 #include "tile.hpp"
 #include "utils.hpp"
+#include "water_system.hpp"
 #include "world_renderer.hpp"
-#include "garden_generator.hpp"
+
 
 class Garden {
 public:
@@ -40,6 +42,7 @@ private:
 	SDL_Rect camera;
 	std::string window_title;
 	World_Renderer* world_renderer;
+	Water_System* water_system;
 	static constexpr float camera_speed = Zen::TERRAIN_WIDTH / 60.0f;
 	bool up_key, down_key, left_key, right_key;
 };

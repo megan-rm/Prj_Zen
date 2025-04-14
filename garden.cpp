@@ -208,7 +208,7 @@ void Garden::run()
 	auto last_time = SDL_GetTicks();
 	const int fps = 60;
 	const int frame_delay = 1000 / fps;
-
+	water_system = new Water_System(world, 16);
 	while (running) {
 		auto current_time = SDL_GetTicks();
 		float delta = (current_time - last_time) / 1000.0f;

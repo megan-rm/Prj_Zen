@@ -69,3 +69,31 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, int delta) {
 	self.saturation -= amount;
 	return;
 }
+
+/*************************************************
+*
+*	ALRIGHT! so, this function should ideally only
+*	ever be called probably once. We'll see. Maybe
+*	affecting the world's total water budget on
+*	a seasonal scale might be something to do, but
+*	as of now - you set a relative pct (entries below)
+*	and the world should maintain this amount
+*	constantly, just in different forms.
+*
+**************************************************/
+
+Uint64 Water_System::place_water(std::vector<std::vector<Tile>>& world, float relative_pct) {
+	Uint64 total_water = 0;
+	std::random_device rd;
+	std::mt19937 g(rd());
+	// so if we set relative_pct to 0.5, on average you'd expect a tile to hold 50% of its maximum. this random distr
+	// allows a +/- 30% to the relative_pct - meaning we'd have 35~65% of our maximum_saturation in each tile;
+	std::uniform_real_distribution<float> dist(0.7, 1.3);
+	for (int x = 0; x < world.size(); x++) {
+		for (int y = 0; y < world.at(x).size(); y++) {
+			float sat_pct_modifier = dist(g);
+			world.at(x).at(y).saturation = ((sat_pct_modifier * relative_pct) * world.at(x).at(y).max_saturation);
+			total_water += world.at(x).at(y).saturation;
+		}
+	}
+}

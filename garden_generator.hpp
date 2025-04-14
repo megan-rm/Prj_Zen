@@ -20,6 +20,7 @@ public:
 	bool place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
 	bool place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], int center, int height);
 	bool place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], bool direction);
+	
 private:
 
 };
