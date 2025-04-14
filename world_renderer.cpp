@@ -25,7 +25,8 @@ SDL_Rect World_Renderer::tile_src_rect(int tile_id) {
 }
 
 void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world, SDL_Renderer* renderer, const SDL_Rect& camera) {
-
+	SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
 	for (int x = 0; x < world.size(); x++){
 		for (int y = 0; y < world.at(x).size(); y++) {
 			int global_x = x * tile_size;
@@ -38,11 +39,17 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world, S
 			SDL_Rect dst{ global_x - camera.x, global_y - camera.y, tile_size, tile_size };
 			SDL_RenderCopy(renderer, tile_atlas, &src, &dst);
 			if (world.at(x).at(y).max_saturation > 0) {
-				SDL_Rect water_level{ dst.x, dst.y, tile_size, tile_size * (world.at(x).at(y).saturation / world.at(x).at(y).max_saturation) };
+				float ratio = world.at(x).at(y).saturation / world.at(x).at(y).max_saturation;
+				SDL_Rect water_level{ dst.x, dst.y, tile_size, tile_size * ratio };
+				if (water_level.h < 0 || water_level.y > 1200 || water_level.h > 8) {
+					std::cout << "Hello" << std::endl;
+				}
 				SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
-				SDL_RenderDrawRect(renderer, &water_level);
+				SDL_RenderFillRect(renderer, &water_level);
 			}
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		}
 	}
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }

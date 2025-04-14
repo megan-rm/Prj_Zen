@@ -31,7 +31,12 @@ void Water_System::update_saturation(int delta) {
 			}
 		}
 	}
-	update_count = (update_count + 1) % update_mod;
+	
+	update_count += 1;
+	if (update_count >= update_mod) {
+		std::cout << "Test" << std::endl;
+		update_count = 0;
+	}
 }
 
 void Water_System::calculate_flow(Tile& self, Tile& tile, int delta) {
@@ -92,10 +97,14 @@ Uint64 Water_System::place_water(float relative_pct) {
 	std::uniform_real_distribution<float> dist(0.7, 1.3);
 	for (int x = 0; x < world_reference.size(); x++) {
 		for (int y = 0; y < world_reference.at(x).size(); y++) {
+			if (world_reference.at(x).at(y).max_saturation == 10000) {
+				continue;
+			}
 			float sat_pct_modifier = dist(g);
 			world_reference.at(x).at(y).saturation = ((sat_pct_modifier * relative_pct) * world_reference.at(x).at(y).max_saturation);
 			total_water += world_reference.at(x).at(y).saturation;
 		}
 	}
+	Zen::water_budget = total_water;
 	return total_water;
 }

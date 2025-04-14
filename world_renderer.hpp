@@ -3,6 +3,7 @@
 #include "SDL_image.h"
 #include "tile.hpp"
 
+#include <iostream>
 #include <string>
 #include <vector>
 

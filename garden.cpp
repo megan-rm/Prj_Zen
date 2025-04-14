@@ -130,6 +130,7 @@ void Garden::update(float delta) {
 }
 
 void Garden::render(float delta) {
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderClear(renderer);
 	world_renderer->render_tiles(world, renderer, camera);
 	SDL_RenderPresent(renderer);
@@ -209,7 +210,7 @@ void Garden::run()
 	const int fps = 60;
 	const int frame_delay = 1000 / fps;
 	water_system = new Water_System(world, 80);
-	Uint64 water = water_system->place_water(0.5);
+	Uint64 water = water_system->place_water(0.3);
 	while (running) {
 		auto current_time = SDL_GetTicks();
 		float delta = (current_time - last_time) / 1000.0f;
