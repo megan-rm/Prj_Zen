@@ -67,6 +67,7 @@ bool Garden_Generator::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEI
 					switch (cells[x + tx][y + ty]) {
 					case Zen::PIXEL_TYPE::EMPTY:
 						max_saturation += ((100.0 / 64.0) * 100);
+						permeability += ((100.0 / 64.0) * 100);
 						break;
 					case Zen::PIXEL_TYPE::DIRT:
 						permeability += Zen::DIRT_PERMIABILITY;
@@ -102,6 +103,9 @@ bool Garden_Generator::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEI
 			}
 			if (max_saturation > 0) {
 				max_saturation += 16;
+			}
+			if (permeability > 0) {
+				permeability += 16;
 			}
 			file << id << "," << permeability << "," << max_saturation << "," << "0" << "|";
 		}
