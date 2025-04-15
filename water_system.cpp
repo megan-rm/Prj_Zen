@@ -1,9 +1,12 @@
 #include "water_system.hpp"
 
-void Water_System::update_saturation(int delta) {
+void Water_System::update_saturation(float delta) {
 	for (int i = update_count; i < world_reference.size(); i += update_mod) {
 		for (int y = 0; y < world_reference.at(i).size() - 1; y++){
 			Tile& self = world_reference.at(i).at(y);
+			if (self.saturation == 0) {
+				continue;
+			}
 			Tile* left, *right, *down;
 			left = nullptr;
 			right = nullptr;
@@ -29,19 +32,24 @@ void Water_System::update_saturation(int delta) {
 					calculate_flow(self, *right, delta);
 				}
 			}
+			water_update_total += self.saturation;
 		}
 	}
-	
 	update_count += 1;
 	if (update_count >= update_mod) {
 		std::cout << "Test" << std::endl;
 		update_count = 0;
+		std::cout << water_update_total << "/" << Zen::water_budget << std::endl;
+		water_update_total = 0;
 	}
 }
 
-void Water_System::calculate_flow(Tile& self, Tile& tile, int delta) {
-	delta = 6;
-	int saturation_difference = std::abs(self.saturation - tile.saturation); /// what if we didn't abs, and just kept it as potential negative and had 2 variables; 1 to add into from, 1 to add into dest.
+void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
+	//delta = 16.0/1000.0f;
+	int saturation_difference = self.saturation - tile.saturation; /// what if we didn't abs, and just kept it as potential negative and had 2 variables; 1 to add into from, 1 to add into dest.
+	if (saturation_difference < 0) {
+		return;
+	}
 	int tiles_ratio = tile.saturation / tile.max_saturation;
 	/**************************************************************
 	*
@@ -54,7 +62,7 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, int delta) {
 	*
 	**************************************************************/
 	float from_chance = self.permeability / 10000.0f; // 10,000 / 100 = 100, so we're taking the potential max divided by 100 to bring it down to a int representation of percentage
-	float to_scale = tile.permeability / 100000.0f;
+	float to_scale = tile.permeability / 10000.0f;
 
 	std::random_device rd;
 	std::mt19937 g(rd());
@@ -66,13 +74,20 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, int delta) {
 	float rate_constant = 0.25; // fam, i'm gonna fine tune this over time. idk.
 	float fraction = delta / rate_constant;
 	int amount = saturation_difference * fraction * to_scale;
+	amount = std::max(amount, 1);
+	
 	int remainder = 0;
 	tile.saturation += amount;
 	if (tile.saturation >= tile.max_saturation) {
 		remainder = tile.saturation - tile.max_saturation;
+		tile.saturation = tile.max_saturation;
 	}
+
 	self.saturation += remainder;
 	self.saturation -= amount;
+	if (self.saturation > self.max_saturation) {
+		std::cout << "ERROR" << std::endl;
+	}
 	return;
 }
 
@@ -106,5 +121,6 @@ Uint64 Water_System::place_water(float relative_pct) {
 		}
 	}
 	Zen::water_budget = total_water;
+	water_total = total_water;
 	return total_water;
 }

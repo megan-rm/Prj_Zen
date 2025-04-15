@@ -192,11 +192,15 @@ void Garden::input(float delta) {
 	}
 	if (down_key) {
 		camera.y += camera_speed * delta;
-		camera.y = std::min(camera.y, (Zen::TERRAIN_HEIGHT - camera.y + camera.h));
+		if (camera.y + camera.h > Zen::TERRAIN_HEIGHT) {
+			camera.y = Zen::TERRAIN_HEIGHT - camera.h;
+		}
 	}
 	if (right_key) {
 		camera.x += camera_speed * delta;
-		camera.x = std::min(camera.x, (Zen::TERRAIN_WIDTH - camera.x + camera.w)); // you know, in my head this sounds right
+		if (camera.x + camera.w > Zen::TERRAIN_WIDTH) {
+			camera.x = Zen::TERRAIN_WIDTH - camera.w;
+		}
 	}
 	if (left_key) {
 		camera.x -= camera_speed * delta;
@@ -210,7 +214,7 @@ void Garden::run()
 	const int fps = 60;
 	const int frame_delay = 1000 / fps;
 	water_system = new Water_System(world, 80);
-	Uint64 water = water_system->place_water(0.3);
+	Uint64 water = water_system->place_water(0.50f);
 	while (running) {
 		auto current_time = SDL_GetTicks();
 		float delta = (current_time - last_time) / 1000.0f;

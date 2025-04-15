@@ -39,15 +39,16 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world, S
 			SDL_Rect dst{ global_x - camera.x, global_y - camera.y, tile_size, tile_size };
 			SDL_RenderCopy(renderer, tile_atlas, &src, &dst);
 			if (world.at(x).at(y).max_saturation > 0) {
-				float ratio = world.at(x).at(y).saturation / world.at(x).at(y).max_saturation;
+				float ratio = static_cast<float>(world.at(x).at(y).saturation) / world.at(x).at(y).max_saturation;
 				SDL_Rect water_level{ dst.x, dst.y, tile_size, tile_size * ratio };
-				if (water_level.h < 0 || water_level.y > 1200 || water_level.h > 8) {
-					std::cout << "Hello" << std::endl;
-				}
-				SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
+				//SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
 				SDL_RenderFillRect(renderer, &water_level);
+				/*if (world.at(x).at(y).saturation > 0 && world.at(x).at(y).saturation < world.at(x).at(y).max_saturation) {
+					std::cout << "DEBUG" << std::endl;
+				}*/
 			}
-			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+			//SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		}
 	}
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
