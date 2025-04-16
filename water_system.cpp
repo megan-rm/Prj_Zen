@@ -20,16 +20,16 @@ void Water_System::update_saturation(float delta) {
 					calculate_flow(self, *down, delta);
 				}
 			}
-			//share left
-			if (left != nullptr) {
-				if (self.saturation < left->saturation && left->saturation < left->max_saturation) {
-					calculate_flow(self, *left, delta);
+			//share right
+			if (right != nullptr) {
+				if (/*self.saturation < right->saturation &&*/ right->saturation < right->max_saturation) {
+					calculate_flow(self, *right, delta);
 				}
 			}
 			//share left
-			if (right != nullptr) {
-				if (self.saturation < right->saturation && right->saturation < right->max_saturation) {
-					calculate_flow(self, *right, delta);
+			if (left != nullptr) {
+				if (/*self.saturation < left->saturation && */ left->saturation < left->max_saturation) {
+					calculate_flow(self, *left, delta);
 				}
 			}
 			water_update_total += self.saturation;
@@ -50,9 +50,11 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 	if (saturation_difference < 0) {
 		return;
 	}
+	if (self.saturation > 0 && tile.saturation == 0) {
+		//std::cout << "Test" << std::endl;
+	}
 	int sum = self.saturation + tile.saturation;
 	int after_sum = 0;
-	int tiles_ratio = tile.saturation / tile.max_saturation;
 	/**************************************************************
 	*
 	*	so like... what i think we're going to do is like...
@@ -70,16 +72,17 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 	std::mt19937 g(rd());
 	std::uniform_real_distribution<float> dist(0, 1);
 	float random = dist(g);
-	if (random > from_chance) {
+	/*if (random > from_chance) {
 		return;
-	}
+	}*/
 	float rate_constant = 0.25; // fam, i'm gonna fine tune this over time. idk.
-	float fraction = delta / rate_constant;
-	int amount = saturation_difference * fraction * to_scale;
-	amount = std::max(amount, 10);
+	//float fraction = delta / rate_constant;
+	int amount = saturation_difference * rate_constant * to_scale;
+	//amount = std::max(amount, 10);
 	
 	int remainder = 0;
 	tile.saturation += amount;
+
 	if (tile.saturation >= tile.max_saturation) {
 		remainder = tile.saturation - tile.max_saturation;
 		tile.saturation = tile.max_saturation;
@@ -115,7 +118,7 @@ Uint64 Water_System::place_water(float relative_pct) {
 	std::mt19937 g(rd());
 	// so if we set relative_pct to 0.5, on average you'd expect a tile to hold 50% of its maximum. this random distr
 	// allows a +/- 30% to the relative_pct - meaning we'd have 35~65% of our maximum_saturation in each tile;
-	std::uniform_real_distribution<float> dist(0.7, 1.3);
+	std::uniform_real_distribution<float> dist(0.85, 1.15);
 	for (int x = 0; x < world_reference.size(); x++) {
 		for (int y = 0; y < world_reference.at(x).size(); y++) {
 			if (world_reference.at(x).at(y).max_saturation == 10000) {

@@ -136,6 +136,18 @@ void Garden::render(float delta) {
 	SDL_RenderPresent(renderer);
 }
 
+void Garden::mouse_click(int x, int y) {
+	x += camera.x;
+	y += camera.y;
+	int tile_x = x / Zen::TILE_SIZE;
+	int tile_y = y / Zen::TILE_SIZE;
+	Tile& tile = world.at(tile_x).at(tile_y);
+	int addition = 3000;
+	int open_space = tile.max_saturation - tile.saturation;
+	int amt = std::min(addition, open_space);
+	tile.saturation += amt;
+}
+
 void Garden::input(float delta) {
 	while (SDL_PollEvent(&events)) {
 		if (events.type == SDL_QUIT) {
@@ -180,6 +192,12 @@ void Garden::input(float delta) {
 				break;
 			}
 		}
+		else if (events.type == SDL_MOUSEBUTTONDOWN && events.button.button == SDL_BUTTON_LEFT) {
+			left_mouse = true;
+		}
+		else if (events.type == SDL_MOUSEBUTTONUP && events.button.button == SDL_BUTTON_LEFT) {
+			left_mouse = false;
+		}
 	}
 	
 	/****************************************
@@ -206,6 +224,11 @@ void Garden::input(float delta) {
 		camera.x -= camera_speed * delta;
 		camera.x = std::max(camera.x, 0); // seriously? I don't know about this chief.
 	}
+	if (left_mouse) {
+		int x, y;
+		SDL_GetMouseState(&x, &y);
+		mouse_click(x, y);
+	}
 }
 
 void Garden::run()
@@ -214,7 +237,8 @@ void Garden::run()
 	const int fps = 60;
 	const int frame_delay = 1000 / fps;
 	water_system = new Water_System(world, 80);
-	Uint64 water = water_system->place_water(0.50f);
+	Uint64 water = water_system->place_water(0.80f);
+	std::string window_title;
 	while (running) {
 		auto current_time = SDL_GetTicks();
 		float delta = (current_time - last_time) / 1000.0f;
@@ -222,6 +246,10 @@ void Garden::run()
 		input(delta);
 		update(delta);
 		render(delta);
+		auto tick_time = SDL_GetTicks() - last_time;
+		window_title = "Project Zen: " + std::to_string(tick_time);
+		SDL_SetWindowTitle(window, window_title.c_str());
+		//std::cout << tick_time << std::endl;
 		SDL_Delay(16);
 	}
 }

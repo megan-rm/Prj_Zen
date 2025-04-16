@@ -30,6 +30,7 @@ public:
 	void render(float delta);
 	void update(float delta	);
 	bool load_world();
+	void mouse_click(int x, int y);
 private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
@@ -44,5 +45,5 @@ private:
 	World_Renderer* world_renderer;
 	Water_System* water_system;
 	static constexpr float camera_speed = Zen::TERRAIN_WIDTH / 60.0f;
-	bool up_key, down_key, left_key, right_key;
+	bool up_key, down_key, left_key, right_key, left_mouse;
 };
