@@ -2,7 +2,7 @@
 
 void Water_System::update_saturation(float delta) {
 	for (int i = update_count; i < world_reference.size(); i += update_mod) {
-		for (int y = 0; y < world_reference.at(i).size() - 1; y++){
+		for (int y = world_reference.at(i).size() - 1; y > 0; y--) {
 			Tile& self = world_reference.at(i).at(y);
 			if (self.saturation == 0) {
 				continue;
@@ -47,7 +47,7 @@ void Water_System::update_saturation(float delta) {
 void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 	//delta = 16.0/1000.0f;
 	int saturation_difference = self.saturation - tile.saturation; /// what if we didn't abs, and just kept it as potential negative and had 2 variables; 1 to add into from, 1 to add into dest.
-	if (saturation_difference < 0) {
+	if (saturation_difference <= 0) {
 		return;
 	}
 	if (self.saturation > 0 && tile.saturation == 0) {
@@ -68,8 +68,6 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 	float from_chance = self.permeability / 10000.0f; // 10,000 / 100 = 100, so we're taking the potential max divided by 100 to bring it down to a int representation of percentage
 	float to_scale = tile.permeability / 10000.0f;
 
-	std::random_device rd;
-	std::mt19937 g(rd());
 	std::uniform_real_distribution<float> dist(0, 1);
 	float random = dist(g);
 	/*if (random > from_chance) {
@@ -78,7 +76,7 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 	float rate_constant = 0.25; // fam, i'm gonna fine tune this over time. idk.
 	//float fraction = delta / rate_constant;
 	int amount = saturation_difference * rate_constant * to_scale;
-	//amount = std::max(amount, 10);
+	amount = std::max(amount, 1);
 	
 	int remainder = 0;
 	tile.saturation += amount;
@@ -114,8 +112,6 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 
 Uint64 Water_System::place_water(float relative_pct) {
 	Uint64 total_water = 0;
-	std::random_device rd;
-	std::mt19937 g(rd());
 	// so if we set relative_pct to 0.5, on average you'd expect a tile to hold 50% of its maximum. this random distr
 	// allows a +/- 30% to the relative_pct - meaning we'd have 35~65% of our maximum_saturation in each tile;
 	std::uniform_real_distribution<float> dist(0.85, 1.15);
