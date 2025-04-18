@@ -4,7 +4,6 @@
 
 struct Tile {
 	Uint16 saturation;
-	Uint16 saturation_buffer;
 	Uint16 max_saturation;
 	Uint16 permeability;
 	//Uint16 humidity; // we have to separate standing water to render, vs humidity in the air :(

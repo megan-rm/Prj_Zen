@@ -69,7 +69,7 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 	float to_scale = tile.permeability / 10000.0f;
 
 	std::uniform_real_distribution<float> dist(0, 1);
-	float random = dist(g);
+	float random = dist(rand);
 	/*if (random > from_chance) {
 		return;
 	}*/
@@ -120,7 +120,7 @@ Uint64 Water_System::place_water(float relative_pct) {
 			if (world_reference.at(x).at(y).max_saturation == 10000) {
 				continue;
 			}
-			float sat_pct_modifier = dist(g);
+			float sat_pct_modifier = dist(rand);
 			world_reference.at(x).at(y).saturation = ((sat_pct_modifier * relative_pct) * world_reference.at(x).at(y).max_saturation);
 			total_water += world_reference.at(x).at(y).saturation;
 		}

@@ -37,6 +37,7 @@ private:
 	SDL_Event events;
 
 	std::vector<std::vector<Tile>> world; // 2d array of 8x8px 'blocks' in the garden
+	std::vector<std::vector<Tile>> buffer;
 	bool running;
 	int screen_width;
 	int screen_height;

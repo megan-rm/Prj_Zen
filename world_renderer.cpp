@@ -27,19 +27,28 @@ SDL_Rect World_Renderer::tile_src_rect(int tile_id) {
 void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world, SDL_Renderer* renderer, const SDL_Rect& camera) {
 	SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
-	for (int x = 0; x < world.size(); x++){
-		for (int y = 0; y < world.at(x).size(); y++) {
-			int global_x = x * tile_size;
-			int global_y = y * tile_size;
-			if (global_x + tile_size < camera.x || global_x > camera.x + camera.w ||
-				global_y + tile_size < camera.y || global_y > camera.y + camera.h) {
-				continue;
-			}
-			SDL_Rect src = tile_src_rect(world.at(x).at(y).img_id);
-			SDL_Rect dst{ global_x - camera.x, global_y - camera.y, tile_size, tile_size };
+	int tile_start_x = camera.x / Zen::TILE_SIZE;
+	int tile_start_y = camera.y / Zen::TILE_SIZE;
+	int tile_end_x = (camera.x + camera.w) / Zen::TILE_SIZE + 1;
+	int tile_end_y = (camera.y + camera.h) / Zen::TILE_SIZE + 1;
+
+	tile_start_x = std::max(0, tile_start_x);
+	tile_start_y = std::max(0, tile_start_y);
+	tile_end_x = std::min(Zen::TERRAIN_WIDTH/Zen::TILE_SIZE, tile_end_x);
+	tile_end_y = std::min(Zen::TERRAIN_HEIGHT/Zen::TILE_SIZE, tile_end_y);
+
+	for (int y = tile_start_y; y < tile_end_y; y++){
+		for (int x = tile_start_x; x < tile_end_x; x++) {
+			auto tile = world.at(x).at(y);
+			SDL_Rect src = tile_src_rect(tile.img_id);
+			SDL_Rect dst{ x * Zen::TILE_SIZE - camera.x,
+						  y * Zen::TILE_SIZE - camera.y,
+				          tile_size, tile_size
+			};
+			
 			SDL_RenderCopy(renderer, tile_atlas, &src, &dst);
-			if (world.at(x).at(y).max_saturation > 0 && world.at(x).at(y).saturation > 10) {
-				float ratio = static_cast<float>(world.at(x).at(y).saturation) / world.at(x).at(y).max_saturation;
+			if (tile.max_saturation > 0 && tile.saturation > 10) {
+				float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
 				if (ratio < 0.09f) continue;
 				SDL_Rect water_level{ dst.x, dst.y + 8, tile_size, -tile_size* ratio };
 				//SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);

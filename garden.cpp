@@ -30,27 +30,28 @@ Garden::Garden() {
 
 Garden::Garden(std::string st, int sw, int sh) {
 	window_title = st;
+
 	screen_width = sw;
 	screen_height = sh;
-	up_key = down_key = left_key = right_key = false;
-	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);
 	
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	running = true;
-
-	world_renderer = new World_Renderer();
-
-	int w = Zen::TERRAIN_WIDTH;
-	int h = Zen::TERRAIN_HEIGHT;
-
 	camera.w = screen_width;
 	camera.h = screen_height;
 	camera.x = 0;
 	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
 
-	world.resize(w / Zen::TILE_SIZE);
-	for (int i = 0; i < w / Zen::TILE_SIZE; i++) {
-		world.at(i).resize(h / Zen::TILE_SIZE);
+	up_key = down_key = left_key = right_key = false;
+	running = true;
+
+	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);	
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+
+	world_renderer = new World_Renderer();
+
+
+	world.resize(Zen::TERRAIN_WIDTH / Zen::TILE_SIZE);
+	for (int i = 0; i < Zen::TERRAIN_WIDTH / Zen::TILE_SIZE; i++) {
+		world.at(i).resize(Zen::TERRAIN_HEIGHT / Zen::TILE_SIZE);
 	}
 
 	std::ifstream file("World.zen");
