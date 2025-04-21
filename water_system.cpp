@@ -32,16 +32,11 @@ void Water_System::update_saturation(float delta) {
 					calculate_flow(self, *left, delta);
 				}
 			}
-			water_update_total += self.saturation;
+			//water_update_total += self.saturation;
 		}
 	}
 	update_count += 1;
-	if (update_count >= update_mod) {
-		std::cout << "Test" << std::endl;
-		update_count = 0;
-		std::cout << water_update_total << "/" << Zen::water_budget << std::endl;
-		water_update_total = 0;
-	}
+	update_count = update_count % update_mod;
 }
 
 void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
@@ -50,22 +45,10 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 	if (saturation_difference <= 0) {
 		return;
 	}
-	if (self.saturation > 0 && tile.saturation == 0) {
-		//std::cout << "Test" << std::endl;
-	}
-	int sum = self.saturation + tile.saturation;
+	int initial_sum = self.saturation + tile.saturation;
 	int after_sum = 0;
-	/**************************************************************
-	*
-	*	so like... what i think we're going to do is like...
-	*   source tile's permeability is the probability that water
-	*   leaves the tile at all. permeability / 100 = chance water
-	*	can leave the source tile. Assuming it does, we now look at
-	*   the difference between source->destination, absolute value
-	*   then we times that by some... ratios or some such? idk. 
-	*
-	**************************************************************/
-	float from_chance = self.permeability / 10000.0f; // 10,000 / 100 = 100, so we're taking the potential max divided by 100 to bring it down to a int representation of percentage
+
+	float from_chance = self.permeability / 10000.0f;
 	float to_scale = tile.permeability / 10000.0f;
 
 	std::uniform_real_distribution<float> dist(0, 1);
@@ -89,7 +72,7 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 	self.saturation += remainder;
 	self.saturation -= amount;
 	after_sum = self.saturation + tile.saturation;
-	if (after_sum != sum) {
+	if (after_sum != initial_sum) {
 		std::cout << "ERROR" << std::endl;
 	}
 	if (self.saturation > self.max_saturation) {

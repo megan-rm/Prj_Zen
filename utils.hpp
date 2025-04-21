@@ -31,6 +31,7 @@ namespace Zen {
 	static int lake_start_x = 0;
 	static int lake_end_x = 0;
 
+	static Uint64 water_update_total = 0;
 	static Uint64 water_budget = 0;
 
 	enum PIXEL_TYPE { EMPTY = 0, DIRT, CLAY, STONE };
