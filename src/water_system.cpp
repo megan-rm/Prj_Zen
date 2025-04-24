@@ -108,6 +108,12 @@ Uint64 Water_System::place_water(float relative_pct) {
 			total_water += world_reference.at(x).at(y).saturation;
 		}
 	}
+	//lake fill
+	for (int x = (Zen::lake_start_x / Zen::TILE_SIZE); x < (Zen::lake_end_x / Zen::TILE_SIZE); x++) {
+		for (int y = (Zen::mountain_end_y / Zen::TILE_SIZE) + 1; y < Zen::TERRAIN_HEIGHT / Zen::TILE_SIZE; y++) {
+			world_reference.at(x).at(y).saturation = world_reference.at(x).at(y).max_saturation;
+		}
+	}
 	Zen::water_budget = total_water;
 	water_total = total_water;
 	return total_water;

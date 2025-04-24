@@ -20,10 +20,12 @@ void Weather_System::update_temperatures(int tile_x, int tile_y) {
 	}
 	
 	if (tile_x < Zen::TERRAIN_WIDTH){
+		temp_sum += world_reference.at(tile_x + 1).at(tile_y).temperature;
 		valid_neighbors++;
 	}
 
-	if (tile_x > 0) left = &world_reference.at(tile_x + 1).at(tile_y) {
+	if (tile_x > 0){
+		temp_sum += world_reference.at(tile_x - 1).at(tile_y).temperature;
 		valid_neighbors++;
 	}
 

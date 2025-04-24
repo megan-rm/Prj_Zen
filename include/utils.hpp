@@ -21,18 +21,18 @@ namespace Zen {
 	constexpr int CLAY_PERMIABILITY = 25; // divide by 100 ; aka  0.25 ; 10000 => 100.00 
 	constexpr int STONE_PERMIABILITY = 0;
 
-	static int mountain_start_x = 0;
-	static int mountain_end_x = 0;
-	static int mountain_end_y = 0; // for river formation, we only need the intercept at the end
+	inline int mountain_start_x = 0;
+	inline int mountain_end_x = 0;
+	inline int mountain_end_y = 0; // for river formation, we only need the intercept at the end
 
-	static int river_start_x = 0;
-	static int river_end_x = 0;
+	inline int river_start_x = 0;
+	inline int river_end_x = 0;
 
-	static int lake_start_x = 0;
-	static int lake_end_x = 0;
+	inline int lake_start_x = 0;
+	inline int lake_end_x = 0;
 
-	static Uint64 water_update_total = 0;
-	static Uint64 water_budget = 0;
+	inline Uint64 water_update_total = 0;
+	inline Uint64 water_budget = 0;
 
 	enum PIXEL_TYPE { EMPTY = 0, DIRT, CLAY, STONE };
 

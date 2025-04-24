@@ -79,28 +79,36 @@ bool Garden::load_world() {
 	int y = 0;
 	std::ifstream file;
 	file.open("world.zen");
+	if (!file.is_open()) {
+		return false;
+	}
 	while (!file.eof()) {
 		std::string line;
 		std::getline(file, line);
-		if (line == "[WORLD_PROPERTIES") {
-			std::stringstream property_stream;
+		if (line == "[WORLD_PROPERTIES]") {
+			std::getline(file, line);
+			std::stringstream property_stream(line);
 			//MOUNTAIN LOADING
 			std::getline(property_stream, line, ',');
 			Zen::mountain_end_x = std::stoi(line);
 			std::getline(property_stream, line, ',');
 			Zen::mountain_end_y = std::stoi(line);
 			//RIVER LOADING
+			std::getline(file, line);
+			property_stream.clear();
+			property_stream.str(line);
 			std::getline(property_stream, line, ',');
 			Zen::river_start_x = std::stoi(line);
 			std::getline(property_stream, line, ',');
 			Zen::river_end_x = std::stoi(line);
 			//LAKE LOADING
+			std::getline(file, line);
+			property_stream.clear();
+			property_stream.str(line);
 			std::getline(property_stream, line, ',');
 			Zen::lake_start_x = std::stoi(line);
 			std::getline(property_stream, line, ',');
 			Zen::lake_end_x = std::stoi(line);
-			// i think?
-			std::getline(file, line);
 		}
 		else if (line == "[WORLD_TILES]") {
 			std::getline(file, line);
@@ -138,54 +146,10 @@ bool Garden::load_world() {
 				std::getline(file, line, '|');
 			}
 		}
+		//return true;
 	}
 	/////////////////////////////////
-	if (file.is_open()) {
-		std::string line;
-		std::getline(file, line);
-		if (line == "[WORLD_TILES]") {
-			std::getline(file, line);
-			while (!file.eof() && line.at(0) != '[') {
-				std::stringstream s_stream(line);
-				while (std::getline(s_stream, line, '|')) {
-					std::string value{};
-					std::stringstream tile_stream(line);
-					
-					std::getline(tile_stream, line, ',');
-					int tile_id = std::stoi(line);
-					std::getline(tile_stream, line, ',');
-					int permeability = std::stoi(line);
-					std::getline(tile_stream, line, ',');
-					int max_saturation = std::stoi(line);
-					std::getline(tile_stream, line, ',');
-					int saturation = std::stoi(line);
-
-					//world.at(x).at(y).register_image(terrain_atlas);
-					world.at(x).at(y).img_id = tile_id;
-					world.at(x).at(y).permeability = permeability;
-					world.at(x).at(y).max_saturation = max_saturation;
-					world.at(x).at(y).saturation = saturation;
-					//world.at(x).at(y).set_pos(x * Zen::TILE_SIZE, y * Zen::TILE_SIZE);
-
-					x++;
-					if (x >= Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) {
-						x = 0;
-						y++;
-					}
-					if (y > Zen::TERRAIN_HEIGHT / Zen::TILE_SIZE) { // just a failsafe
-						y = Zen::TERRAIN_HEIGHT;
-					}
-				}
-				std::getline(file, line, '|');
-			}
-		}
-		
-		return true;
-	}
-	else {
-		std::cout << "Error loading world.zen..." << std::endl;
-		return false;
-	}
+	return false;
 }
 
 void Garden::update(float delta) {
@@ -313,6 +277,7 @@ void Garden::run()
 		window_title = "Project Zen: " + std::to_string(tick_time);
 		SDL_SetWindowTitle(window, window_title.c_str());
 		//std::cout << tick_time << std::endl;
-		SDL_Delay(16);
+		if (tick_time > 16) tick_time = 15;
+		SDL_Delay(16 - tick_time);
 	}
 }
