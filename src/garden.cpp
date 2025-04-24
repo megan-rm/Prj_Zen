@@ -127,13 +127,10 @@ bool Garden::load_world() {
 					std::getline(tile_stream, line, ',');
 					int saturation = std::stoi(line);
 
-					//world.at(x).at(y).register_image(terrain_atlas);
 					world.at(x).at(y).img_id = tile_id;
 					world.at(x).at(y).permeability = permeability;
 					world.at(x).at(y).max_saturation = max_saturation;
 					world.at(x).at(y).saturation = saturation;
-					//world.at(x).at(y).set_pos(x * Zen::TILE_SIZE, y * Zen::TILE_SIZE);
-
 					x++;
 					if (x >= Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) {
 						x = 0;
@@ -146,9 +143,7 @@ bool Garden::load_world() {
 				std::getline(file, line, '|');
 			}
 		}
-		//return true;
 	}
-	/////////////////////////////////
 	return false;
 }
 
@@ -249,7 +244,7 @@ void Garden::input(float delta) {
 	}
 	if (left_key) {
 		camera.x -= camera_speed * delta;
-		camera.x = std::max(camera.x, 0); // seriously? I don't know about this chief.
+		camera.x = std::max(camera.x, 0);
 	}
 	if (left_mouse) {
 		int x, y;
@@ -276,7 +271,6 @@ void Garden::run()
 		auto tick_time = SDL_GetTicks() - last_time;
 		window_title = "Project Zen: " + std::to_string(tick_time);
 		SDL_SetWindowTitle(window, window_title.c_str());
-		//std::cout << tick_time << std::endl;
 		if (tick_time > 16) tick_time = 15;
 		SDL_Delay(16 - tick_time);
 	}
