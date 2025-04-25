@@ -153,6 +153,23 @@ void Garden::update(float delta) {
 
 void Garden::render(float delta) {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	auto now = time_system.get_time();
+	
+	if (now.tm_hour >= 0 && now.tm_hour < 6) {
+		SDL_SetRenderDrawColor(renderer, 25, 25, 115, 255);
+	}
+	else if (now.tm_hour >= 7 && now.tm_hour < 12) {
+		SDL_SetRenderDrawColor(renderer, 235, 200, 160, 255);
+	}
+	else if (now.tm_hour >= 12 && now.tm_hour < 17) {
+		SDL_SetRenderDrawColor(renderer, 75, 195, 255, 255);
+	}
+	else if (now.tm_hour >= 17 && now.tm_hour < 20) {
+		SDL_SetRenderDrawColor(renderer, 255, 190, 80, 255);
+	}
+	else if (now.tm_hour >= 20 && now.tm_hour <= 23) {
+		SDL_SetRenderDrawColor(renderer, 45, 70, 130, 255);
+	}
 	SDL_RenderClear(renderer);
 	world_renderer->render_tiles(world, renderer, camera);
 	SDL_RenderPresent(renderer);
@@ -259,7 +276,7 @@ void Garden::run()
 	const int fps = 60;
 	const int frame_delay = 1000 / fps;
 	water_system = new Water_System(world, 80);
-	Uint64 water = water_system->place_water(0.80f);
+	Uint64 water = water_system->place_water(0.60f);
 	std::string window_title;
 	while (running) {
 		auto current_time = SDL_GetTicks();

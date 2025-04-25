@@ -22,13 +22,13 @@ void Water_System::update_saturation(float delta) {
 			}
 			//share right
 			if (right != nullptr) {
-				if (/*self.saturation < right->saturation &&*/ right->saturation < right->max_saturation) {
+				if (self.saturation > right->saturation && right->saturation < right->max_saturation) {
 					calculate_flow(self, *right, delta);
 				}
 			}
 			//share left
 			if (left != nullptr) {
-				if (/*self.saturation < left->saturation && */ left->saturation < left->max_saturation) {
+				if (self.saturation > left->saturation && left->saturation < left->max_saturation) {
 					calculate_flow(self, *left, delta);
 				}
 			}

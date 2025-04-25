@@ -15,6 +15,7 @@
 
 #include "garden_generator.hpp"
 #include "tile.hpp"
+#include "time_system.hpp"
 #include "utils.hpp"
 #include "water_system.hpp"
 #include "world_renderer.hpp"
@@ -45,6 +46,7 @@ private:
 	std::string window_title;
 	World_Renderer* world_renderer;
 	Water_System* water_system;
+	Time_System time_system;
 	static constexpr float camera_speed = Zen::TERRAIN_WIDTH / 60.0f;
 	bool up_key, down_key, left_key, right_key, left_mouse;
 };
