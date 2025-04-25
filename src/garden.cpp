@@ -155,19 +155,19 @@ void Garden::render(float delta) {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	auto now = time_system.get_time();
 	
-	if (now.tm_hour >= 0 && now.tm_hour < 6) {
+	if (now.hour >= 0 && now.hour < 6) {
 		SDL_SetRenderDrawColor(renderer, 25, 25, 115, 255);
 	}
-	else if (now.tm_hour >= 7 && now.tm_hour < 12) {
+	else if (now.hour >= 7 && now.hour < 12) {
 		SDL_SetRenderDrawColor(renderer, 235, 200, 160, 255);
 	}
-	else if (now.tm_hour >= 12 && now.tm_hour < 17) {
+	else if (now.hour >= 12 && now.hour < 17) {
 		SDL_SetRenderDrawColor(renderer, 75, 195, 255, 255);
 	}
-	else if (now.tm_hour >= 17 && now.tm_hour < 20) {
+	else if (now.hour >= 17 && now.hour < 20) {
 		SDL_SetRenderDrawColor(renderer, 255, 190, 80, 255);
 	}
-	else if (now.tm_hour >= 20 && now.tm_hour <= 23) {
+	else if (now.hour >= 20 && now.hour <= 23) {
 		SDL_SetRenderDrawColor(renderer, 45, 70, 130, 255);
 	}
 	SDL_RenderClear(renderer);
