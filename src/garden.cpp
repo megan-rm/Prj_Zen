@@ -1,4 +1,5 @@
 #include "garden.hpp"
+#include <filesystem>
 
 Garden::Garden() {
 	window_title = "App";
@@ -39,15 +40,15 @@ Garden::Garden(std::string st, int sw, int sh) {
 	camera.x = 0;
 	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
 
-	up_key = down_key = left_key = right_key = false;
+	up_key = down_key = left_key = right_key = left_mouse = false;
 	running = true;
 
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);	
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-
-
+	sky_gradient = IMG_LoadTexture(renderer, "assets/images/sky_gradient.png");
+	auto path = std::filesystem::current_path();
 	world_renderer = new World_Renderer();
-
+	water_system = nullptr;
 
 	world.resize(Zen::TERRAIN_WIDTH / Zen::TILE_SIZE);
 	for (int i = 0; i < Zen::TERRAIN_WIDTH / Zen::TILE_SIZE; i++) {
@@ -150,27 +151,49 @@ bool Garden::load_world() {
 void Garden::update(float delta) {
 	water_system->update_saturation(delta);
 }
+void Garden::render_sky() {
+	auto now = time_system.get_time();
+	SDL_Rect dst{ 0, -camera.y , screen_width, Zen::TERRAIN_HEIGHT };
+	SDL_SetTextureBlendMode(sky_gradient, SDL_BLENDMODE_BLEND);
+	SDL_SetTextureAlphaMod(sky_gradient, 225);
+	if (now.hour >= 0 && now.hour < 6) {
+		SDL_SetTextureAlphaMod(sky_gradient, 225);
+		SDL_SetTextureColorMod(sky_gradient, 25, 25, 115);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
+		//SDL_SetRenderDrawColor(renderer, 25, 25, 115, 255);
+	}
+	else if (now.hour >= 7 && now.hour < 11) {
+		SDL_SetTextureAlphaMod(sky_gradient, 110);
+		//SDL_SetTextureColorMod(sky_gradient, 235, 200, 160);
+		SDL_SetTextureColorMod(sky_gradient, 180, 220, 255);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
+		//SDL_SetRenderDrawColor(renderer, 235, 200, 160, 255);
+	}
+	else if (now.hour >= 11 && now.hour < 17) {
+		SDL_SetTextureAlphaMod(sky_gradient, 140);
+		SDL_SetTextureColorMod(sky_gradient, 75, 195, 255);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
+		//SDL_SetRenderDrawColor(renderer, 75, 195, 255, 125);
+	}
+	else if (now.hour >= 17 && now.hour < 20) {
+		SDL_SetTextureAlphaMod(sky_gradient, 180);
+		SDL_SetTextureColorMod(sky_gradient, 255, 190, 80);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
+		//SDL_SetRenderDrawColor(renderer, 255, 190, 80, 255);
+	}
+	else if (now.hour >= 20 && now.hour <= 23) {
+		SDL_SetTextureAlphaMod(sky_gradient, 225);
+		SDL_SetTextureColorMod(sky_gradient, 15, 15, 50);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
+		//SDL_SetRenderDrawColor(renderer, 45, 70, 130, 255);
+	}
+}
 
 void Garden::render(float delta) {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	auto now = time_system.get_time();
-	
-	if (now.hour >= 0 && now.hour < 6) {
-		SDL_SetRenderDrawColor(renderer, 25, 25, 115, 255);
-	}
-	else if (now.hour >= 7 && now.hour < 11) {
-		SDL_SetRenderDrawColor(renderer, 235, 200, 160, 255);
-	}
-	else if (now.hour >= 11 && now.hour < 17) {
-		SDL_SetRenderDrawColor(renderer, 75, 195, 255, 125);
-	}
-	else if (now.hour >= 17 && now.hour < 20) {
-		SDL_SetRenderDrawColor(renderer, 255, 190, 80, 255);
-	}
-	else if (now.hour >= 20 && now.hour <= 23) {
-		SDL_SetRenderDrawColor(renderer, 45, 70, 130, 255);
-	}
+
 	SDL_RenderClear(renderer);
+	render_sky();
 	world_renderer->render_tiles(world, renderer, camera);
 	SDL_RenderPresent(renderer);
 }
@@ -289,6 +312,6 @@ void Garden::run()
 		window_title = "Project Zen: " + std::to_string(tick_time);
 		SDL_SetWindowTitle(window, window_title.c_str());
 		if (tick_time > 16) tick_time = 15;
-		//SDL_Delay(16 - tick_time);
+		SDL_Delay(16 - tick_time);
 	}
 }
