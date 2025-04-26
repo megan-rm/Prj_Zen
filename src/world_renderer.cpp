@@ -51,14 +51,8 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world, S
 				float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
 				if (ratio < 0.09f) continue;
 				SDL_Rect water_level{ dst.x, dst.y + 8, tile_size, -tile_size* ratio };
-				//SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
 				SDL_RenderFillRect(renderer, &water_level);
-				/*if (world.at(x).at(y).saturation > 0 && world.at(x).at(y).saturation < world.at(x).at(y).max_saturation) {
-					std::cout << "DEBUG" << std::endl;
-				}*/
 			}
-
-			//SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		}
 	}
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);

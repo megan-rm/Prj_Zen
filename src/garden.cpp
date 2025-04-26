@@ -158,11 +158,11 @@ void Garden::render(float delta) {
 	if (now.hour >= 0 && now.hour < 6) {
 		SDL_SetRenderDrawColor(renderer, 25, 25, 115, 255);
 	}
-	else if (now.hour >= 7 && now.hour < 12) {
+	else if (now.hour >= 7 && now.hour < 11) {
 		SDL_SetRenderDrawColor(renderer, 235, 200, 160, 255);
 	}
-	else if (now.hour >= 12 && now.hour < 17) {
-		SDL_SetRenderDrawColor(renderer, 75, 195, 255, 255);
+	else if (now.hour >= 11 && now.hour < 17) {
+		SDL_SetRenderDrawColor(renderer, 75, 195, 255, 125);
 	}
 	else if (now.hour >= 17 && now.hour < 20) {
 		SDL_SetRenderDrawColor(renderer, 255, 190, 80, 255);
@@ -289,6 +289,6 @@ void Garden::run()
 		window_title = "Project Zen: " + std::to_string(tick_time);
 		SDL_SetWindowTitle(window, window_title.c_str());
 		if (tick_time > 16) tick_time = 15;
-		SDL_Delay(16 - tick_time);
+		//SDL_Delay(16 - tick_time);
 	}
 }
