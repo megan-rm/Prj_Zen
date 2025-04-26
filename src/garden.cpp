@@ -1,34 +1,6 @@
 #include "garden.hpp"
 #include <filesystem>
 
-Garden::Garden() {
-	window_title = "App";
-	screen_width = 640;
-	screen_height = 480;
-	up_key = down_key = left_key = right_key = false;
-
-	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);
-
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	running = true;
-
-	world_renderer = new World_Renderer();
-	camera.w = screen_width;
-	camera.h = screen_height;
-	camera.x = 0;
-	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
-	std::ifstream file("World.zen");
-	if (!file.good()) {
-		Garden_Generator* garden_generator = new Garden_Generator();
-		garden_generator->generate_world(renderer);
-	}
-	else {
-		load_world();
-		world_renderer->register_tile_atlas(renderer, "tilemap.png");
-	}
-	file.close();
-}
-
 Garden::Garden(std::string st, int sw, int sh) {
 	window_title = st;
 
@@ -45,30 +17,16 @@ Garden::Garden(std::string st, int sw, int sh) {
 
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);	
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	sky_gradient = IMG_LoadTexture(renderer, "assets/images/sky_gradient.png");
-	auto path = std::filesystem::current_path();
-	world_renderer = new World_Renderer();
-	water_system = nullptr;
 
 	world.resize(Zen::TERRAIN_WIDTH / Zen::TILE_SIZE);
 	for (int i = 0; i < Zen::TERRAIN_WIDTH / Zen::TILE_SIZE; i++) {
 		world.at(i).resize(Zen::TERRAIN_HEIGHT / Zen::TILE_SIZE);
 	}
-
-	std::ifstream file("World.zen");
-	if ( !file.good() ) {
-		Garden_Generator* garden_generator = new Garden_Generator();
-		garden_generator->generate_world(renderer);
-	}
-	else {
-		load_world();
-		world_renderer->register_tile_atlas(renderer, "tilemap.png");
-	}
-	file.close();
-
 }
 
 Garden::~Garden() {
+	delete texture_manager;
+	delete water_system;
 	delete world_renderer;
 	world.clear();
 	SDL_DestroyRenderer(renderer);
@@ -151,50 +109,13 @@ bool Garden::load_world() {
 void Garden::update(float delta) {
 	water_system->update_saturation(delta);
 }
-void Garden::render_sky() {
-	auto now = time_system.get_time();
-	SDL_Rect dst{ 0, -camera.y , screen_width, Zen::TERRAIN_HEIGHT };
-	SDL_SetTextureBlendMode(sky_gradient, SDL_BLENDMODE_BLEND);
-	SDL_SetTextureAlphaMod(sky_gradient, 225);
-	if (now.hour >= 0 && now.hour < 6) {
-		SDL_SetTextureAlphaMod(sky_gradient, 225);
-		SDL_SetTextureColorMod(sky_gradient, 25, 25, 115);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 25, 25, 115, 255);
-	}
-	else if (now.hour >= 7 && now.hour < 11) {
-		SDL_SetTextureAlphaMod(sky_gradient, 110);
-		//SDL_SetTextureColorMod(sky_gradient, 235, 200, 160);
-		SDL_SetTextureColorMod(sky_gradient, 180, 220, 255);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 235, 200, 160, 255);
-	}
-	else if (now.hour >= 11 && now.hour < 17) {
-		SDL_SetTextureAlphaMod(sky_gradient, 140);
-		SDL_SetTextureColorMod(sky_gradient, 75, 195, 255);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 75, 195, 255, 125);
-	}
-	else if (now.hour >= 17 && now.hour < 20) {
-		SDL_SetTextureAlphaMod(sky_gradient, 180);
-		SDL_SetTextureColorMod(sky_gradient, 255, 190, 80);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 255, 190, 80, 255);
-	}
-	else if (now.hour >= 20 && now.hour <= 23) {
-		SDL_SetTextureAlphaMod(sky_gradient, 225);
-		SDL_SetTextureColorMod(sky_gradient, 15, 15, 50);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 45, 70, 130, 255);
-	}
-}
 
 void Garden::render(float delta) {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 
 	SDL_RenderClear(renderer);
-	render_sky();
-	world_renderer->render_tiles(world, renderer, camera);
+	world_renderer->render_sky(time_system);
+	world_renderer->render_tiles(world);
 	SDL_RenderPresent(renderer);
 }
 
@@ -295,7 +216,25 @@ void Garden::input(float delta) {
 
 void Garden::run()
 {
+	texture_manager = new Texture_Manager(renderer);
+	texture_manager->load_texture("sun");
+	texture_manager->load_texture("moon");
+	texture_manager->load_texture("sky_gradient");
+	texture_manager->load_texture("tilemap");
 	auto last_time = SDL_GetTicks();
+	std::ifstream file("World.zen");
+	if (!file.good()) {
+		Garden_Generator* garden_generator = new Garden_Generator();
+		garden_generator->generate_world(renderer);
+	}
+	else {
+		load_world();
+		texture_manager->load_texture("tilemap");
+	}
+	file.close();
+	world_renderer = new World_Renderer(renderer, *texture_manager, camera);
+
+	water_system = nullptr;
 	const int fps = 60;
 	const int frame_delay = 1000 / fps;
 	water_system = new Water_System(world, 80);

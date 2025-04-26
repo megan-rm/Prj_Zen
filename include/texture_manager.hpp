@@ -17,6 +17,6 @@ public:
 private:
 	SDL_Renderer* renderer;
 	std::unordered_map<std::string, SDL_Texture*> textures;
-	static inline const std::string path = "/assets/images/";
+	static inline const std::string path = "assets/images/";
 	static inline const std::string img_ext = ".png";
 };

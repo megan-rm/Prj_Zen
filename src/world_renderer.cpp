@@ -1,25 +1,8 @@
 #include "world_renderer.hpp"
 
-World_Renderer::World_Renderer() {
-	tile_atlas = nullptr;
-	tile_atlas_width = 0;
-	tile_atlas_height = 0;
-	tile_size = 0;
-}
-
 World_Renderer::~World_Renderer() {
 	SDL_DestroyTexture(tile_atlas);
 }
-
-void World_Renderer::register_tile_atlas(SDL_Renderer* renderer, std::string path) {
-	tile_atlas = SDL_CreateTextureFromSurface(renderer, IMG_Load(path.c_str()));
-	SDL_QueryTexture(tile_atlas, nullptr, nullptr, &tile_atlas_width, &tile_atlas_height);
-	tile_size = 8;
-}
-void World_Renderer::register_sky_gradient(SDL_Renderer* renderer, std::string path) {
-
-}
-
 SDL_Rect World_Renderer::tile_src_rect(int tile_id) {
 	int tiles_per_row = tile_atlas_width / tile_size;
 	int x = (tile_id % tiles_per_row) * tile_size;
@@ -27,7 +10,7 @@ SDL_Rect World_Renderer::tile_src_rect(int tile_id) {
 	return SDL_Rect{ x, y, tile_size, tile_size };
 }
 
-void World_Renderer::render_sky(Time_System& ts, SDL_Renderer* renderer, const SDL_Rect& camera) {
+void World_Renderer::render_sky(Time_System& ts) {
 	auto now = ts.get_time();
 	SDL_Rect dst{ 0, -camera.y , camera.w, Zen::TERRAIN_HEIGHT };
 	SDL_SetTextureBlendMode(sky_gradient, SDL_BLENDMODE_BLEND);
@@ -64,7 +47,7 @@ void World_Renderer::render_sky(Time_System& ts, SDL_Renderer* renderer, const S
 		//SDL_SetRenderDrawColor(renderer, 45, 70, 130, 255);
 	}
 }
-void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world, SDL_Renderer* renderer, const SDL_Rect& camera) {
+void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 	SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
 	int tile_start_x = camera.x / Zen::TILE_SIZE;
