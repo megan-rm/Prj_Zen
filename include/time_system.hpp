@@ -36,7 +36,7 @@ public:
 		current_time.hour = local_tm.tm_hour;
 		current_time.minute = local_tm.tm_min;
 		current_time.second = local_tm.tm_sec;
-		day_pct = current_time.hour * 60 + current_time.second;
+		day_pct = ((current_time.hour * 60 * 60) + (current_time.minute * 60) + current_time.second) / static_cast<float>(seconds_in_day);
 		year_pct = ((current_time.month-1) * 30 + current_time.day) / 365; // is it elegant? no. but for now
 		
 	}
@@ -45,7 +45,7 @@ public:
 		update_time();
 		int sun_height = Zen::TERRAIN_HEIGHT * 0.8;
 		sun_position.x = day_pct * camera.w;
-		sun_position.y = camera.h - sinf(day_pct * M_PI) * (camera.h * 0.8);
+		sun_position.y = sinf(day_pct * M_PI) * (camera.h * 0.8);
 
 		return sun_position;
 	}

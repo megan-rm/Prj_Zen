@@ -115,6 +115,7 @@ void Garden::render(float delta) {
 
 	SDL_RenderClear(renderer);
 	world_renderer->render_sky(time_system);
+	world_renderer->render_sun(time_system);
 	world_renderer->render_tiles(world);
 	SDL_RenderPresent(renderer);
 }

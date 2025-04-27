@@ -44,6 +44,11 @@ void World_Renderer::render_sky(Time_System& time_system) {
 
 void World_Renderer::render_sun(Time_System& time_system) {
 	auto now = time_system.get_time();
+	auto sun_pos = time_system.get_sun_pos(camera);
+	SDL_Rect src = { 0, 0, 16, 16 };
+	SDL_Rect dst = { sun_pos.x, sun_pos.y, 48, 48 };
+	SDL_SetTextureColorMod(texture_manager.get_texture("celestial_bodies"), 255, 255, 0);
+	SDL_RenderCopy(renderer, texture_manager.get_texture("celestial_bodies"), &src, &dst);
 }
 
 void World_Renderer::render_moon(Time_System& time_system) {
