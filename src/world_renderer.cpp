@@ -10,8 +10,8 @@ SDL_Rect World_Renderer::tile_src_rect(int tile_id) {
 	return SDL_Rect{ x, y, tile_size, tile_size };
 }
 
-void World_Renderer::render_sky(Time_System& ts) {
-	auto now = ts.get_time();
+void World_Renderer::render_sky(Time_System& time_system) {
+	auto now = time_system.get_time();
 	SDL_Rect dst{ 0, -camera.y , camera.w, Zen::TERRAIN_HEIGHT };
 	SDL_SetTextureBlendMode(sky_gradient, SDL_BLENDMODE_BLEND);
 	SDL_SetTextureAlphaMod(sky_gradient, 225);
@@ -19,34 +19,45 @@ void World_Renderer::render_sky(Time_System& ts) {
 		SDL_SetTextureAlphaMod(sky_gradient, 225);
 		SDL_SetTextureColorMod(sky_gradient, 25, 25, 115);
 		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 25, 25, 115, 255);
 	}
 	else if (now.hour >= 7 && now.hour < 11) {
 		SDL_SetTextureAlphaMod(sky_gradient, 110);
-		//SDL_SetTextureColorMod(sky_gradient, 235, 200, 160);
 		SDL_SetTextureColorMod(sky_gradient, 180, 220, 255);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 235, 200, 160, 255);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);;
 	}
 	else if (now.hour >= 11 && now.hour < 17) {
-		SDL_SetTextureAlphaMod(sky_gradient, 140);
-		SDL_SetTextureColorMod(sky_gradient, 75, 195, 255);
+		SDL_SetTextureAlphaMod(sky_gradient, 225);
+		SDL_SetTextureColorMod(sky_gradient, 85, 145, 255);
 		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 75, 195, 255, 125);
 	}
 	else if (now.hour >= 17 && now.hour < 20) {
 		SDL_SetTextureAlphaMod(sky_gradient, 180);
 		SDL_SetTextureColorMod(sky_gradient, 255, 190, 80);
 		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 255, 190, 80, 255);
 	}
 	else if (now.hour >= 20 && now.hour <= 23) {
 		SDL_SetTextureAlphaMod(sky_gradient, 225);
 		SDL_SetTextureColorMod(sky_gradient, 15, 15, 50);
 		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-		//SDL_SetRenderDrawColor(renderer, 45, 70, 130, 255);
 	}
 }
+
+void World_Renderer::render_sun(Time_System& time_system) {
+	auto now = time_system.get_time();
+}
+
+void World_Renderer::render_moon(Time_System& time_system) {
+	auto now = time_system.get_time();
+}
+
+void World_Renderer::render_stars(Time_System& time_system) {
+	auto now = time_system.get_time();
+}
+
+void World_Renderer::render_clouds() {
+
+}
+
 void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 	SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);

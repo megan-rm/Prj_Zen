@@ -217,8 +217,7 @@ void Garden::input(float delta) {
 void Garden::run()
 {
 	texture_manager = new Texture_Manager(renderer);
-	texture_manager->load_texture("sun");
-	texture_manager->load_texture("moon");
+	texture_manager->load_texture("celestial_bodies");
 	texture_manager->load_texture("sky_gradient");
 	texture_manager->load_texture("tilemap");
 	auto last_time = SDL_GetTicks();
