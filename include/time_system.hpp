@@ -45,10 +45,10 @@ public:
 		float daylight_length = 12.0f + (4.0f * std::cosf((year_pct - 0.5f) * 2.0f * M_PI));
 
 		float daylight_bias = 0.1f * std::cosf((year_pct - 0.25f) * 2.0f * M_PI);
-		float mid_day = 0.5f - daylight_bias;
+		midday_pct = 0.5f - daylight_bias;
 
-		float sunrise_pct = .125f + mid_day - (daylight_length / 48.0f); // I think I need to tweak this some. I'm kinda throwing magic numbers around with .125 and .166
-		float sunset_pct = .166f + mid_day + (daylight_length / 48.0f);
+		sunrise_pct = .125f + midday_pct - (daylight_length / 48.0f); // I think I need to tweak this some. I'm kinda throwing magic numbers around with .125 and .166
+		sunset_pct = .166f + midday_pct + (daylight_length / 48.0f);
 		
 		if (day_pct < sunrise_pct || day_pct > sunset_pct) {
 			//return { 10000,10000 }; // out of sight, out of mind
@@ -65,6 +65,22 @@ public:
 		update_time();
 		get_moon_phase();
 		return moon_position;
+	}
+
+	float get_day_pct() {
+		return day_pct;
+	}
+
+	float get_midday_pct() {
+		return midday_pct;
+	}
+
+	float get_sunrise_pct() {
+		return sunrise_pct;
+	}
+
+	float get_sunset_pct() {
+		return sunset_pct;
 	}
 
 	Moon_Phase get_moon_phase() {
@@ -87,6 +103,9 @@ private:
 	Moon_Phase moon_phase;
 	float day_pct;
 	float year_pct;
+	float sunrise_pct;
+	float midday_pct;
+	float sunset_pct;
 	const static int seconds_in_day = 60 * 60 * 24;
 	const static int days_in_year = 365; // more often than not. we're not going to recalculate this over and over.
 	

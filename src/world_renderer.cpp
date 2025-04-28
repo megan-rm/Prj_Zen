@@ -15,7 +15,40 @@ void World_Renderer::render_sky(Time_System& time_system) {
 	SDL_Rect dst{ 0, -camera.y , camera.w, Zen::TERRAIN_HEIGHT };
 	SDL_SetTextureBlendMode(sky_gradient, SDL_BLENDMODE_BLEND);
 	SDL_SetTextureAlphaMod(sky_gradient, 225);
-	if (now.hour >= 0 && now.hour < 6) {
+	SDL_Color current_sky_color;
+	float day_pct = time_system.get_day_pct();
+	float sunrise_pct = time_system.get_sunrise_pct();
+	float sunset_pct = time_system.get_sunset_pct();
+	float midday_pct = time_system.get_midday_pct();
+	if (day_pct < sunrise_pct) {
+		float t = day_pct / sunrise_pct;
+		current_sky_color = Zen::lerp_color(Zen::NIGHT_COLOR, Zen::DAWN_COLOR, t);
+		SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
+		SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, nullptr);
+	}
+	else if (day_pct >= sunrise_pct && day_pct < midday_pct) {
+		float t = day_pct / midday_pct;
+		current_sky_color = Zen::lerp_color(Zen::DAWN_COLOR, Zen::MIDDAY_COLOR, t);
+		SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
+		SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, nullptr);
+	}
+	else if (day_pct >= midday_pct && day_pct < sunset_pct) {
+		float t = day_pct / sunset_pct;
+		current_sky_color = Zen::lerp_color(Zen::MIDDAY_COLOR, Zen::EVENING_COLOR, t);
+		SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
+		SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, nullptr);
+	}
+	else if (day_pct >= sunset_pct) {
+		float t = day_pct / sunset_pct;
+		current_sky_color = Zen::lerp_color(Zen::EVENING_COLOR, Zen::NIGHT_COLOR, t);
+		SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
+		SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
+		SDL_RenderCopy(renderer, sky_gradient, nullptr, nullptr);
+	}
+	/*if (now.hour >= 0 && now.hour < 6) {
 		SDL_SetTextureAlphaMod(sky_gradient, 225);
 		SDL_SetTextureColorMod(sky_gradient, 25, 25, 115);
 		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
@@ -39,7 +72,7 @@ void World_Renderer::render_sky(Time_System& time_system) {
 		SDL_SetTextureAlphaMod(sky_gradient, 225);
 		SDL_SetTextureColorMod(sky_gradient, 15, 15, 50);
 		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-	}
+	}*/
 }
 
 void World_Renderer::render_sun(Time_System& time_system) {
