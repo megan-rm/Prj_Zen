@@ -39,10 +39,22 @@ namespace Zen {
 	static SDL_Color DIRT_COLOR = { 140, 70, 20, 255 };
 	static SDL_Color CLAY_COLOR = { 197, 95, 64, 255 };
 	static SDL_Color STONE_COLOR = { 128, 128, 128, 255 };
-	
+	static SDL_Color NIGHT_COLOR = { 25, 25, 115, 115 };
+	static SDL_Color DAWN_COLOR = { 180, 220, 255, 255 };
+	static SDL_Color MIDDAY_COLOR = { 85, 145, 255, 80 };
+	static SDL_Color EVENING_COLOR = { 255, 190, 80, 50 };
 	static SDL_Color MAGENTA_COLOR = { 255, 0, 255, 0 };
 
 	struct Vector2D {
 		int x, y;
 	};
+
+	SDL_Color lerp_color(SDL_Color start, SDL_Color end, float t) {
+		SDL_Color new_color;
+		new_color.r = static_cast<Uint8>(start.r + t * (end.r - start.r));
+		new_color.g = static_cast<Uint8>(start.g + t * (end.g - start.g));
+		new_color.b = static_cast<Uint8>(start.b + t * (end.b - start.b));
+		new_color.a = static_cast<Uint8>(start.a + t * (end.a - start.a));
+		return new_color;
+	}
 }
