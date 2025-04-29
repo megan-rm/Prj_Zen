@@ -4,7 +4,7 @@
 #include <chrono>
 #include <ctime>
 
-enum class Moon_Phase { NEW_MOON, WAXING_CRESCENT, FIRST_QUARTER, WAXING_GIBBOUS, FULL_MOON, WANING_GIBBOUS, THIRD_QUARTER, WANING_CRESCENT };
+enum class Moon_Phase { NEW_MOON, WAXING_CRESCENT, FIRST_QUARTER, WAXING_GIBBOUS, FULL_MOON, WANING_GIBBOUS, LAST_QUARTER, WANING_CRESCENT };
 
 struct Time {
 	int year, month, day, hour, minute, second;
@@ -63,7 +63,15 @@ public:
 
 	Zen::Vector2D get_moon_pos(SDL_Rect& camera) {
 		update_time();
-		get_moon_phase();
+		lunar_day = std::fmod((current_time.day + current_time.month * 30), 29.5f);
+		lunar_pct = lunar_day / 29.5f;
+		current_lunar_phase = (lunar_pct - 0.5f) * 2.0f; // we got two phases of moon to chew through
+
+		float peak_y = 150.0f;
+		float orbit_radius = 0.4f * camera.w;
+
+		moon_position.x = (lunar_pct * orbit_radius) + (camera.w * 0.5f);
+		moon_position.y = (0.5f * camera.h) - std::sinf(lunar_pct * M_PI) * peak_y;
 		return moon_position;
 	}
 
@@ -85,10 +93,34 @@ public:
 
 	Moon_Phase get_moon_phase() {
 		update_time();
-		float lunar_day = std::fmod((current_time.day + current_time.month * 30), 29.5f);
-		float lunar_pct = lunar_day / 29.5f;
-		float current_phase = (lunar_pct - 0.5f) * 2.0f; // we got two phases of moon to chew through
 
+		if (current_lunar_phase >= -1.0f && current_lunar_phase < -0.75f) {
+			moon_phase = Moon_Phase::NEW_MOON;
+		}
+		else if (current_lunar_phase >= -0.75f && current_lunar_phase < -0.5f) {
+			moon_phase = Moon_Phase::WAXING_CRESCENT;
+		}
+		else if (current_lunar_phase >= -0.5f && current_lunar_phase < -0.25f) {
+			moon_phase = Moon_Phase::FIRST_QUARTER;
+		}
+		else if (current_lunar_phase >= -0.25f && current_lunar_phase < 0.0f) {
+			moon_phase = Moon_Phase::WAXING_GIBBOUS;
+		}
+		else if (current_lunar_phase >= 0.0f && current_lunar_phase < 0.25f) {
+			moon_phase = Moon_Phase::FULL_MOON;
+		}
+		else if (current_lunar_phase >= 0.25f && current_lunar_phase < 0.5f) {
+			moon_phase = Moon_Phase::WANING_GIBBOUS;
+		}
+		else if (current_lunar_phase >= 0.5f && current_lunar_phase < 0.75f) {
+			moon_phase = Moon_Phase::LAST_QUARTER;
+		}
+		else if (current_lunar_phase >= 0.75f && current_lunar_phase < 0.95f) {
+			moon_phase = Moon_Phase::WANING_CRESCENT;
+		}
+		else if (current_lunar_phase >= 0.95f) {
+			moon_phase = Moon_Phase::NEW_MOON;
+		}
 		return moon_phase;
 	}
 
@@ -106,6 +138,10 @@ private:
 	float sunrise_pct;
 	float midday_pct;
 	float sunset_pct;
+
+	float lunar_day;
+	float lunar_pct;
+	float current_lunar_phase;
 	const static int seconds_in_day = 60 * 60 * 24;
 	const static int days_in_year = 365; // more often than not. we're not going to recalculate this over and over.
 	

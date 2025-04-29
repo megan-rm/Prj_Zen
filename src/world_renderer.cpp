@@ -48,37 +48,11 @@ void World_Renderer::render_sky(Time_System& time_system) {
 		SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
 		SDL_RenderCopy(renderer, sky_gradient, nullptr, nullptr);
 	}
-	/*if (now.hour >= 0 && now.hour < 6) {
-		SDL_SetTextureAlphaMod(sky_gradient, 225);
-		SDL_SetTextureColorMod(sky_gradient, 25, 25, 115);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-	}
-	else if (now.hour >= 7 && now.hour < 11) {
-		SDL_SetTextureAlphaMod(sky_gradient, 110);
-		SDL_SetTextureColorMod(sky_gradient, 180, 220, 255);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);;
-	}
-	else if (now.hour >= 11 && now.hour < 17) {
-		SDL_SetTextureAlphaMod(sky_gradient, 225);
-		SDL_SetTextureColorMod(sky_gradient, 85, 145, 255);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-	}
-	else if (now.hour >= 17 && now.hour < 20) {
-		SDL_SetTextureAlphaMod(sky_gradient, 180);
-		SDL_SetTextureColorMod(sky_gradient, 255, 190, 80);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-	}
-	else if (now.hour >= 20 && now.hour <= 23) {
-		SDL_SetTextureAlphaMod(sky_gradient, 225);
-		SDL_SetTextureColorMod(sky_gradient, 15, 15, 50);
-		SDL_RenderCopy(renderer, sky_gradient, nullptr, &dst);
-	}*/
 }
 
 void World_Renderer::render_sun(Time_System& time_system) {
 	auto now = time_system.get_time();
 	auto sun_pos = time_system.get_sun_pos(camera);
-	auto moon_pos = time_system.get_moon_pos(camera);
 	SDL_Rect src = { 0, 0, 16, 16 };
 	SDL_Rect dst = { sun_pos.x, sun_pos.y, 48, 48 };
 	SDL_SetTextureColorMod(texture_manager.get_texture("celestial_bodies"), 255, 255, 0);
@@ -87,6 +61,59 @@ void World_Renderer::render_sun(Time_System& time_system) {
 
 void World_Renderer::render_moon(Time_System& time_system) {
 	auto now = time_system.get_time();
+	Moon_Phase moon_phase = time_system.get_moon_phase();
+	SDL_Rect src{ 0,0,16,16 };
+	SDL_RendererFlip flip = SDL_FLIP_NONE;
+	auto moon_pos= time_system.get_moon_pos(camera);
+	SDL_Rect dst{ moon_pos.x, moon_pos.y, 48, 48 };
+	SDL_SetTextureColorMod(texture_manager.get_texture("celestial_bodies"), 255, 255, 255);
+	float day_pct = time_system.get_day_pct();
+	float evening_pct = time_system.get_sunset_pct();
+	Uint8 alpha = (day_pct / (evening_pct * 1.1)) * 255;
+	alpha = 100;
+	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), alpha);
+	if (moon_phase == Moon_Phase::NEW_MOON) {
+		src.x = 64;
+		src.y = 0;
+		flip = SDL_FLIP_NONE;
+	}
+	else if (moon_phase == Moon_Phase::WAXING_CRESCENT) {
+		src.x = 48;
+		src.y = 0;
+		flip = SDL_FLIP_NONE;
+	}
+	else if (moon_phase == Moon_Phase::FIRST_QUARTER) {
+		src.x = 32;
+		src.y = 0;
+		flip = SDL_FLIP_NONE;
+	}
+	else if (moon_phase == Moon_Phase::WAXING_GIBBOUS) {
+		src.x = 16;
+		src.y = 0;
+		flip = SDL_FLIP_NONE;
+	}
+	else if (moon_phase == Moon_Phase::FULL_MOON) {
+		src.x = 0;
+		src.y = 0;
+		flip = SDL_FLIP_NONE;
+	}
+	else if (moon_phase == Moon_Phase::WANING_GIBBOUS) {
+		src.x = 16;
+		src.y = 0;
+		flip = SDL_FLIP_VERTICAL;
+	}
+	else if (moon_phase == Moon_Phase::LAST_QUARTER) {
+		src.x = 32;
+		src.y = 0;
+		flip = SDL_FLIP_VERTICAL;
+	}
+	else if (moon_phase == Moon_Phase::WANING_CRESCENT) {
+		src.x = 16;
+		src.y = 0;
+		flip = SDL_FLIP_VERTICAL;
+	}
+	SDL_RenderCopyEx(renderer, texture_manager.get_texture("celestial_bodies"), &src, &dst, NULL, NULL, flip);
+	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), 255);
 }
 
 void World_Renderer::render_stars(Time_System& time_system) {

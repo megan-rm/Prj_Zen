@@ -8,6 +8,7 @@
 #include <iostream>
 #include <math.h>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 class World_Renderer {
@@ -18,6 +19,10 @@ public:
 		tile_atlas = texture_manager.get_texture("tilemap");
 		sky_gradient = texture_manager.get_texture("sky_gradient");
 		celestial_bodies = texture_manager.get_texture("celestial_bodies");
+		moon_phases["new_moon"] = { 0,0,16,16 };
+		moon_phases["gibbous"] = { 16, 0, 16, 16 };
+		moon_phases["quarter"] = { 32, 0, 16, 16 };
+		moon_phases["crescent"] = { 48, 0, 16, 16 };
 	};
 	~World_Renderer();
 	void render_sky(Time_System& ts);
@@ -38,4 +43,5 @@ private:
 	int tile_atlas_height;
 	int tile_size;
 	SDL_Rect tile_src_rect(int tile_id);
+	std::unordered_map<std::string, SDL_Rect> moon_phases;
 };
