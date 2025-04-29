@@ -47,24 +47,24 @@ public:
 		float daylight_bias = 0.1f * std::cosf((year_pct - 0.25f) * 2.0f * M_PI);
 		midday_pct = 0.5f - daylight_bias;
 
-		sunrise_pct = .125f + midday_pct - (daylight_length / 48.0f); // I think I need to tweak this some. I'm kinda throwing magic numbers around with .125 and .166
-		sunset_pct = .166f + midday_pct + (daylight_length / 48.0f);
+		sunrise_pct = midday_pct - (daylight_length / 48.0f); // I think I need to tweak this some. I'm kinda throwing magic numbers around with .125 and .166
+		sunset_pct = midday_pct + (daylight_length / 48.0f);
 		
 		if (day_pct < sunrise_pct || day_pct > sunset_pct) {
 			//return { 10000,10000 }; // out of sight, out of mind
 		}
 		float daylight_pct = (day_pct - sunrise_pct) / (sunset_pct - sunrise_pct);
-		constexpr float peak_y = 200.0f;
+		float peak_y = camera.h * 0.8;// 750.0f;
 
 		sun_position.x = daylight_pct * (0.9 * camera.w);
-		sun_position.y = (camera.h * 0.75) - std::sinf(daylight_pct * M_PI) * peak_y;
+		sun_position.y = peak_y - std::sinf(daylight_pct * M_PI) * peak_y;
 		return sun_position;
 	}
 
 	Zen::Vector2D get_moon_pos(SDL_Rect& camera) {
 		update_time();
-		lunar_day = std::fmod((current_time.day + current_time.month * 30), 29.5f);
-		lunar_pct = lunar_day / 29.5f;
+		lunar_day = std::fmod((current_time.day + current_time.month * 30), lunar_length);
+		lunar_pct = lunar_day / lunar_length;
 		current_lunar_phase = (lunar_pct - 0.5f) * 2.0f; // we got two phases of moon to chew through
 
 		float peak_y = 150.0f;

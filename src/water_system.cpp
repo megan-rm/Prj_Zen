@@ -13,7 +13,7 @@ void Water_System::update_saturation(float delta) {
 			down = nullptr;
 			if (i > 0) left = &world_reference.at(i - 1).at(y);
 			if (i < world_reference.size() - 1) right = &world_reference.at(i + 1).at(y);
-			if (y < world_reference.at(i).size()) down = &world_reference.at(i).at(y + 1);
+			if (y < world_reference.at(i).size() - 1) down = &world_reference.at(i).at(y + 1);
 			//share down first, if we can
 			if (down != nullptr) {
 				if (down->saturation < down->max_saturation) {

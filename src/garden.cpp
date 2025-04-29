@@ -227,6 +227,7 @@ void Garden::run()
 	if (!file.good()) {
 		Garden_Generator* garden_generator = new Garden_Generator();
 		garden_generator->generate_world(renderer);
+		texture_manager->load_texture("tilemap");
 	}
 	else {
 		load_world();

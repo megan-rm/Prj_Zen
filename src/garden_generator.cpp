@@ -246,8 +246,8 @@ bool Garden_Generator::place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], 
 	std::random_device rd;
 	std::mt19937 g(rd());
 	float range_start = Zen::LAKE_WIDTH / 2.0f;
-	float range_end = Zen::LAKE_WIDTH / 3.0f;
-	std::normal_distribution<double> dist(range_start, range_end);
+	float range_standard_deviation = Zen::LAKE_WIDTH / 3.0f;
+	std::normal_distribution<double> dist(range_start, range_standard_deviation);
 	std::shuffle(pixels.begin(), pixels.end(), g);
 	for (auto i : pixels) {
 		int x = dist(g) + Zen::lake_start_x;
@@ -282,9 +282,20 @@ bool Garden_Generator::place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT],
 	std::mt19937 g(rd());
 	std::uniform_int_distribution<int> rand(0, 69); // Darren I swear I asked Tyler what number to randomize between, he chose this.
 	std::uniform_int_distribution<int> riverbed_dist(20, 30);
+	
 	//river moving -> right
 	Zen::river_end_x = Zen::river_start_x + Zen::MOUNTAIN_WIDTH + rand(g);
 	Zen::lake_start_x = Zen::river_end_x;
+	int river_length = Zen::river_end_x - Zen::river_start_x;
+	int river_slope_pixels = (river_length * 0.5f) * 32;
+	int clay_pixels = river_slope_pixels * 0.85f;
+	int stone_pixels = river_slope_pixels * 0.15f;
+
+	std::vector<Zen::PIXEL_TYPE> pixels(clay_pixels + stone_pixels);
+	std::fill_n(pixels.begin(), clay_pixels, Zen::PIXEL_TYPE::CLAY);
+	std::fill_n(pixels.begin() + clay_pixels, stone_pixels, Zen::PIXEL_TYPE::STONE);
+	std::shuffle(pixels.begin(), pixels.end(), g);
+
 	for (int x = Zen::river_start_x; x < Zen::river_end_x; x++) {
 		int tr = riverbed_dist(g);
 		for (int y = ty; y < (ty + tr); y++) {
@@ -299,6 +310,60 @@ bool Garden_Generator::place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT],
 			}
 		}
 	}
+
+	std::default_random_engine rng;
+	for (int tx = Zen::river_start_x - (Zen::TILE_SIZE * 3); tx < Zen::river_end_x; tx += Zen::TILE_SIZE) {
+		float ratio = 1.0f - static_cast<float>(tx - Zen::river_start_x) / (Zen::river_end_x - Zen::river_start_x);
+		int pixel_count = ((Zen::TILE_SIZE * Zen::TILE_SIZE) * 6) * ratio;
+		int stone_pixels = pixel_count * 0.10;
+		int clay_pixels = pixel_count * 0.70;
+		int dirt_pixels = pixel_count - clay_pixels;
+		dirt_pixels -= stone_pixels;
+		std::vector<Zen::PIXEL_TYPE> pixels(pixel_count);
+		std::fill_n(pixels.begin(), clay_pixels, Zen::PIXEL_TYPE::CLAY);
+		std::fill_n(pixels.begin() + clay_pixels, stone_pixels, Zen::PIXEL_TYPE::STONE);
+		std::fill_n(pixels.begin() + clay_pixels + stone_pixels, dirt_pixels, Zen::PIXEL_TYPE::DIRT);
+		std::shuffle(pixels.begin(), pixels.end(), g);
+		for (auto i : pixels) {
+			int x = rand(g) % Zen::TILE_SIZE;
+			for (int y = Zen::TERRAIN_HEIGHT / 1.5; y < Zen::TERRAIN_HEIGHT; y++) {
+				if (cells[tx+x][y + 1] != Zen::PIXEL_TYPE::EMPTY) {
+					// DIRT PIXEL PLACEMENT
+					while (true) {
+						const unsigned int bottom_left = tx+x-1;
+						const unsigned int bottom_right = tx+x+1;
+						if (cells[tx+x][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
+							y++;
+							continue;
+						}
+						else if (cells[bottom_left][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
+							x--;
+							continue;
+						}
+						else if (cells[bottom_right][y + 1] == Zen::PIXEL_TYPE::EMPTY) {
+							x++;
+							continue;
+						}
+						else {
+							cells[tx+x][y] = i;
+							break;
+						}
+					}
+					//cells[tx+x][y] = i;
+					break;
+				}
+			}
+		}
+	}
+	/*for (auto i : pixels) {
+		int x = river_slope(rng);
+		for (int y = Zen::TERRAIN_HEIGHT / 2; y < Zen::TERRAIN_HEIGHT; y++) {
+			if (cells[x][y + 1] != Zen::PIXEL_TYPE::EMPTY) {
+				cells[x][y] = i;
+				break;
+			}
+		}
+	}*/
 	return place_lake(cells, false);
 }
 

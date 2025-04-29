@@ -23,3 +23,6 @@ Project Zen/x64/Debug/Project Zen.vcxproj.FileListAbsolute.txt
 tilemap.png
 test.png
 *.enc
+*.sarif
+*.xml
+Project Zen/x64/Debug/CodeAnalysisResultManifest.txt

@@ -36,13 +36,21 @@ void World_Renderer::render_sky(Time_System& time_system) {
 	}
 	else if (day_pct >= midday_pct && day_pct < sunset_pct) {
 		float t = day_pct / sunset_pct;
-		current_sky_color = Zen::lerp_color(Zen::MIDDAY_COLOR, Zen::EVENING_COLOR, t);
-		SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
-		SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
+		if (t > 0.9) {
+			current_sky_color = Zen::lerp_color(Zen::MIDDAY_COLOR, Zen::EVENING_COLOR, t);
+			SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
+			SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
+		}
+		else {
+			current_sky_color = Zen::lerp_color(Zen::MIDDAY_COLOR, Zen::EVENING_COLOR, t);
+			SDL_SetTextureColorMod(sky_gradient, Zen::MIDDAY_COLOR.r, Zen::MIDDAY_COLOR.g, Zen::MIDDAY_COLOR.b);
+			SDL_SetTextureAlphaMod(sky_gradient, Zen::MIDDAY_COLOR.a);
+		}
+
 		SDL_RenderCopy(renderer, sky_gradient, nullptr, nullptr);
 	}
 	else if (day_pct >= sunset_pct) {
-		float t = day_pct / sunset_pct;
+		float t = day_pct / 1;
 		current_sky_color = Zen::lerp_color(Zen::EVENING_COLOR, Zen::NIGHT_COLOR, t);
 		SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
 		SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
@@ -69,8 +77,7 @@ void World_Renderer::render_moon(Time_System& time_system) {
 	SDL_SetTextureColorMod(texture_manager.get_texture("celestial_bodies"), 255, 255, 255);
 	float day_pct = time_system.get_day_pct();
 	float evening_pct = time_system.get_sunset_pct();
-	Uint8 alpha = (day_pct / (evening_pct * 1.1)) * 255;
-	alpha = 100;
+	Uint8 alpha = 255 - (day_pct / (evening_pct * 1.1)) * 255;
 	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), alpha);
 	if (moon_phase == Moon_Phase::NEW_MOON) {
 		src.x = 64;
@@ -151,7 +158,7 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 				float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
 				if (ratio < 0.09f) continue;
 				SDL_Rect water_level{ dst.x, dst.y + 8, tile_size, -tile_size* ratio };
-				SDL_RenderFillRect(renderer, &water_level);
+				//SDL_RenderFillRect(renderer, &water_level);
 			}
 		}
 	}

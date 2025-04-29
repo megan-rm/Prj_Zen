@@ -42,8 +42,8 @@ namespace Zen {
 
 	static SDL_Color DAWN_COLOR = { 135, 205, 235, 155 };
 	static SDL_Color MIDDAY_COLOR = { 0, 190, 255, 200 };
-	static SDL_Color EVENING_COLOR = { 255, 140, 0, 225 };
-	static SDL_Color NIGHT_COLOR = { 25, 25, 115, 155 };
+	static SDL_Color EVENING_COLOR = { 255, 140, 0, 215 };
+	static SDL_Color NIGHT_COLOR = { 5, 5, 55, 245 };
 
 	static SDL_Color MAGENTA_COLOR = { 255, 0, 255, 0 }; // deprecated from old rendering system
 
