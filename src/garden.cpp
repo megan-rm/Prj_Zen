@@ -221,13 +221,13 @@ void Garden::run()
 	texture_manager = new Texture_Manager(renderer);
 	texture_manager->load_texture("celestial_bodies");
 	texture_manager->load_texture("sky_gradient");
-	texture_manager->load_texture("tilemap");
 	auto last_time = SDL_GetTicks();
 	std::ifstream file("World.zen");
 	if (!file.good()) {
 		Garden_Generator* garden_generator = new Garden_Generator();
 		garden_generator->generate_world(renderer);
 		texture_manager->load_texture("tilemap");
+		load_world();
 	}
 	else {
 		load_world();

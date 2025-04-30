@@ -14,9 +14,9 @@
 class World_Renderer {
 public:
 	World_Renderer(SDL_Renderer* ren, Texture_Manager& tm, SDL_Rect& cam) : renderer(ren), texture_manager(tm), camera(cam) {
-		SDL_QueryTexture(texture_manager.get_texture("tilemap"), nullptr, nullptr, &tile_atlas_width, &tile_atlas_height);
 		tile_size = Zen::TILE_SIZE;
 		tile_atlas = texture_manager.get_texture("tilemap");
+		SDL_QueryTexture(tile_atlas, nullptr, nullptr, &tile_atlas_width, &tile_atlas_height);
 		sky_gradient = texture_manager.get_texture("sky_gradient");
 		celestial_bodies = texture_manager.get_texture("celestial_bodies");
 		moon_phases["new_moon"] = { 0,0,16,16 };
@@ -31,6 +31,14 @@ public:
 	void render_moon(Time_System& ts);
 	void render_stars(Time_System& ts);
 	void render_clouds(/*Temperature_System& tmp_s*/);
+
+	void register_tilemap(Texture_Manager& tx_mgr) {
+		texture_manager = tx_mgr;
+		tile_size = Zen::TILE_SIZE;
+		tile_atlas = texture_manager.get_texture("tilemap");
+		SDL_QueryTexture(tile_atlas, nullptr, nullptr, &tile_atlas_width, &tile_atlas_height);
+	}
+
 private:
 	SDL_Renderer* renderer;
 	SDL_Rect& camera;

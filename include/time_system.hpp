@@ -39,24 +39,39 @@ public:
 		year_pct = ((current_time.month-1) * 30 + current_time.day) / 365.0f; // is it elegant? no. but for now
 		
 	}
+
+	float get_day_length(float latitude_deg, int day_of_year) {
+		float decline = -23.44f * std::cosf((2.0f * M_PI / 365.0f) * (day_of_year + 10));
+		float lat_rad = latitude_deg * M_PI / 180.0f;
+		float decline_radians = decline * M_PI / 180.0f;
+
+		float hour_angle = std::acosf(-std::tan(lat_rad) * std::tan(decline_radians));
+		float daylight_hours = (2.0f * hour_angle * 24.0f) / (2.0f * M_PI);
+		return daylight_hours;
+	}
+
 	//to be honest this is mostly for the sake of knowing where to draw the entities
 	Zen::Vector2D get_sun_pos(SDL_Rect& camera) {
 		update_time();
-		float daylight_length = 12.0f + (4.0f * std::cosf((year_pct - 0.5f) * 2.0f * M_PI));
 
-		float daylight_bias = 0.1f * std::cosf((year_pct - 0.25f) * 2.0f * M_PI);
-		midday_pct = 0.5f - daylight_bias;
+		float latitude = 47.0f; // we're just using north dakota for now. maybe a .conf file to change this eventually....
+		float day_length = get_day_length(latitude, static_cast<int>(year_pct * 365));
 
-		sunrise_pct = midday_pct - (daylight_length / 48.0f); // I think I need to tweak this some. I'm kinda throwing magic numbers around with .125 and .166
-		sunset_pct = midday_pct + (daylight_length / 48.0f);
-		
-		if (day_pct < sunrise_pct || day_pct > sunset_pct) {
-			//return { 10000,10000 }; // out of sight, out of mind
-		}
+		float sunrise_hour = 12.0f - (day_length / 2.0f) + 2; // 2 hour offset because DST. on that note... i'm not sure how to handle dst and time zone?
+		float sunset_hour = 12.0f + (day_length / 2.0f) + 2;
+
+		sunrise_pct = sunrise_hour / 24.0f;
+		sunset_pct = sunset_hour / 24.0f;
+
+		//probs gonna remove vvvvvvv
+		//if (day_pct < sunrise_pct || day_pct > sunset_pct) {
+		//	return { 10000, 10000 }; 
+		//}
+
 		float daylight_pct = (day_pct - sunrise_pct) / (sunset_pct - sunrise_pct);
-		float peak_y = camera.h * 0.8;// 750.0f;
+		float peak_y = camera.h * 0.8f;
 
-		sun_position.x = daylight_pct * (0.9 * camera.w);
+		sun_position.x = daylight_pct * (0.9f * camera.w);
 		sun_position.y = peak_y - std::sinf(daylight_pct * M_PI) * peak_y;
 		return sun_position;
 	}
