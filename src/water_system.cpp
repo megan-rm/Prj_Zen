@@ -17,19 +17,19 @@ void Water_System::update_saturation(float delta) {
 			//share down first, if we can
 			if (down != nullptr) {
 				if (down->saturation < down->max_saturation) {
-					calculate_flow(self, *down, delta);
+					calculate_flow(self, *down, delta, true);
 				}
 			}
 			//share right
 			if (right != nullptr) {
 				if (self.saturation > right->saturation && right->saturation < right->max_saturation) {
-					calculate_flow(self, *right, delta);
+					calculate_flow(self, *right, delta, false);
 				}
 			}
 			//share left
 			if (left != nullptr) {
 				if (self.saturation > left->saturation && left->saturation < left->max_saturation) {
-					calculate_flow(self, *left, delta);
+					calculate_flow(self, *left, delta, false);
 				}
 			}
 			//water_update_total += self.saturation;
@@ -39,10 +39,10 @@ void Water_System::update_saturation(float delta) {
 	update_count = update_count % update_mod;
 }
 
-void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
+void Water_System::calculate_flow(Tile& self, Tile& tile, float delta, bool downward) {
 	//delta = 16.0/1000.0f;
 	int saturation_difference = self.saturation - tile.saturation; /// what if we didn't abs, and just kept it as potential negative and had 2 variables; 1 to add into from, 1 to add into dest.
-	if (saturation_difference <= 0) {
+	if (saturation_difference <= 0 && downward == false) {
 		return;
 	}
 	int initial_sum = self.saturation + tile.saturation;
@@ -53,12 +53,15 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta) {
 
 	std::uniform_real_distribution<float> dist(0, 1);
 	float random = dist(rand);
-	/*if (random > from_chance) {
+	if (random > from_chance) {
 		return;
-	}*/
+	}
 	float rate_constant = 0.25; // fam, i'm gonna fine tune this over time. idk.
 	//float fraction = delta / rate_constant;
 	int amount = saturation_difference * rate_constant * to_scale;
+	if (from_chance < 0.6) {
+		std::cout << "Test" << std::endl;
+	}
 	amount = std::max(amount, 1);
 	
 	int remainder = 0;
@@ -112,6 +115,7 @@ Uint64 Water_System::place_water(float relative_pct) {
 	for (int x = (Zen::lake_start_x / Zen::TILE_SIZE); x < (Zen::lake_end_x / Zen::TILE_SIZE); x++) {
 		for (int y = (Zen::mountain_end_y / Zen::TILE_SIZE) + 1; y < Zen::TERRAIN_HEIGHT / Zen::TILE_SIZE; y++) {
 			world_reference.at(x).at(y).saturation = world_reference.at(x).at(y).max_saturation;
+			total_water += world_reference.at(x).at(y).saturation;
 		}
 	}
 	Zen::water_budget = total_water;

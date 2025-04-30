@@ -21,7 +21,7 @@ private:
 	std::vector<std::vector<Tile>>& world_reference;
 	int update_count;
 	int update_mod;
-	void calculate_flow(Tile& self, Tile& tile, float delta);
+	void calculate_flow(Tile& self, Tile& tile, float delta, bool downward);
 	
 	std::mt19937 rand;
 
