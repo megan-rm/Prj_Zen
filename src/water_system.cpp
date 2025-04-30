@@ -45,9 +45,6 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta, bool down
 	if (saturation_difference <= 0 && downward == false) {
 		return;
 	}
-	else if (downward == true) {
-		std::cout << "Test" << std::endl;
-	}
 	int initial_sum = self.saturation + tile.saturation;
 	int after_sum = 0;
 

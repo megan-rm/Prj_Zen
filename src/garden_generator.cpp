@@ -275,7 +275,6 @@ bool Garden_Generator::place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT],
 	/*************************************************************************
 	TODO:
 		* River goes according to mountain gen (use bool direction)
-		* Bleed clay bed better
 	**************************************************************************/
 	int ty = Zen::mountain_end_y - 10; // this is from where we'll iterate down
 	std::random_device rd;
@@ -355,15 +354,6 @@ bool Garden_Generator::place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT],
 			}
 		}
 	}
-	/*for (auto i : pixels) {
-		int x = river_slope(rng);
-		for (int y = Zen::TERRAIN_HEIGHT / 2; y < Zen::TERRAIN_HEIGHT; y++) {
-			if (cells[x][y + 1] != Zen::PIXEL_TYPE::EMPTY) {
-				cells[x][y] = i;
-				break;
-			}
-		}
-	}*/
 	return place_lake(cells, false);
 }
 

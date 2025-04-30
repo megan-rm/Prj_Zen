@@ -54,7 +54,7 @@ public:
 	Zen::Vector2D get_sun_pos(SDL_Rect& camera) {
 		update_time();
 
-		float latitude = 47.0f; // we're just using north dakota for now. maybe a .conf file to change this eventually....
+		float latitude = 47.5f; // we're just using north dakota for now. maybe a .conf file to change this eventually....
 		float day_length = get_day_length(latitude, static_cast<int>(year_pct * 365));
 
 		float sunrise_hour = 12.0f - (day_length / 2.0f) + 2; // 2 hour offset because DST. on that note... i'm not sure how to handle dst and time zone?
@@ -62,11 +62,6 @@ public:
 
 		sunrise_pct = sunrise_hour / 24.0f;
 		sunset_pct = sunset_hour / 24.0f;
-
-		//probs gonna remove vvvvvvv
-		//if (day_pct < sunrise_pct || day_pct > sunset_pct) {
-		//	return { 10000, 10000 }; 
-		//}
 
 		float daylight_pct = (day_pct - sunrise_pct) / (sunset_pct - sunrise_pct);
 		float peak_y = camera.h * 0.8f;
