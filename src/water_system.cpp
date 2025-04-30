@@ -45,6 +45,9 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta, bool down
 	if (saturation_difference <= 0 && downward == false) {
 		return;
 	}
+	else if (downward == true) {
+		std::cout << "Test" << std::endl;
+	}
 	int initial_sum = self.saturation + tile.saturation;
 	int after_sum = 0;
 
@@ -59,8 +62,8 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta, bool down
 	float rate_constant = 0.25; // fam, i'm gonna fine tune this over time. idk.
 	//float fraction = delta / rate_constant;
 	int amount = saturation_difference * rate_constant * to_scale;
-	if (from_chance < 0.6) {
-		std::cout << "Test" << std::endl;
+	if (downward) {
+		amount = self.saturation * to_scale * std::pow(from_chance, 2);
 	}
 	amount = std::max(amount, 1);
 	

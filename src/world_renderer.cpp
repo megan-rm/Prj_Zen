@@ -79,8 +79,25 @@ void World_Renderer::render_moon(Time_System& time_system) {
 	SDL_Rect dst{ moon_pos.x, moon_pos.y, 48, 48 };
 	SDL_SetTextureColorMod(texture_manager.get_texture("celestial_bodies"), 255, 255, 255);
 	float day_pct = time_system.get_day_pct();
-	float evening_pct = time_system.get_sunset_pct();
-	Uint8 alpha = 255 - (day_pct / (evening_pct * 1.1)) * 255;
+	float sunset_pct = time_system.get_sunset_pct();
+	float sunrise_pct = time_system.get_sunrise_pct();
+	float t = 0.0f;
+	Uint8 alpha = 0;
+
+	if (day_pct < sunrise_pct) {
+		// Midnight to sunrise: fade out
+		t = day_pct / sunrise_pct;
+		alpha = static_cast<Uint8>((1.0f - t) * 255.0f);
+	}
+	else if (day_pct > sunset_pct) {
+		// Sunset to midnight: fade in
+		t = (day_pct - sunset_pct) / (1.0f - sunset_pct);
+		alpha = static_cast<Uint8>(t * 255.0f);
+	}
+	else {
+		// Daytime: invisible
+		alpha = 0;
+	}
 	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), alpha);
 	if (moon_phase == Moon_Phase::NEW_MOON) {
 		src.x = 64;
