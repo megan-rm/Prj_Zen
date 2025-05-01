@@ -52,7 +52,7 @@ bool Garden_Generator::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEI
 	std::vector<char> buffer;
 	buffer.resize(buffer_size);
 	file.rdbuf()->pubsetbuf(&buffer[0], buffer_size);
-	file.open("world.zen");
+	file.open("world_info/world.zen");
 	file << "[WORLD_PROPERTIES]" << std::endl;
 	file << Zen::mountain_end_x << "," << Zen::mountain_end_y << std::endl;
 	file << Zen::river_start_x << "," << Zen::river_end_x << std::endl;

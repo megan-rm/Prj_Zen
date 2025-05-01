@@ -32,6 +32,7 @@ public:
 	void render(float delta);
 	void update(float delta	);
 	bool load_world();
+	bool save_world();
 	void mouse_click(int x, int y);
 private:
 	SDL_Window* window;
@@ -42,6 +43,7 @@ private:
 	std::vector<std::vector<Tile>> world; // 2d array of 8x8px 'blocks' in the garden
 	std::vector<std::vector<Tile>> buffer; // I don't quite like how we have Tiles as buffers for just properly reading saturation states between updates.
 	bool running;
+	bool existing_world;
 	bool up_key, down_key, left_key, right_key, left_mouse;
 	int screen_width;
 	int screen_height;

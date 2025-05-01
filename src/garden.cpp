@@ -14,7 +14,7 @@ Garden::Garden(std::string st, int sw, int sh) {
 
 	up_key = down_key = left_key = right_key = left_mouse = false;
 	running = true;
-
+	existing_world = false;
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);	
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 
@@ -33,11 +33,38 @@ Garden::~Garden() {
 	SDL_DestroyWindow(window);
 }
 
+bool Garden::save_world() {
+	std::ofstream file;
+	file.open("world_info/world.zen");
+	if (file.is_open()) {
+		file << "[WORLD_PROPERTIES]" << std::endl;
+		file << Zen::mountain_end_x << "," << Zen::mountain_end_y << std::endl;
+		file << Zen::river_start_x << "," << Zen::river_end_x << std::endl;
+		file << Zen::lake_start_x << "," << Zen::lake_end_x << std::endl;
+		file << "[WORLD_TILES]" << std::endl;
+		for (int y = 0; y < world.at(0).size(); y++) {
+			for (int x = 0; x < world.size(); x++) {
+				int img_id, permeability, saturation, max_saturation;
+				img_id = world.at(x).at(y).img_id;
+				permeability = world.at(x).at(y).permeability;
+				max_saturation = world.at(x).at(y).max_saturation;
+				saturation = world.at(x).at(y).saturation;
+				file << img_id << "," << permeability << "," << max_saturation << "," << saturation << "|";
+			}
+			file << std::endl;
+		}
+		file.close();
+		return true;
+	}
+	file.close();
+	return false;
+}
+
 bool Garden::load_world() {
 	int x = 0;
 	int y = 0;
 	std::ifstream file;
-	file.open("world.zen");
+	file.open("world_info/world.zen");
 	if (!file.is_open()) {
 		return false;
 	}
@@ -222,7 +249,7 @@ void Garden::run()
 	texture_manager->load_texture("celestial_bodies");
 	texture_manager->load_texture("sky_gradient");
 	auto last_time = SDL_GetTicks();
-	std::ifstream file("World.zen");
+	std::ifstream file("world_info/world.zen");
 	if (!file.good()) {
 		Garden_Generator* garden_generator = new Garden_Generator();
 		garden_generator->generate_world(renderer);
@@ -231,16 +258,19 @@ void Garden::run()
 	}
 	else {
 		load_world();
+		existing_world = true;
 		texture_manager->load_texture("tilemap");
 	}
 	file.close();
 	world_renderer = new World_Renderer(renderer, *texture_manager, camera);
 
-	water_system = nullptr;
 	const int fps = 60;
 	const int frame_delay = 1000 / fps;
 	water_system = new Water_System(world, 80);
-	Uint64 water = water_system->place_water(0.60f);
+	if (!existing_world) {
+		Uint64 water = water_system->place_water(0.60f);
+	}
+	
 	std::string window_title;
 	while (running) {
 		auto current_time = SDL_GetTicks();
@@ -255,4 +285,5 @@ void Garden::run()
 		if (tick_time > 16) tick_time = 15;
 		SDL_Delay(16 - tick_time);
 	}
+	save_world();
 }
