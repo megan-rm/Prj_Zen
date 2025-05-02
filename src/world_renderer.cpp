@@ -97,7 +97,7 @@ void World_Renderer::render_moon(Time_System& time_system) {
 	Uint8 alpha = 0;
 	if (day_pct < sunrise_pct && day_pct > blend_start) {
 		// Midnight to sunrise: fade out
-		t = day_pct / sunrise_pct;
+		t = day_pct / blend_start;
 		alpha = static_cast<Uint8>((1.0f - t) * 255.0f);
 	}
 	else if (day_pct < sunrise_pct && day_pct < blend_start) {
