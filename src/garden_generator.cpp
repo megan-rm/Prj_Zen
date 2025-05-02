@@ -46,7 +46,7 @@ bool Garden_Generator::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEI
 	if (SDL_MUSTLOCK(surface)) {
 		SDL_UnlockSurface(surface);
 	}
-
+	std::cout << "Generating world's tilemap..." << std::endl;
 	std::ofstream file;
 	int buffer_size = 131072;
 	std::vector<char> buffer;
@@ -156,7 +156,7 @@ bool Garden_Generator::place_terrain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT
 	std::mt19937 g(rd());
 	std::uniform_int_distribution<int> dist(0, Zen::TERRAIN_WIDTH - 1);
 	std::shuffle(pixels.begin(), pixels.end(), g);
-
+	std::cout << "Generating base terrain..." << std::endl;
 	/*****************************************
 	*		PLACE PIXEL SUB ROUTINE
 	*****************************************/
@@ -218,7 +218,7 @@ bool Garden_Generator::place_lake(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT], 
 	**************************************************************************/
 	Zen::lake_start_x = Zen::river_end_x - 24;
 	Zen::lake_end_x = Zen::lake_start_x + Zen::LAKE_WIDTH;
-
+	std::cout << "Digging a hole..." << std::endl;
 	int center_x = (Zen::lake_end_x + Zen::lake_start_x) / 2;
 	int center_y = 0;
 	for (int y = 0; y < Zen::TERRAIN_HEIGHT; y++) {
@@ -276,6 +276,7 @@ bool Garden_Generator::place_river(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGHT],
 	TODO:
 		* River goes according to mountain gen (use bool direction)
 	**************************************************************************/
+	std::cout << "Generating river from mountain->lake basin..." << std::endl;
 	int ty = Zen::mountain_end_y - 10; // this is from where we'll iterate down
 	std::random_device rd;
 	std::mt19937 g(rd());
@@ -362,6 +363,7 @@ bool Garden_Generator::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGH
 	TODO:
 		* Randomize side of screen to generate mountain on
 	********************************************************************/
+	std::cout << "Generating a mountain..." << std::endl;
 	std::random_device rd;
 	std::mt19937 g(rd());
 	std::uniform_real_distribution<double> r_dist(0.95, 1.05);

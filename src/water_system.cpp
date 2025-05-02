@@ -1,9 +1,9 @@
 #include "water_system.hpp"
 
 void Water_System::update_saturation(float delta) {
-	for (int i = update_count; i < world_reference.size(); i += update_mod) {
-		for (int y = world_reference.at(i).size() - 1; y > 0; y--) {
-			Tile& self = world_reference.at(i).at(y);
+	for (int x = update_count; x < world_reference.size(); x += update_mod) {
+		for (int y = world_reference.at(x).size() - 1; y > 0; y--) {
+			Tile& self = world_reference.at(x).at(y);
 			if (self.saturation == 0) {
 				continue;
 			}
@@ -11,9 +11,9 @@ void Water_System::update_saturation(float delta) {
 			left = nullptr;
 			right = nullptr;
 			down = nullptr;
-			if (i > 0) left = &world_reference.at(i - 1).at(y);
-			if (i < world_reference.size() - 1) right = &world_reference.at(i + 1).at(y);
-			if (y < world_reference.at(i).size() - 1) down = &world_reference.at(i).at(y + 1);
+			if (x > 0) left = &world_reference.at(x - 1).at(y);
+			if (x < world_reference.size() - 1) right = &world_reference.at(x + 1).at(y);
+			if (y < world_reference.at(x).size() - 1) down = &world_reference.at(x).at(y + 1);
 			//share down first, if we can
 			if (down != nullptr) {
 				if (down->saturation < down->max_saturation) {
@@ -97,6 +97,7 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta, bool down
 **************************************************/
 
 Uint64 Water_System::place_water(float relative_pct) {
+	std::cout << "placing initial water..." << std::endl;
 	Uint64 total_water = 0;
 	// so if we set relative_pct to 0.5, on average you'd expect a tile to hold 50% of its maximum. this random distr
 	// allows a +/- 30% to the relative_pct - meaning we'd have 35~65% of our maximum_saturation in each tile;

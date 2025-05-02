@@ -68,6 +68,7 @@ public:
 
 		sun_position.x = daylight_pct * (0.9f * camera.w);
 		sun_position.y = peak_y - std::sinf(daylight_pct * M_PI) * peak_y;
+		sunlight_intensity = std::max(0.0f, std::sinf(daylight_pct * M_PI));
 		return sun_position;
 	}
 
@@ -148,7 +149,7 @@ private:
 	float sunrise_pct;
 	float midday_pct;
 	float sunset_pct;
-
+	float sunlight_intensity;
 	float lunar_day;
 	float lunar_pct;
 	float current_lunar_phase;

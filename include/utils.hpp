@@ -35,7 +35,7 @@ namespace Zen {
 	inline Uint64 water_budget = 0;
 
 	enum PIXEL_TYPE { EMPTY = 0, DIRT, CLAY, STONE };
-	enum DEBUG_MODE { WATER = 0, TEMPERATURE, FLOW };
+	enum DEBUG_MODE { NONE = 0, WATER, TEMPERATURE, FLOW };
 	static SDL_Color DIRT_COLOR = { 140, 70, 20, 255 };
 	static SDL_Color CLAY_COLOR = { 197, 95, 64, 255 };
 	static SDL_Color STONE_COLOR = { 128, 128, 128, 255 };

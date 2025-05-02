@@ -19,6 +19,7 @@
 #include "time_system.hpp"
 #include "utils.hpp"
 #include "water_system.hpp"
+#include "weather_system.hpp"
 #include "world_renderer.hpp"
 
 
@@ -51,8 +52,11 @@ private:
 
 	World_Renderer* world_renderer;
 	Water_System* water_system;
+	Weather_System* weather_system;
 	Time_System time_system;
 	Texture_Manager* texture_manager;
 
 	static constexpr float camera_speed = Zen::TERRAIN_WIDTH / 60.0f;
+	Uint64 tick_count;
+	Zen::DEBUG_MODE debug_mode;
 };

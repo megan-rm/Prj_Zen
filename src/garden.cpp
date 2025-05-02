@@ -15,8 +15,12 @@ Garden::Garden(std::string st, int sw, int sh) {
 	up_key = down_key = left_key = right_key = left_mouse = false;
 	running = true;
 	existing_world = false;
+	tick_count = 0;
+
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);	
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+
+	debug_mode = Zen::DEBUG_MODE::NONE;
 
 	world.resize(Zen::TERRAIN_WIDTH / Zen::TILE_SIZE);
 	for (int i = 0; i < Zen::TERRAIN_WIDTH / Zen::TILE_SIZE; i++) {
@@ -34,6 +38,7 @@ Garden::~Garden() {
 }
 
 bool Garden::save_world() {
+	std::cout << "Saving world..." << std::endl;
 	std::ofstream file;
 	file.open("world_info/world.zen");
 	if (file.is_open()) {
@@ -134,7 +139,10 @@ bool Garden::load_world() {
 }
 
 void Garden::update(float delta) {
+	int tick_val = tick_count % 2; // maybe used to stagger updates between systems
 	water_system->update_saturation(delta);
+	weather_system->sun_temperature_update(time_system);
+	tick_count++; // maybe to stagger updates between systems?
 }
 
 void Garden::render(float delta) {
@@ -264,13 +272,15 @@ void Garden::run()
 	file.close();
 	world_renderer = new World_Renderer(renderer, *texture_manager, camera);
 
-	const int fps = 60;
-	const int frame_delay = 1000 / fps;
+
 	water_system = new Water_System(world, 80);
+	weather_system = new Weather_System(world, time_system, 80);
 	if (!existing_world) {
 		Uint64 water = water_system->place_water(0.60f);
 	}
-	
+
+	const int fps = 60;
+	const int frame_delay = 1000 / fps;
 	std::string window_title;
 	while (running) {
 		auto current_time = SDL_GetTicks();
@@ -283,7 +293,7 @@ void Garden::run()
 		window_title = "Project Zen: " + std::to_string(tick_time);
 		SDL_SetWindowTitle(window, window_title.c_str());
 		if (tick_time > 16) tick_time = 15;
-		SDL_Delay(16 - tick_time);
+		SDL_Delay(frame_delay - tick_time);
 	}
 	save_world();
 }
