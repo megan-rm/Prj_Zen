@@ -69,3 +69,12 @@ float Weather_System::get_day_temperature() {
 	day_temp = day_temp * (9 / 5) + 32;
 	return day_temp;
 }
+
+void Weather_System::update_forecasts() {
+	std::ifstream file("world_info/weekly.zen");
+	if (!file.is_open()) {
+
+	}
+
+	file.open("world_info/monthly.zen");
+}
