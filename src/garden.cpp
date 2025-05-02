@@ -141,7 +141,7 @@ bool Garden::load_world() {
 void Garden::update(float delta) {
 	int tick_val = tick_count % 2; // maybe used to stagger updates between systems
 	water_system->update_saturation(delta);
-	weather_system->sun_temperature_update(time_system);
+	weather_system->sun_temperature_update();
 	tick_count++; // maybe to stagger updates between systems?
 }
 

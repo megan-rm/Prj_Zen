@@ -22,10 +22,20 @@ void World_Renderer::render_sky(Time_System& time_system) {
 	float sunset_pct = time_system.get_sunset_pct();
 	float midday_pct = time_system.get_midday_pct();
 	if (day_pct < sunrise_pct) {
-		float t = day_pct / sunrise_pct;
-		current_sky_color = Zen::lerp_color(Zen::NIGHT_COLOR, Zen::DAWN_COLOR, t);
-		SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
-		SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
+		float sunrise_duration_pct = 1.5f / 24.0f;
+		float blend_start = sunrise_pct - sunrise_duration_pct;
+
+		if (day_pct >= blend_start) {
+			float t = (day_pct - blend_start) / (sunset_pct - blend_start);
+			current_sky_color = Zen::lerp_color(Zen::NIGHT_COLOR, Zen::DAWN_COLOR, t);
+			SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
+			SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
+		}
+		else {
+			current_sky_color = Zen::NIGHT_COLOR;
+			SDL_SetTextureColorMod(sky_gradient, current_sky_color.r, current_sky_color.g, current_sky_color.b);
+			SDL_SetTextureAlphaMod(sky_gradient, current_sky_color.a);
+		}
 		SDL_RenderCopy(renderer, sky_gradient, nullptr, nullptr);
 	}
 	else if (day_pct >= sunrise_pct && day_pct < midday_pct) {
@@ -81,13 +91,17 @@ void World_Renderer::render_moon(Time_System& time_system) {
 	float day_pct = time_system.get_day_pct();
 	float sunset_pct = time_system.get_sunset_pct();
 	float sunrise_pct = time_system.get_sunrise_pct();
+	float sunrise_duration_pct = 1.5f / 24.0f;
+	float blend_start = sunrise_pct - sunrise_duration_pct;
 	float t = 0.0f;
 	Uint8 alpha = 0;
-
-	if (day_pct < sunrise_pct) {
+	if (day_pct < sunrise_pct && day_pct > blend_start) {
 		// Midnight to sunrise: fade out
 		t = day_pct / sunrise_pct;
 		alpha = static_cast<Uint8>((1.0f - t) * 255.0f);
+	}
+	else if (day_pct < sunrise_pct && day_pct < blend_start) {
+		alpha = 255;
 	}
 	else if (day_pct > sunset_pct) {
 		// Sunset to midnight: fade in

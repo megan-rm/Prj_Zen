@@ -28,7 +28,7 @@ private:
 	void update_forecasts(); // called in constructor, handles week.forecast and month.forecast
 	Time_System& time_system;
 	std::mt19937 rand;
-	Monthly_Forecast monthly_forecast;
+	//Monthly_Forecast monthly_forecast;
 };
 
 struct Hourly_Forecast {
