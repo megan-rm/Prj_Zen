@@ -36,8 +36,11 @@ public:
 		current_time.minute = local_tm.tm_min;
 		current_time.second = local_tm.tm_sec;
 		day_pct = ((current_time.hour * 60 * 60) + (current_time.minute * 60) + current_time.second) / static_cast<float>(seconds_in_day);
-		year_pct = ((current_time.month-1) * 30 + current_time.day) / 365.0f; // is it elegant? no. but for now
-		
+		year_pct = ((current_time.month - 1) * 30 + current_time.day) / 365.0f; // is it elegant? no. but for now
+		month_days_now = 0;
+		for (int m = 0; m < current_time.month - 1; m++) {
+			month_days_now += days_in_months[m];
+		}
 	}
 
 	float get_day_length(float latitude_deg, int day_of_year) {
@@ -74,7 +77,7 @@ public:
 
 	Zen::Vector2D get_moon_pos(SDL_Rect& camera) {
 		update_time();
-		lunar_day = std::fmod((current_time.day + current_time.month * 30), lunar_length);
+		lunar_day = std::fmod((current_time.day + month_days_now + 1), lunar_length);
 		lunar_pct = lunar_day / lunar_length;
 		current_lunar_phase = (lunar_pct - 0.5f) * 2.0f; // we got two phases of moon to chew through
 
@@ -104,7 +107,7 @@ public:
 
 	Moon_Phase get_moon_phase() {
 		update_time();
-
+		/*
 		if (current_lunar_phase >= -1.0f && current_lunar_phase < -0.75f) {
 			moon_phase = Moon_Phase::NEW_MOON;
 		}
@@ -131,16 +134,24 @@ public:
 		}
 		else if (current_lunar_phase >= 0.95f) {
 			moon_phase = Moon_Phase::NEW_MOON;
-		}
+		}*/
+
+		if (lunar_day < 1)			moon_phase = Moon_Phase::NEW_MOON;
+		else if (lunar_day < 7)		moon_phase = Moon_Phase::WAXING_CRESCENT;
+		else if (lunar_day < 9)		moon_phase = Moon_Phase::FIRST_QUARTER;
+		else if (lunar_day < 14)	moon_phase = Moon_Phase::WAXING_GIBBOUS;
+		else if (lunar_day < 16)	moon_phase = Moon_Phase::FULL_MOON;
+		else if (lunar_day < 21)	moon_phase = Moon_Phase::WANING_GIBBOUS;
+		else if (lunar_day < 23)	moon_phase = Moon_Phase::LAST_QUARTER;
+		else if (lunar_day < 29)	moon_phase = Moon_Phase::WANING_CRESCENT;
+		else						moon_phase = Moon_Phase::NEW_MOON;
 		return moon_phase;
 	}
 
 private:
 	Zen::Vector2D sun_position;
 	Zen::Vector2D moon_position;
-	const int reference_new_moon_year = 2025;
-	const int reference_new_moon_month = 4;
-	const int reference_new_moon_day = 27;
+	const int reference_new_moon_day = 117; // April 27th 2025 of this year happened to be a new moon
 	const float lunar_length = 29.530575f; // idk i just googled lunar length and this is what came up, don't hurt me
 	Time current_time;
 	Moon_Phase moon_phase;
@@ -155,5 +166,6 @@ private:
 	float current_lunar_phase;
 	const static int seconds_in_day = 60 * 60 * 24;
 	const static int days_in_year = 365; // more often than not. we're not going to recalculate this over and over.
-	
+	static constexpr int days_in_months[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+	int month_days_now;
 };

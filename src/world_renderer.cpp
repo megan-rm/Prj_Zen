@@ -121,17 +121,17 @@ void World_Renderer::render_moon(Time_System& time_system) {
 	else if (moon_phase == Moon_Phase::WAXING_CRESCENT) {
 		src.x = 48;
 		src.y = 0;
-		flip = SDL_FLIP_NONE;
+		flip = SDL_FLIP_HORIZONTAL;
 	}
 	else if (moon_phase == Moon_Phase::FIRST_QUARTER) {
 		src.x = 32;
 		src.y = 0;
-		flip = SDL_FLIP_NONE;
+		flip = SDL_FLIP_HORIZONTAL;
 	}
 	else if (moon_phase == Moon_Phase::WAXING_GIBBOUS) {
 		src.x = 16;
 		src.y = 0;
-		flip = SDL_FLIP_NONE;
+		flip = SDL_FLIP_HORIZONTAL;
 	}
 	else if (moon_phase == Moon_Phase::FULL_MOON) {
 		src.x = 0;
@@ -141,17 +141,17 @@ void World_Renderer::render_moon(Time_System& time_system) {
 	else if (moon_phase == Moon_Phase::WANING_GIBBOUS) {
 		src.x = 16;
 		src.y = 0;
-		flip = SDL_FLIP_VERTICAL;
+		flip = SDL_FLIP_NONE;
 	}
 	else if (moon_phase == Moon_Phase::LAST_QUARTER) {
 		src.x = 32;
 		src.y = 0;
-		flip = SDL_FLIP_VERTICAL;
+		flip = SDL_FLIP_NONE;
 	}
 	else if (moon_phase == Moon_Phase::WANING_CRESCENT) {
 		src.x = 16;
 		src.y = 0;
-		flip = SDL_FLIP_VERTICAL;
+		flip = SDL_FLIP_NONE;
 	}
 	SDL_RenderCopyEx(renderer, texture_manager.get_texture("celestial_bodies"), &src, &dst, NULL, NULL, flip);
 	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), 255);
