@@ -31,7 +31,9 @@ public:
 	void render_moon(Time_System& ts);
 	void render_stars(Time_System& ts);
 	void render_clouds(/*Temperature_System& tmp_s*/);
-
+	void register_debug_mode(Zen::DEBUG_MODE mode) {
+		garden_debug_mode = mode;
+	}
 	void register_tilemap(Texture_Manager& tx_mgr) {
 		texture_manager = tx_mgr;
 		tile_size = Zen::TILE_SIZE;
@@ -46,7 +48,7 @@ private:
 	SDL_Texture* tile_atlas;
 	SDL_Texture* sky_gradient;
 	SDL_Texture* celestial_bodies;
-
+	Zen::DEBUG_MODE garden_debug_mode;
 	int tile_atlas_width;
 	int tile_atlas_height;
 	int tile_size;

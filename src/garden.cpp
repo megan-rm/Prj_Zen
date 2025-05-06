@@ -12,7 +12,7 @@ Garden::Garden(std::string st, int sw, int sh) {
 	camera.x = 0;
 	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
 
-	up_key = down_key = left_key = right_key = left_mouse = false;
+	up_key = down_key = left_key = right_key = t_key = left_mouse = false;
 	running = true;
 	existing_world = false;
 	tick_count = 0;
@@ -194,6 +194,9 @@ void Garden::input(float delta) {
 			case SDLK_DOWN:
 				down_key = true;
 				break;
+			case SDLK_t:
+				t_key = !t_key;
+				break;
 			}
 		}
 		else if (events.type == SDL_KEYUP) {
@@ -249,6 +252,13 @@ void Garden::input(float delta) {
 		SDL_GetMouseState(&x, &y);
 		mouse_click(x, y);
 	}
+	if (t_key) {
+		debug_mode = Zen::DEBUG_MODE::TEMPERATURE;
+	}
+	else if (!t_key) {
+		debug_mode = Zen::DEBUG_MODE::NONE;
+	}
+	world_renderer->register_debug_mode(debug_mode);
 }
 
 void Garden::run()
@@ -271,7 +281,8 @@ void Garden::run()
 	}
 	file.close();
 	world_renderer = new World_Renderer(renderer, *texture_manager, camera);
-
+	//FOR DEBUG PURPOSES:
+	world_renderer->register_debug_mode(debug_mode);
 
 	water_system = new Water_System(world, 80);
 	weather_system = new Weather_System(world, time_system, 80);

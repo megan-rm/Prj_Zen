@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <functional>
 #include <random>
 #include <vector>
 
@@ -13,6 +14,7 @@ public:
 		world_bottom = world_bottom = world_reference.front().size();
 		update_count = 0;
 		update_forecasts();
+		find_surface_tiles();
 	};
 	~Weather_System() = default;
 	void update_temperatures(float delta);
@@ -29,6 +31,8 @@ private:
 	Time_System& time_system;
 	std::mt19937 rand;
 	//Monthly_Forecast monthly_forecast;
+	std::vector<std::reference_wrapper<Tile>> surface_tiles;
+	void find_surface_tiles();
 };
 
 struct Hourly_Forecast {

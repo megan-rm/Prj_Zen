@@ -44,17 +44,8 @@ void Weather_System::update_temperatures(float delta) {
 
 void Weather_System::sun_temperature_update() {
 	float day_temp = get_day_temperature();
-	for (int x = 0; x < world_reference.size(); x++) {
-		//find the first non-air tile
-		for (int y = 0; y < world_reference.front().size(); y++) {
-			if (world_reference.at(x).at(y).permeability == 10000 && world_reference.at(x).at(y).saturation > 0) {
-				break; // skip this column, we found a body of water (like our lake) and dont need to update the surface under the water
-			}
-			if (world_reference.at(x).at(y).permeability == 10000) {
-				break;
-			}
-
-		}
+	for (auto i : surface_tiles) {
+		i.get().temperature = day_temp;
 	}
 }
 
@@ -77,4 +68,16 @@ void Weather_System::update_forecasts() {
 	}
 
 	file.open("world_info/monthly.zen");
+}
+
+void Weather_System::find_surface_tiles() {
+	for (int x = 0; x < world_reference.size(); x++) {
+		for (int y = 0; y < world_reference.at(x).size(); y++) {
+			if (world_reference.at(x).at(y).max_saturation != 10000 ||
+				world_reference.at(x).at(y).max_saturation == 10000 && world_reference.at(x).at(y).saturation > 0) {
+				surface_tiles.push_back(world_reference.at(x).at(y));
+				break;
+			}
+		}
+	}
 }
