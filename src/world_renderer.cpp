@@ -204,9 +204,11 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 				else {
 					heat_mask_color = { 128, 128, 128, 0};
 				}
-				SDL_Rect temp_mask{ dst.x + 1, dst.y + tile_size + 1, tile_size - 2, tile_size - 2};
+				SDL_Rect temp_mask{ dst.x + 1, dst.y + 1, tile_size - 2, tile_size - 2};
+				SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 				SDL_SetRenderDrawColor(renderer, heat_mask_color.r, heat_mask_color.g, heat_mask_color.b, heat_mask_color.a);
 				SDL_RenderFillRect(renderer, &temp_mask);
+				continue;
 			}
 			if (tile.max_saturation > 0 && tile.saturation > 10) {
 				float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;

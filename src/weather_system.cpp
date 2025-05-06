@@ -11,29 +11,60 @@ void Weather_System::update_temperatures(float delta) {
 	for (int x = update_count; x < world_reference.size(); x += update_mod) {
 		for (int y = world_reference.at(x).size() - 1; y > 0; y--) {
 			Tile& self = world_reference.at(x).at(y);
-			if (self.saturation == 0) {
-				continue;
-			}
-			Tile* left, *right, *down, *up;
+			Tile *left, *right, *down, *up;
 			left = nullptr;
 			right = nullptr;
 			down = nullptr;
 			up = nullptr;
-			if (x > 0) left = &world_reference.at(x - 1).at(y);
+			float up_weight = 1.35f;
+			float down_weight = 0.65f;
+			float side_weight = 1.0f;
+
+			float base_alpha = 0.998f;
+			float permeability_factor = 1 - (self.permeability / 10000.0f);
+			if (permeability_factor == 0) permeability_factor = 0.1;
+			float saturation_factor;
+			if (self.max_saturation > 0) {
+				saturation_factor = self.saturation / float(self.max_saturation);
+			}
+			else {
+				saturation_factor = 0.25f;
+			}
+			float saturation_penalty = 1.0f - 0.01f * saturation_factor;
+			float alpha = base_alpha * permeability_factor * saturation_penalty;//  0.5;
+			float sum_deltas = 0.0f;
+			float total_weight = 0.0f;
+			if (x > 0)  left = &world_reference.at(x - 1).at(y);
 			if (x < world_reference.size() - 1) right = &world_reference.at(x + 1).at(y);
 			if (y < world_reference.at(x).size() - 1) down = &world_reference.at(x).at(y + 1);
 			if (y > 0) up = &world_reference.at(x).at(y - 1);
-			//share down first, if we can
-			if (down != nullptr) {
+			// laplace sorta? i guess...
+			if (up) {
+				float delta = static_cast<float>(up->temperature) - static_cast<float>(self.temperature);
+				sum_deltas += up_weight * delta;
+				total_weight += up_weight;
 			}
-			//share right
-			if (right != nullptr) {
-				if (self.saturation > right->saturation && right->saturation < right->max_saturation) {
-				}
+			if (down) {
+				float delta = static_cast<float>(down->temperature) - static_cast<float>(self.temperature);
+				sum_deltas += down_weight * delta;
+				total_weight += down_weight;
 			}
-			//share left
-			if (left != nullptr) {
-				if (self.saturation > left->saturation && left->saturation < left->max_saturation) {
+			if (left) {
+				float delta = static_cast<float>(left->temperature) - static_cast<float>(self.temperature);
+				sum_deltas += side_weight * delta;
+				total_weight += side_weight;
+			}
+			if (right) {
+				float delta = static_cast<float>(right->temperature) - static_cast<float>(self.temperature);
+				sum_deltas += side_weight * delta;
+				total_weight += side_weight;
+			}
+			self.temperature += (Uint8)round(alpha * (sum_deltas / total_weight));
+			if (up) {
+				if (up->temperature <= self.temperature) {
+					int avg = up->temperature + self.temperature;
+					avg /= 2;
+					up->temperature = avg;
 				}
 			}
 		}
@@ -44,13 +75,17 @@ void Weather_System::update_temperatures(float delta) {
 
 void Weather_System::sun_temperature_update() {
 	float day_temp = get_day_temperature();
+	float night_temp = day_temp * 0.6f;
+	float temperature_scalar = std::cos(2 * M_PI * (time_system.get_day_pct() - 0.5f));
+	temperature_scalar = -0.5f * temperature_scalar + 0.5f;
+	float current_temperature = night_temp + (day_temp - night_temp) * temperature_scalar;
 	for (auto i : surface_tiles) {
-		i.get().temperature = day_temp;
+		i.get().temperature = current_temperature;
 	}
 }
 
 float Weather_System::get_day_temperature() {
-	int day_of_year = time_system.get_time().month * 30 + time_system.get_time().day;
+	int day_of_year = time_system.get_month_days_now() + time_system.get_time().day;
 
 	float min_temp = -40.0f;
 	float max_temp = 40.0f;

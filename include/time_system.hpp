@@ -11,7 +11,9 @@ struct Time {
 };
 class Time_System {
 public:
-	Time_System() = default;
+	Time_System() {
+		update_time();
+	}
 	~Time_System() = default;
 
 	Time get_time() {
@@ -91,6 +93,10 @@ public:
 
 	float get_day_pct() {
 		return day_pct;
+	}
+
+	int get_month_days_now() {
+		return month_days_now;
 	}
 
 	float get_midday_pct() {

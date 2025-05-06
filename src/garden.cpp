@@ -122,6 +122,7 @@ bool Garden::load_world() {
 					world.at(x).at(y).permeability = permeability;
 					world.at(x).at(y).max_saturation = max_saturation;
 					world.at(x).at(y).saturation = saturation;
+					world.at(x).at(y).temperature = -50;
 					x++;
 					if (x >= Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) {
 						x = 0;
@@ -141,7 +142,8 @@ bool Garden::load_world() {
 void Garden::update(float delta) {
 	int tick_val = tick_count % 2; // maybe used to stagger updates between systems
 	water_system->update_saturation(delta);
-	weather_system->sun_temperature_update();
+	weather_system->update_temperatures(delta);
+	if (tick_count % 10 == 0) weather_system->sun_temperature_update();
 	tick_count++; // maybe to stagger updates between systems?
 }
 
@@ -162,10 +164,11 @@ void Garden::mouse_click(int x, int y) {
 	int tile_x = x / Zen::TILE_SIZE;
 	int tile_y = y / Zen::TILE_SIZE;
 	Tile& tile = world.at(tile_x).at(tile_y);
-	int addition = 3000;
-	int open_space = tile.max_saturation - tile.saturation;
-	int amt = std::min(addition, open_space);
-	tile.saturation += amt;
+	std::cout << "Tile(" << tile_x << ", " << tile_y << "):" << std::endl;
+	std::cout << "Permeability: " << tile.permeability << std::endl;
+	std::cout << "Max Saturation: " << tile.max_saturation << std::endl;
+	std::cout << "Saturation: " << tile.saturation << std::endl;
+	std::cout << "Temperature: " << static_cast<int>(tile.temperature) << std::endl << "----------------------" << std::endl;
 }
 
 void Garden::input(float delta) {
