@@ -72,6 +72,7 @@ void Weather_System::update_temperatures(float delta) {
 					up->temperature = avg;
 				}
 			}
+			humidity_handling(x, y, delta);
 		}
 	}
 	evaporations(delta);
@@ -121,9 +122,9 @@ void Weather_System::evaporations(float delta) {
 	const float evaporation_rate = 0.02f;
 
 	int x = 0;
-	for (auto& pair : surface_tiles) {
-		Tile& tile = pair.first.get();
-		int y = pair.second;
+	for (auto i : surface_tiles) {
+		Tile& tile = i.first.get();
+		int y = i.second;
 		x++;
 
 		if (tile.temperature < evaporation_temperature || tile.saturation == 0)
@@ -132,7 +133,7 @@ void Weather_System::evaporations(float delta) {
 		if (y == 0) continue;
 		Tile& above = world_reference.at(x-1).at(y - 1);
 
-		if (above.permeability < 10000 && above.humidity >= 10000) continue;
+		if (above.permeability < 10000 && above.humidity >= 100) continue;
 
 		float temp_factor = (tile.temperature - evaporation_temperature) / 30.0f;
 		//float permeability_penalty = 1.0f - (tile.permeability / 10000.0f);
@@ -150,8 +151,50 @@ void Weather_System::evaporations(float delta) {
 	}
 }
 
-void Weather_System::humidity_handling(Tile& self, Tile& neighbor, float delta) {
-	
+void Weather_System::humidity_handling(int x, int y, float delta) {
+	Tile& self = world_reference.at(x).at(y);
+	if (self.humidity == 0 || self.max_saturation != 10000) return;
+
+	Tile *up, *down, *left, *right;
+	up = down = left = right = nullptr;
+
+	if (x > 0) left = &world_reference.at(x - 1).at(y);
+	if (x < world_reference.size()) right = &world_reference.at(x + 1).at(y);
+	if (y > 0) up = &world_reference.at(x).at(y - 1);
+	if (y < world_reference.front().size()) down = &world_reference.at(x).at(y + 1);
+
+	const float side_weight = 0.5f;
+	const float up_weight = 1.0f;
+	const float down_weight = 0.25f;
+	if (up) humidity_share(self, *up, up_weight);
+	if (down) humidity_share(self, *down, down_weight);
+	if (left) humidity_share(self, *left, side_weight);
+	if (right) humidity_share(self, *right, side_weight);
+
+}
+
+void Weather_System::humidity_share(Tile& self, Tile& neighbor, float weight) {
+	if (neighbor.max_saturation != 10000 || neighbor.saturation != 0) return;
+
+	float self_humidity_norm = self.humidity / 100.0f;
+	float neighbor_humidity_norm = neighbor.humidity / 100.0f;
+	float delta_humidity = self_humidity_norm - neighbor_humidity_norm;
+
+	if (std::abs(delta_humidity) > 0.01f) {
+		int transfer = static_cast<int>(delta_humidity * 100.0f * weight);
+
+		if (transfer > 0) {
+			transfer = std::min(transfer, static_cast<int>(self.humidity));
+			transfer = std::min(transfer, 100 - neighbor.humidity);
+		}
+		else {
+			transfer = std::max(transfer, -neighbor.humidity);
+			transfer = std::max(transfer, -(100 - self.humidity));
+		}
+
+		self.humidity -= transfer;
+		neighbor.humidity += transfer;
+	}
 }
 
 void Weather_System::find_surface_tiles() {

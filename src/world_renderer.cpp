@@ -223,18 +223,31 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 }
 
 SDL_Color World_Renderer::get_humidity_color(int humidity) {
-	float normalization = std::clamp(humidity / 10000.0f, 0.0f, 1.0f);
+	float humidity_pct = std::clamp(humidity / 100.0f, 0.0f, 1.0f);
+
 	SDL_Color color;
-	color.r = static_cast<Uint8>((1.0f - normalization) * 200.0f + normalization * 50.0f);
-	color.g = static_cast<Uint8>((1.0f - normalization) * 150.0f + normalization * 220.0f);
-	color.b = static_cast<Uint8>((1.0f - normalization) * 50.0f + normalization * 255.0f);
+
+	if (humidity_pct < 0.5f) {
+		float lower_half = humidity_pct / 0.5f;
+		color.r = 255;
+		color.g = static_cast<Uint8>(lower_half * 255.0f);
+		color.b = 0;
+	}
+	else {
+		float upper_half = (humidity_pct - 0.5f) / 0.5f;
+		color.r = static_cast<Uint8>((1.0f - upper_half) * 255.0f);
+		color.g = static_cast<Uint8>((1.0f - upper_half) * 255.0f);
+		color.b = static_cast<Uint8>(upper_half * 255.0f);
+	}
+
 	color.a = 127;
 	return color;
 }
+
 SDL_Color World_Renderer::get_heatmap_color(int temperature) {
 	const int min_temp = -50;
 	const int max_temp = 115;
-	float normalization = (temperature - min_temp) / float(max_temp - min_temp);
+	float normalization = (temperature - min_temp) / float(max_temp - min_temp); // we're not even taking sqrt but idk what else to call this. 
 	normalization = std::clamp(normalization, 0.0f, 1.0f);
 
 	SDL_Color color;

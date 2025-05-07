@@ -28,7 +28,8 @@ private:
 
 	float get_day_temperature();
 	void evaporations(float delta);
-	void humidity_handling(Tile& self, Tile& neighbor, float delta);
+	void humidity_handling(int x, int y, float delta);
+	void humidity_share(Tile& self, Tile& neighbor, float weight);
 	void update_forecasts(); // called in constructor, handles week.forecast and month.forecast
 	Time_System& time_system;
 	std::mt19937 rand;
