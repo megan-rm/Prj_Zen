@@ -115,6 +115,41 @@ void Weather_System::update_forecasts() {
 	file.open("world_info/monthly.zen");
 }
 
+void Weather_System::evaporations(float delta) {
+	const Uint8 evaporation_temperature = 40;
+	const float evaporation_rate = 0.02f;   // base rate, tweak this
+
+	int x = 0;
+	for (auto& pair : surface_tiles) {
+		Tile& tile = pair.first.get();
+		int y = pair.second;
+		x++;
+
+		if (tile.temperature < evaporation_temperature || tile.saturation == 0)
+			continue;
+
+		if (y == 0) continue;
+		Tile& above = world_reference.at(x).at(y - 1);
+
+		if (above.permeability < 10000 && above.humidity >= 10000) continue;
+
+		// Scale evaporation
+		float temp_factor = (tile.temperature - evaporation_temperature) / 30.0f;
+		float permeability_penalty = 1.0f - (tile.permeability / 10000.0f);
+		float evap_amount = tile.saturation * evaporation_rate * temp_factor * permeability_penalty * delta;
+
+		int evap_units = static_cast<int>(evap_amount);
+		if (evap_units <= 0) continue;
+
+		evap_units = std::min(evap_units, static_cast<int>(tile.saturation));
+		int humidity_space = above.max_saturation - above.saturation;
+		int humidity_added = std::min(evap_units, humidity_space);
+
+		tile.saturation -= humidity_added;
+		above.saturation += humidity_added;
+	}
+}
+
 void Weather_System::find_surface_tiles() {
 	for (int x = 0; x < world_reference.size(); x++) {
 		for (int y = 0; y < world_reference.at(x).size(); y++) {
