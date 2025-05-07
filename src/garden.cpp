@@ -12,7 +12,7 @@ Garden::Garden(std::string st, int sw, int sh) {
 	camera.x = 0;
 	camera.y = Zen::TERRAIN_HEIGHT - camera.h;
 
-	up_key = down_key = left_key = right_key = t_key = left_mouse = false;
+	up_key = down_key = left_key = right_key = h_key = t_key = left_mouse = false;
 	running = true;
 	existing_world = false;
 	tick_count = 0;
@@ -49,12 +49,13 @@ bool Garden::save_world() {
 		file << "[WORLD_TILES]" << std::endl;
 		for (int y = 0; y < world.at(0).size(); y++) {
 			for (int x = 0; x < world.size(); x++) {
-				int img_id, permeability, saturation, max_saturation;
+				int img_id, permeability, saturation, max_saturation, humidity;
 				img_id = world.at(x).at(y).img_id;
 				permeability = world.at(x).at(y).permeability;
 				max_saturation = world.at(x).at(y).max_saturation;
 				saturation = world.at(x).at(y).saturation;
-				file << img_id << "," << permeability << "," << max_saturation << "," << saturation << "|";
+				humidity = world.at(x).at(y).humidity;
+				file << img_id << "," << permeability << "," << max_saturation << "," << saturation << "," << humidity << "|";
 			}
 			file << std::endl;
 		}
@@ -117,12 +118,14 @@ bool Garden::load_world() {
 					int max_saturation = std::stoi(line);
 					std::getline(tile_stream, line, ',');
 					int saturation = std::stoi(line);
-
+					std::getline(tile_stream, line, ',');
+					int humidity = std::stoi(line);
 					world.at(x).at(y).img_id = tile_id;
 					world.at(x).at(y).permeability = permeability;
 					world.at(x).at(y).max_saturation = max_saturation;
 					world.at(x).at(y).saturation = saturation;
 					world.at(x).at(y).temperature = -20;
+					world.at(x).at(y).humidity = humidity;
 					x++;
 					if (x >= Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) {
 						x = 0;
@@ -163,12 +166,15 @@ void Garden::mouse_click(int x, int y) {
 	y += camera.y;
 	int tile_x = x / Zen::TILE_SIZE;
 	int tile_y = y / Zen::TILE_SIZE;
+	if (tile_x >= world.size()) return;
+	if (tile_y >= world.at(tile_x).size()) return;
 	Tile& tile = world.at(tile_x).at(tile_y);
 	std::cout << "Tile(" << tile_x << ", " << tile_y << "):" << std::endl;
 	std::cout << "Permeability: " << tile.permeability << std::endl;
 	std::cout << "Max Saturation: " << tile.max_saturation << std::endl;
 	std::cout << "Saturation: " << tile.saturation << std::endl;
-	std::cout << "Temperature: " << static_cast<int>(tile.temperature) << std::endl << "----------------------" << std::endl;
+	std::cout << "Temperature: " << static_cast<int>(tile.temperature) << std::endl;
+	std::cout << "Humidity: " << static_cast<int>(tile.humidity) << std::endl << "----------------------" << std::endl;
 }
 
 void Garden::input(float delta) {
@@ -199,6 +205,9 @@ void Garden::input(float delta) {
 				break;
 			case SDLK_t:
 				t_key = !t_key;
+				break;
+			case SDLK_h:
+				h_key = !h_key;
 				break;
 			}
 		}
@@ -256,12 +265,20 @@ void Garden::input(float delta) {
 		mouse_click(x, y);
 	}
 	if (t_key) {
+		h_key = false;
 		debug_mode = Zen::DEBUG_MODE::TEMPERATURE;
 	}
-	else if (!t_key) {
+	else if (!t_key && !h_key) {
 		debug_mode = Zen::DEBUG_MODE::NONE;
 	}
-	world_renderer->register_debug_mode(debug_mode);
+	if (h_key) {
+		t_key = false;
+		debug_mode = Zen::DEBUG_MODE::HUMIDITY;
+	}
+	else if (!h_key && !t_key) {
+		debug_mode = Zen::DEBUG_MODE::NONE;
+	}
+	//world_renderer->register_debug_mode(debug_mode);
 }
 
 void Garden::run()
@@ -284,6 +301,7 @@ void Garden::run()
 	}
 	file.close();
 	world_renderer = new World_Renderer(renderer, *texture_manager, camera);
+	world_renderer->register_debug_mode(debug_mode);
 	//FOR DEBUG PURPOSES:
 	world_renderer->register_debug_mode(debug_mode);
 

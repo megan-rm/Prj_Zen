@@ -45,7 +45,7 @@ private:
 	std::vector<std::vector<Tile>> buffer; // I don't quite like how we have Tiles as buffers for just properly reading saturation states between updates.
 	bool running;
 	bool existing_world;
-	bool up_key, down_key, left_key, right_key, t_key, left_mouse;
+	bool up_key, down_key, left_key, right_key, h_key, t_key, left_mouse;
 	int screen_width;
 	int screen_height;
 	std::string window_title;

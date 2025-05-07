@@ -88,7 +88,7 @@ void Water_System::calculate_flow(Tile& self, Tile& tile, float delta, bool down
 }
 
 void Water_System::capillary_action(Tile& self, Tile& below, float delta) {
-	const Uint8 capillary_temp = 33;
+	const Uint8 capillary_temp = 33; //farenheit to cause capillary action at all
 
 	if (self.saturation >= below.saturation || self.temperature < capillary_temp || self.permeability == 10000) {
 		return;
@@ -97,14 +97,12 @@ void Water_System::capillary_action(Tile& self, Tile& below, float delta) {
 	int saturation_delta = below.saturation - self.saturation;
 	int capacity = self.max_saturation - self.saturation;
 
-	// Prevent negative/zero transfer
 	if (saturation_delta <= 0 || capacity <= 0) return;
 
-	// Capillary effect strength scales with delta time and temperature difference
 	float temp_factor = std::clamp((float)(self.temperature - capillary_temp) / 10.0f, 0.0f, 1.0f);
 	float permeability_resistance = 1.0f - (self.permeability / 10000.0f);
 	permeability_resistance = std::clamp(permeability_resistance, 0.1f, 1.0f);
-	float alpha = 0.33f * delta * temp_factor * permeability_resistance;
+	float alpha = 0.33f * delta * temp_factor * permeability_resistance; // i dont know. i'm tweaking the base alpha of 0.10 to a few values. its at 0.33f now.
 
 	int transfer_amount = static_cast<int>(saturation_delta * alpha);
 	transfer_amount = std::min(transfer_amount, capacity);

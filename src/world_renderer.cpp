@@ -188,34 +188,33 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 			};
 			
 			SDL_RenderCopy(renderer, tile_atlas, &src, &dst);
-			//
-			if (garden_debug_mode == Zen::DEBUG_MODE::TEMPERATURE) {
+			//temperature view
+			if (*garden_debug_mode == Zen::DEBUG_MODE::TEMPERATURE) {
 				SDL_Color heat_mask_color;
-				Uint8 red, blue, green;
-				if (tile.temperature < 0) {
-					blue = static_cast<Uint8>(255 + tile.temperature);
-					heat_mask_color = { 0, static_cast<Uint8>(blue / 2), blue, 128 };
-				}
-				else if (tile.temperature > 0) {
-					red = 128 + static_cast<Uint8>(tile.temperature);
-					green = static_cast<Uint8>(tile.temperature);
-					heat_mask_color = { red, green, 0, 128 };
-				}
-				else {
-					heat_mask_color = { 128, 128, 128, 0};
-				}
 				SDL_Rect temp_mask{ dst.x + 1, dst.y + 1, tile_size - 2, tile_size - 2};
 				heat_mask_color = get_heatmap_color(tile.temperature);
 				SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 				SDL_SetRenderDrawColor(renderer, heat_mask_color.r, heat_mask_color.g, heat_mask_color.b, heat_mask_color.a);
 				SDL_RenderFillRect(renderer, &temp_mask);
-				continue;
 			}
-			if (tile.max_saturation > 0 && tile.saturation > 10) {
-				float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
-				if (ratio < 0.09f) continue;
-				SDL_Rect water_level{ dst.x, dst.y + tile_size, tile_size, -tile_size * ratio };
-				SDL_RenderFillRect(renderer, &water_level);
+			else if (*garden_debug_mode == Zen::DEBUG_MODE::HUMIDITY) {
+				if (tile.humidity > 0) {
+					SDL_Color humidity_mask_color;
+					SDL_Rect humidity_mask{ dst.x + 1, dst.y + 1, tile_size - 2, tile_size - 2 };
+					humidity_mask_color = get_humidity_color(tile.temperature);
+					SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+					SDL_SetRenderDrawColor(renderer, humidity_mask_color.r, humidity_mask_color.g, humidity_mask_color.b, humidity_mask_color.a);
+					SDL_RenderFillRect(renderer, &humidity_mask);
+				}
+			}
+			//normal view
+			else if (*garden_debug_mode == Zen::DEBUG_MODE::NONE) {
+				if (tile.max_saturation > 0 && tile.saturation > 10) {
+					float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
+					if (ratio < 0.09f) continue;
+					SDL_Rect water_level{ dst.x, dst.y + tile_size, tile_size, -tile_size * ratio };
+					SDL_RenderFillRect(renderer, &water_level);
+				}
 			}
 		}
 	}
@@ -223,6 +222,15 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
 }
 
+SDL_Color World_Renderer::get_humidity_color(int humidity) {
+	float normalization = std::clamp(humidity / 10000.0f, 0.0f, 1.0f);
+	SDL_Color color;
+	color.r = static_cast<Uint8>((1.0f - normalization) * 200.0f + normalization * 50.0f);
+	color.g = static_cast<Uint8>((1.0f - normalization) * 150.0f + normalization * 220.0f);
+	color.b = static_cast<Uint8>((1.0f - normalization) * 50.0f + normalization * 255.0f);
+	color.a = 127;
+	return color;
+}
 SDL_Color World_Renderer::get_heatmap_color(int temperature) {
 	const int min_temp = -50;
 	const int max_temp = 115;

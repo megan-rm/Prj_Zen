@@ -113,35 +113,6 @@ public:
 
 	Moon_Phase get_moon_phase() {
 		update_time();
-		/*
-		if (current_lunar_phase >= -1.0f && current_lunar_phase < -0.75f) {
-			moon_phase = Moon_Phase::NEW_MOON;
-		}
-		else if (current_lunar_phase >= -0.75f && current_lunar_phase < -0.5f) {
-			moon_phase = Moon_Phase::WAXING_CRESCENT;
-		}
-		else if (current_lunar_phase >= -0.5f && current_lunar_phase < -0.25f) {
-			moon_phase = Moon_Phase::FIRST_QUARTER;
-		}
-		else if (current_lunar_phase >= -0.25f && current_lunar_phase < 0.0f) {
-			moon_phase = Moon_Phase::WAXING_GIBBOUS;
-		}
-		else if (current_lunar_phase >= 0.0f && current_lunar_phase < 0.25f) {
-			moon_phase = Moon_Phase::FULL_MOON;
-		}
-		else if (current_lunar_phase >= 0.25f && current_lunar_phase < 0.5f) {
-			moon_phase = Moon_Phase::WANING_GIBBOUS;
-		}
-		else if (current_lunar_phase >= 0.5f && current_lunar_phase < 0.75f) {
-			moon_phase = Moon_Phase::LAST_QUARTER;
-		}
-		else if (current_lunar_phase >= 0.75f && current_lunar_phase < 0.95f) {
-			moon_phase = Moon_Phase::WANING_CRESCENT;
-		}
-		else if (current_lunar_phase >= 0.95f) {
-			moon_phase = Moon_Phase::NEW_MOON;
-		}*/
-
 		if (lunar_day < 1)			moon_phase = Moon_Phase::NEW_MOON;
 		else if (lunar_day < 7)		moon_phase = Moon_Phase::WAXING_CRESCENT;
 		else if (lunar_day < 9)		moon_phase = Moon_Phase::FIRST_QUARTER;

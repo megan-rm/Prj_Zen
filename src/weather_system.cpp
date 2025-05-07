@@ -74,6 +74,7 @@ void Weather_System::update_temperatures(float delta) {
 			}
 		}
 	}
+	evaporations(delta);
 	update_count += 1;
 	update_count = update_count % update_mod;
 }
@@ -129,13 +130,13 @@ void Weather_System::evaporations(float delta) {
 			continue;
 
 		if (y == 0) continue;
-		Tile& above = world_reference.at(x).at(y - 1);
+		Tile& above = world_reference.at(x-1).at(y - 1);
 
 		if (above.permeability < 10000 && above.humidity >= 10000) continue;
 
 		float temp_factor = (tile.temperature - evaporation_temperature) / 30.0f;
-		float permeability_penalty = 1.0f - (tile.permeability / 10000.0f);
-		float evap_amount = tile.saturation * evaporation_rate * temp_factor * permeability_penalty * delta;
+		//float permeability_penalty = 1.0f - (tile.permeability / 10000.0f);
+		float evap_amount = tile.saturation * evaporation_rate * temp_factor  * delta;
 
 		int evap_units = static_cast<int>(evap_amount);
 		if (evap_units <= 0) continue;
@@ -147,6 +148,10 @@ void Weather_System::evaporations(float delta) {
 		tile.saturation -= humidity_added;
 		above.humidity += humidity_added;
 	}
+}
+
+void Weather_System::humidity_handling(Tile& self, Tile& neighbor, float delta) {
+	
 }
 
 void Weather_System::find_surface_tiles() {
