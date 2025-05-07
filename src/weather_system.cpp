@@ -117,7 +117,7 @@ void Weather_System::update_forecasts() {
 
 void Weather_System::evaporations(float delta) {
 	const Uint8 evaporation_temperature = 40;
-	const float evaporation_rate = 0.02f;   // base rate, tweak this
+	const float evaporation_rate = 0.02f;
 
 	int x = 0;
 	for (auto& pair : surface_tiles) {
@@ -133,7 +133,6 @@ void Weather_System::evaporations(float delta) {
 
 		if (above.permeability < 10000 && above.humidity >= 10000) continue;
 
-		// Scale evaporation
 		float temp_factor = (tile.temperature - evaporation_temperature) / 30.0f;
 		float permeability_penalty = 1.0f - (tile.permeability / 10000.0f);
 		float evap_amount = tile.saturation * evaporation_rate * temp_factor * permeability_penalty * delta;
@@ -146,7 +145,7 @@ void Weather_System::evaporations(float delta) {
 		int humidity_added = std::min(evap_units, humidity_space);
 
 		tile.saturation -= humidity_added;
-		above.saturation += humidity_added;
+		above.humidity += humidity_added;
 	}
 }
 
