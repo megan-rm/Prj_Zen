@@ -235,7 +235,7 @@ SDL_Color World_Renderer::get_humidity_color(int humidity) {
 		return Zen::lerp_color(dry_color, mid_color, lower_half * 2.0f);
 	}
 	else {
-		float upper_half = (humidity_pct - 0.5f);// / 0.5f;
+		float upper_half = (humidity_pct - 0.5f);
 		return Zen::lerp_color(mid_color, wet_color, upper_half * 2.0f);
 	}
 }
@@ -245,20 +245,28 @@ SDL_Color World_Renderer::get_heatmap_color(int temperature) {
 	const int max_temp = 115;
 	float t = std::clamp((temperature - min_temp) / float(max_temp - min_temp), 0.0f, 1.0f);
 
-	// Define color stops
-	SDL_Color cold = { 0, 255, 255, 128 };   // Cyan
-	SDL_Color cool = { 255, 255, 255, 128 }; // White
-	SDL_Color warm = { 255, 90, 0, 128 };    // Orange
-	SDL_Color hot = { 255, 0, 255, 128 };   // Magenta
+	// Define your original-inspired color anchors
+	SDL_Color blue = { 0, 255, 255, 128 };   // Cyan-ish blue (cold)
+	SDL_Color green = { 0, 255, 0, 128 };     // Greenish mid-cold
+	SDL_Color yellow = { 255, 255, 0, 128 };   // Warm/mild
+	SDL_Color orange = { 255, 165, 0, 128 };   // Warmer
+	SDL_Color red = { 255, 0, 0, 128 };     // Hot
+	SDL_Color purple = { 255, 0, 255, 128 };   // Very hot
 
-	// Interpolate based on quartiles
-	if (t < 0.33f) {
-		return Zen::lerp_color(cold, cool, t / 0.33f);
+	// Split into 5 segments (20% each)
+	if (t < 0.2f) {
+		return Zen::lerp_color(blue, green, t / 0.2f);
 	}
-	else if (t < 0.66f) {
-		return Zen::lerp_color(cool, warm, (t - 0.33f) / 0.33f);
+	else if (t < 0.4f) {
+		return Zen::lerp_color(green, yellow, (t - 0.2f) / 0.2f);
+	}
+	else if (t < 0.6f) {
+		return Zen::lerp_color(yellow, orange, (t - 0.4f) / 0.2f);
+	}
+	else if (t < 0.8f) {
+		return Zen::lerp_color(orange, red, (t - 0.6f) / 0.2f);
 	}
 	else {
-		return Zen::lerp_color(warm, hot, (t - 0.66f) / 0.34f);
+		return Zen::lerp_color(red, purple, (t - 0.8f) / 0.2f);
 	}
 }
