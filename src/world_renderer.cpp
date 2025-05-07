@@ -201,7 +201,7 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 				if (tile.humidity > 0) {
 					SDL_Color humidity_mask_color;
 					SDL_Rect humidity_mask{ dst.x + 1, dst.y + 1, tile_size - 2, tile_size - 2 };
-					humidity_mask_color = get_humidity_color(tile.temperature);
+					humidity_mask_color = get_humidity_color(tile.humidity);
 					SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 					SDL_SetRenderDrawColor(renderer, humidity_mask_color.r, humidity_mask_color.g, humidity_mask_color.b, humidity_mask_color.a);
 					SDL_RenderFillRect(renderer, &humidity_mask);
@@ -223,70 +223,42 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 }
 
 SDL_Color World_Renderer::get_humidity_color(int humidity) {
-	float humidity_pct = std::clamp(humidity / 100.0f, 0.0f, 1.0f);
-
+	float humidity_pct = std::clamp(static_cast<float>(humidity) / 100.0f, 0.0f, 1.0f);
 	SDL_Color color;
+
+	SDL_Color dry_color = { 255, 150, 0, 127 };
+	SDL_Color mid_color = { 255, 255, 0, 127 };
+	SDL_Color wet_color = { 0, 150, 255, 127 };
 
 	if (humidity_pct < 0.5f) {
 		float lower_half = humidity_pct / 0.5f;
-		color.r = 255;
-		color.g = static_cast<Uint8>(lower_half * 255.0f);
-		color.b = 0;
+		return Zen::lerp_color(dry_color, mid_color, lower_half * 2.0f);
 	}
 	else {
-		float upper_half = (humidity_pct - 0.5f) / 0.5f;
-		color.r = static_cast<Uint8>((1.0f - upper_half) * 255.0f);
-		color.g = static_cast<Uint8>((1.0f - upper_half) * 255.0f);
-		color.b = static_cast<Uint8>(upper_half * 255.0f);
+		float upper_half = (humidity_pct - 0.5f);// / 0.5f;
+		return Zen::lerp_color(mid_color, wet_color, upper_half * 2.0f);
 	}
-
-	color.a = 127;
-	return color;
 }
 
 SDL_Color World_Renderer::get_heatmap_color(int temperature) {
 	const int min_temp = -50;
 	const int max_temp = 115;
-	float normalization = (temperature - min_temp) / float(max_temp - min_temp); // we're not even taking sqrt but idk what else to call this. 
-	normalization = std::clamp(normalization, 0.0f, 1.0f);
+	float t = std::clamp((temperature - min_temp) / float(max_temp - min_temp), 0.0f, 1.0f);
 
-	SDL_Color color;
+	// Define color stops
+	SDL_Color cold = { 0, 255, 255, 128 };   // Cyan
+	SDL_Color cool = { 255, 255, 255, 128 }; // White
+	SDL_Color warm = { 255, 90, 0, 128 };    // Orange
+	SDL_Color hot = { 255, 0, 255, 128 };   // Magenta
 
-	if (normalization < 0.25f) {
-		float k = normalization / 0.25f;
-		color = {
-			static_cast<Uint8>(0),
-			static_cast<Uint8>(k * 255),
-			static_cast<Uint8>(255),
-			128
-		};
+	// Interpolate based on quartiles
+	if (t < 0.33f) {
+		return Zen::lerp_color(cold, cool, t / 0.33f);
 	}
-	else if (normalization < 0.5f) {
-		float k = (normalization - 0.25f) / 0.25f;
-		color = {
-			static_cast<Uint8>(k * 255),
-			static_cast<Uint8>(255),
-			static_cast<Uint8>(255 - k * 0),
-			128
-		};
-	}
-	else if (normalization < 0.75f) {
-		float k = (normalization - 0.5f) / 0.25f;
-		color = {
-			static_cast<Uint8>(255),
-			static_cast<Uint8>(255 - k * 165),
-			static_cast<Uint8>(0),
-			128
-		};
+	else if (t < 0.66f) {
+		return Zen::lerp_color(cool, warm, (t - 0.33f) / 0.33f);
 	}
 	else {
-		float k = (normalization - 0.75f) / 0.25f;
-		color = {
-			static_cast<Uint8>(255),
-			static_cast<Uint8>(90 - k * 90),
-			static_cast<Uint8>(k * 255),
-			128
-		};
+		return Zen::lerp_color(warm, hot, (t - 0.66f) / 0.34f);
 	}
-	return color;
 }

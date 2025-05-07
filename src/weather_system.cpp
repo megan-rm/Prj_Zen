@@ -135,7 +135,7 @@ void Weather_System::evaporations(float delta) {
 
 		if (above.permeability < 10000 && above.humidity >= 100) continue;
 
-		float temp_factor = (tile.temperature - evaporation_temperature) / 30.0f;
+		float temp_factor = std::max(0.0f, (tile.temperature - evaporation_temperature) / 30.0f);
 		//float permeability_penalty = 1.0f - (tile.permeability / 10000.0f);
 		float evap_amount = tile.saturation * evaporation_rate * temp_factor  * delta;
 
@@ -159,13 +159,13 @@ void Weather_System::humidity_handling(int x, int y, float delta) {
 	up = down = left = right = nullptr;
 
 	if (x > 0) left = &world_reference.at(x - 1).at(y);
-	if (x < world_reference.size()) right = &world_reference.at(x + 1).at(y);
+	if (x < world_reference.size() - 1) right = &world_reference.at(x + 1).at(y);
 	if (y > 0) up = &world_reference.at(x).at(y - 1);
-	if (y < world_reference.front().size()) down = &world_reference.at(x).at(y + 1);
+	if (y < world_reference.front().size() - 1) down = &world_reference.at(x).at(y + 1);
 
-	const float side_weight = 0.5f;
-	const float up_weight = 1.0f;
-	const float down_weight = 0.25f;
+	const float side_weight = 0.2f;
+	const float up_weight = 1.5f;
+	const float down_weight = 0.1f;
 	if (up) humidity_share(self, *up, up_weight);
 	if (down) humidity_share(self, *down, down_weight);
 	if (left) humidity_share(self, *left, side_weight);
@@ -176,9 +176,9 @@ void Weather_System::humidity_handling(int x, int y, float delta) {
 void Weather_System::humidity_share(Tile& self, Tile& neighbor, float weight) {
 	if (neighbor.max_saturation != 10000 || neighbor.saturation != 0) return;
 
-	float self_humidity_norm = self.humidity / 100.0f;
-	float neighbor_humidity_norm = neighbor.humidity / 100.0f;
-	float delta_humidity = self_humidity_norm - neighbor_humidity_norm;
+	float self_humidity_pct = self.humidity / 100.0f;
+	float neighbor_humidity_pct = neighbor.humidity / 100.0f;
+	float delta_humidity = self_humidity_pct - neighbor_humidity_pct;
 
 	if (std::abs(delta_humidity) > 0.01f) {
 		int transfer = static_cast<int>(delta_humidity * 100.0f * weight);
