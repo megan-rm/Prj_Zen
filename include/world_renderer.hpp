@@ -5,6 +5,7 @@
 #include "texture_manager.hpp"
 #include "time_system.hpp"
 
+#include <algorithm>
 #include <iostream>
 #include <math.h>
 #include <string>
@@ -31,6 +32,7 @@ public:
 	void render_moon(Time_System& ts);
 	void render_stars(Time_System& ts);
 	void render_clouds(/*Temperature_System& tmp_s*/);
+	SDL_Color get_heatmap_color(int temperature);
 	void register_debug_mode(Zen::DEBUG_MODE mode) {
 		garden_debug_mode = mode;
 	}

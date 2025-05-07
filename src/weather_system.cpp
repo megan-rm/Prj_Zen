@@ -16,13 +16,13 @@ void Weather_System::update_temperatures(float delta) {
 			right = nullptr;
 			down = nullptr;
 			up = nullptr;
-			float up_weight = 1.35f;
-			float down_weight = 0.65f;
+			float up_weight = 1.35;
+			float down_weight = 0.85f;
 			float side_weight = 1.0f;
 
 			float base_alpha = 0.998f;
 			float permeability_factor = 1 - (self.permeability / 10000.0f);
-			if (permeability_factor == 0) permeability_factor = 0.1;
+			if (permeability_factor == 0) permeability_factor = 0.15;
 			float saturation_factor;
 			if (self.max_saturation > 0) {
 				saturation_factor = self.saturation / float(self.max_saturation);
@@ -32,12 +32,17 @@ void Weather_System::update_temperatures(float delta) {
 			}
 			float saturation_penalty = 1.0f - 0.01f * saturation_factor;
 			float alpha = base_alpha * permeability_factor * saturation_penalty;//  0.5;
+			alpha = std::max(0.2f, alpha);
 			float sum_deltas = 0.0f;
 			float total_weight = 0.0f;
 			if (x > 0)  left = &world_reference.at(x - 1).at(y);
 			if (x < world_reference.size() - 1) right = &world_reference.at(x + 1).at(y);
 			if (y < world_reference.at(x).size() - 1) down = &world_reference.at(x).at(y + 1);
 			if (y > 0) up = &world_reference.at(x).at(y - 1);
+			if (self.saturation == 10000) {
+				float gamma = 0.1;
+				int weight = pow(gamma, sum_deltas);
+			}
 			// laplace sorta? i guess...
 			if (up) {
 				float delta = static_cast<float>(up->temperature) - static_cast<float>(self.temperature);
@@ -79,8 +84,13 @@ void Weather_System::sun_temperature_update() {
 	float temperature_scalar = std::cos(2 * M_PI * (time_system.get_day_pct() - 0.5f));
 	temperature_scalar = -0.5f * temperature_scalar + 0.5f;
 	float current_temperature = night_temp + (day_temp - night_temp) * temperature_scalar;
+	int sea_level = 130;
 	for (auto i : surface_tiles) {
-		i.get().temperature = current_temperature;
+		float altitude = sea_level - static_cast<float>(i.second);
+		float altitude_factor = std::clamp(1.0f - (altitude / 100.0f), 0.1f, 1.0f);
+		float permeability_factor = 1 + (0.15 * i.first.get().permeability / 10000);
+
+		i.first.get().temperature = (current_temperature * altitude_factor * permeability_factor);
 	}
 }
 
@@ -110,7 +120,7 @@ void Weather_System::find_surface_tiles() {
 		for (int y = 0; y < world_reference.at(x).size(); y++) {
 			if (world_reference.at(x).at(y).max_saturation != 10000 ||
 				world_reference.at(x).at(y).max_saturation == 10000 && world_reference.at(x).at(y).saturation > 0) {
-				surface_tiles.push_back(world_reference.at(x).at(y));
+				surface_tiles.push_back(std::make_pair(std::ref(world_reference.at(x).at(y)), y));
 				break;
 			}
 		}

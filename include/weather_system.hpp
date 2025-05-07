@@ -31,7 +31,7 @@ private:
 	Time_System& time_system;
 	std::mt19937 rand;
 	//Monthly_Forecast monthly_forecast;
-	std::vector<std::reference_wrapper<Tile>> surface_tiles;
+	std::vector<std::pair<std::reference_wrapper<Tile>, int>> surface_tiles;
 	void find_surface_tiles();
 };
 

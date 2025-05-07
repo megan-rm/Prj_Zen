@@ -205,6 +205,7 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 					heat_mask_color = { 128, 128, 128, 0};
 				}
 				SDL_Rect temp_mask{ dst.x + 1, dst.y + 1, tile_size - 2, tile_size - 2};
+				heat_mask_color = get_heatmap_color(tile.temperature);
 				SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 				SDL_SetRenderDrawColor(renderer, heat_mask_color.r, heat_mask_color.g, heat_mask_color.b, heat_mask_color.a);
 				SDL_RenderFillRect(renderer, &temp_mask);
@@ -220,4 +221,51 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 	}
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+}
+
+SDL_Color World_Renderer::get_heatmap_color(int temperature) {
+	const int min_temp = -50;
+	const int max_temp = 115;
+	float normalization = (temperature - min_temp) / float(max_temp - min_temp);
+	normalization = std::clamp(normalization, 0.0f, 1.0f);
+
+	SDL_Color color;
+
+	if (normalization < 0.25f) {
+		float k = normalization / 0.25f;
+		color = {
+			static_cast<Uint8>(0),
+			static_cast<Uint8>(k * 255),
+			static_cast<Uint8>(255),
+			128
+		};
+	}
+	else if (normalization < 0.5f) {
+		float k = (normalization - 0.25f) / 0.25f;
+		color = {
+			static_cast<Uint8>(k * 255),
+			static_cast<Uint8>(255),
+			static_cast<Uint8>(255 - k * 0),
+			128
+		};
+	}
+	else if (normalization < 0.75f) {
+		float k = (normalization - 0.5f) / 0.25f;
+		color = {
+			static_cast<Uint8>(255),
+			static_cast<Uint8>(255 - k * 165),
+			static_cast<Uint8>(0),
+			128
+		};
+	}
+	else {
+		float k = (normalization - 0.75f) / 0.25f;
+		color = {
+			static_cast<Uint8>(255),
+			static_cast<Uint8>(90 - k * 90),
+			static_cast<Uint8>(k * 255),
+			128
+		};
+	}
+	return color;
 }

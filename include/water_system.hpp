@@ -22,7 +22,7 @@ private:
 	std::vector<std::vector<Tile>>& world_reference;
 
 	void calculate_flow(Tile& self, Tile& tile, float delta, bool downward);
-	
+	void capillary_action(Tile& self, Tile& below, float delta);
 	std::mt19937 rand;
 
 	Uint64 water_total;

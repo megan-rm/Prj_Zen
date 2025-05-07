@@ -122,7 +122,7 @@ bool Garden::load_world() {
 					world.at(x).at(y).permeability = permeability;
 					world.at(x).at(y).max_saturation = max_saturation;
 					world.at(x).at(y).saturation = saturation;
-					world.at(x).at(y).temperature = -50;
+					world.at(x).at(y).temperature = -20;
 					x++;
 					if (x >= Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) {
 						x = 0;
