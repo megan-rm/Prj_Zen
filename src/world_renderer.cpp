@@ -245,15 +245,13 @@ SDL_Color World_Renderer::get_heatmap_color(int temperature) {
 	const int max_temp = 115;
 	float t = std::clamp((temperature - min_temp) / float(max_temp - min_temp), 0.0f, 1.0f);
 
-	// Define your original-inspired color anchors
-	SDL_Color blue = { 0, 255, 255, 128 };   // Cyan-ish blue (cold)
-	SDL_Color green = { 0, 255, 0, 128 };     // Greenish mid-cold
-	SDL_Color yellow = { 255, 255, 0, 128 };   // Warm/mild
-	SDL_Color orange = { 255, 165, 0, 128 };   // Warmer
-	SDL_Color red = { 255, 0, 0, 128 };     // Hot
-	SDL_Color purple = { 255, 0, 255, 128 };   // Very hot
+	SDL_Color blue = { 0, 255, 255, 128 };
+	SDL_Color green = { 0, 255, 0, 128 };
+	SDL_Color yellow = { 255, 255, 0, 128 };
+	SDL_Color orange = { 255, 165, 0, 128 };
+	SDL_Color red = { 255, 0, 0, 128 };
+	SDL_Color purple = { 255, 0, 255, 128 };
 
-	// Split into 5 segments (20% each)
 	if (t < 0.2f) {
 		return Zen::lerp_color(blue, green, t / 0.2f);
 	}

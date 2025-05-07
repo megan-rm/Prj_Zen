@@ -205,9 +205,11 @@ void Garden::input(float delta) {
 				break;
 			case SDLK_t:
 				t_key = !t_key;
+				h_key = false;
 				break;
 			case SDLK_h:
 				h_key = !h_key;
+				t_key = false;
 				break;
 			}
 		}
