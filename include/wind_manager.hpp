@@ -28,7 +28,7 @@ struct Wind_Gust {
 class Wind_Manager {
 public:
 	Wind_Manager(std::vector<std::vector<Tile>>& world_ref) : world_reference(world_ref) {
-		gust_time_spawn = 15.0f; // arbitrary bullshit
+		gust_time_spawn = 15.0f; // arbitrary bologna
 		last_gust = 0.0f;
 		create_new_gust();
 	}
@@ -48,15 +48,13 @@ public:
 		}
 	}
 	void render(SDL_Renderer* renderer, SDL_Rect& camera) {
-		for (auto& gust : gusts) {  // Use reference to avoid unnecessary copying
-			// Adjust gust's x and y by the camera's position
+		for (auto& gust : gusts) {
 			SDL_Rect adjusted_gust = gust.area;
 			adjusted_gust.x -= camera.x;
 			adjusted_gust.y -= camera.y;
 
-			// Set the color for rendering
-			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);  // Black color for gusts
-			SDL_RenderDrawRect(renderer, &adjusted_gust);  // Draw the gust with adjusted coordinates
+			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+			SDL_RenderDrawRect(renderer, &adjusted_gust);
 		}
 	}
 

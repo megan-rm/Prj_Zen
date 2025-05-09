@@ -96,7 +96,6 @@ void World_Renderer::render_moon(Time_System& time_system) {
 	float t = 0.0f;
 	Uint8 alpha = 0;
 	if (day_pct < sunrise_pct && day_pct > blend_start) {
-		// Midnight to sunrise: fade out
 		t = day_pct / blend_start;
 		alpha = static_cast<Uint8>((1.0f - t) * 255.0f);
 	}
@@ -104,12 +103,10 @@ void World_Renderer::render_moon(Time_System& time_system) {
 		alpha = 255;
 	}
 	else if (day_pct > sunset_pct) {
-		// Sunset to midnight: fade in
 		t = (day_pct - sunset_pct) / (1.0f - sunset_pct);
 		alpha = static_cast<Uint8>(t * 255.0f);
 	}
 	else {
-		// Daytime: invisible
 		alpha = 0;
 	}
 	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), alpha);
@@ -165,6 +162,7 @@ void World_Renderer::render_clouds(int humidity, SDL_Rect dst) {
 	//float current_time = SDL_GetTicks() / 1000.0f;
 	//cloud_manager->update(current_time);
 	//cloud_manager->draw(current_time);
+	if (dst.y >= 800) return;
 	float humidity_pct = (humidity - 80) / 20.0f;
 	humidity_pct = std::clamp(humidity_pct, 0.0f, 1.0f);
 	Uint8 alpha = static_cast<Uint8>(humidity_pct * 200.0f);

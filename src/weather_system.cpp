@@ -100,7 +100,8 @@ Uint64 Weather_System::water_check() {
 void Weather_System::sun_temperature_update() {
 	float day_temp = get_day_temperature();
 	float night_temp = day_temp * 0.6f;
-	float temperature_scalar = std::cos(2 * M_PI * (time_system.get_day_pct() - time_system.get_midday_pct()));
+	float temperature_scalar = std::cos(2 * M_PI * time_system.get_day_pct());
+	temperature_scalar = 0.5f * (1.0f - temperature_scalar);
 	temperature_scalar = -0.5f * temperature_scalar + 0.5f;
 	float current_temperature = night_temp + (day_temp - night_temp) * temperature_scalar;
 	int sea_level = 125;
@@ -139,37 +140,32 @@ void Weather_System::evaporations(float delta) {
 	const float evaporation_rate = 0.02f;
 
 	int x = 0;
-	for (auto i : surface_tiles) {
-		Tile& tile = i.first.get();
-		int y = i.second;
+	for (auto& pair : surface_tiles) {
+		Tile& tile = pair.first.get();
+		int y = pair.second;
 		x++;
 
 		if (tile.temperature < evaporation_temperature || tile.saturation == 0)
 			continue;
 
-		// Scan upward to find the first pure air tile
-		for (int dy = 1; dy <= y; ++dy) {
-			Tile& above = world_reference.at(x - 1).at(y - dy);
-			if (above.permeability < 10000 || above.humidity >= 100)
-				continue;
+		if (y == 0) continue;
+		Tile& above = world_reference.at(x - 1).at(y - 1);
 
-			// Compute evaporation as before
-			float temp_factor = std::max(0.0f, (tile.temperature - evaporation_temperature) / 30.0f);
-			float evap_amount = tile.saturation * evaporation_rate * temp_factor * delta;
-			int evap_units = static_cast<int>(evap_amount);
-			if (evap_units <= 0) break;
+		if (above.permeability < 10000 && above.humidity >= 100) continue;
 
-			evap_units = std::min(evap_units, static_cast<int>(tile.saturation));
-			int humidity_space = 100 - above.humidity;
-			int humidity_added = std::min(evap_units, humidity_space);
+		float temp_factor = (tile.temperature - evaporation_temperature) / 30.0f;
+		//float permeability_penalty = 1.0f - (tile.permeability / 10000.0f);
+		float evap_amount = tile.saturation * evaporation_rate * temp_factor * delta;
 
-			if (humidity_added <= 0) break;
+		int evap_units = static_cast<int>(evap_amount);
+		if (evap_units <= 0) continue;
 
-			tile.saturation -= humidity_added;
-			above.humidity += humidity_added;
+		evap_units = std::min(evap_units, static_cast<int>(tile.saturation));
+		int humidity_space = above.max_saturation - above.saturation;
+		int humidity_added = std::min(evap_units, humidity_space);
 
-			break; // evaporate into only the first valid air tile above
-		}
+		tile.saturation -= humidity_added;
+		above.humidity += humidity_added;
 	}
 }
 
