@@ -159,7 +159,7 @@ void Garden::render(float delta) {
 	world_renderer->render_sun(time_system);
 	world_renderer->render_moon(time_system);
 	world_renderer->render_tiles(world);
-	wind_manager->render(renderer);
+	wind_manager->render(renderer, camera);
 	SDL_RenderPresent(renderer);
 }
 
@@ -192,6 +192,14 @@ void Garden::input(float delta) {
 				running = false;
 				break;
 			case SDLK_SPACE:
+				break;
+			case SDLK_END:
+				camera.x = Zen::TERRAIN_WIDTH - camera.w;
+				camera.y = Zen::TERRAIN_HEIGHT - camera.h;
+				break;
+			case SDLK_HOME:
+				camera.x = 0;
+				camera.y = Zen::TERRAIN_HEIGHT - camera.h;
 				break;
 			case SDLK_RIGHT:
 				right_key = true;

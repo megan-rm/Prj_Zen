@@ -47,10 +47,16 @@ public:
 			apply_gust(gust);
 		}
 	}
-	void render(SDL_Renderer* renderer) {
-		for (auto gust : gusts) {
-			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-			SDL_RenderDrawRect(renderer, &gust.area);
+	void render(SDL_Renderer* renderer, SDL_Rect& camera) {
+		for (auto& gust : gusts) {  // Use reference to avoid unnecessary copying
+			// Adjust gust's x and y by the camera's position
+			SDL_Rect adjusted_gust = gust.area;
+			adjusted_gust.x -= camera.x;
+			adjusted_gust.y -= camera.y;
+
+			// Set the color for rendering
+			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);  // Black color for gusts
+			SDL_RenderDrawRect(renderer, &adjusted_gust);  // Draw the gust with adjusted coordinates
 		}
 	}
 
