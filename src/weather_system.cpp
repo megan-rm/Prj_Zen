@@ -73,6 +73,13 @@ void Weather_System::update_temperatures(float delta) {
 				}
 			}
 			humidity_handling(x, y, delta);
+			//if (world_reference.at(x).at(y).humidity >= 80) {
+			//	float humidity_pct = std::clamp((world_reference.at(x).at(y).humidity - 80) / 20.0f, 0.0f, 1.0f);
+			//	float life_span = 0.5f + humidity_pct * 0.5f;
+			//	int alpha = static_cast<int>(225 * humidity_pct);
+			//	float current_time = SDL_GetTicks() / 1000.0f;
+			//	cloud_manager->add_cloud(x * Zen::TILE_SIZE, y * Zen::TILE_SIZE, current_time, life_span, alpha);
+			//}
 		}
 	}
 	evaporations(delta);
@@ -80,13 +87,23 @@ void Weather_System::update_temperatures(float delta) {
 	update_count = update_count % update_mod;
 }
 
+Uint64 Weather_System::water_check() {
+	Uint64 total_water = 0;
+	for (int x = 0; x < world_reference.size(); x++) {
+		for (int y = 0; y < world_reference.at(x).size(); y++) {
+			total_water += world_reference.at(x).at(y).humidity + world_reference.at(x).at(y).saturation;
+		}
+	}
+	return total_water;
+}
+
 void Weather_System::sun_temperature_update() {
 	float day_temp = get_day_temperature();
 	float night_temp = day_temp * 0.6f;
-	float temperature_scalar = std::cos(2 * M_PI * (time_system.get_day_pct() - 0.5f));
+	float temperature_scalar = std::cos(2 * M_PI * (time_system.get_day_pct() - time_system.get_midday_pct()));
 	temperature_scalar = -0.5f * temperature_scalar + 0.5f;
 	float current_temperature = night_temp + (day_temp - night_temp) * temperature_scalar;
-	int sea_level = 130;
+	int sea_level = 125;
 	for (auto i : surface_tiles) {
 		float altitude = sea_level - static_cast<float>(i.second);
 		float altitude_factor = std::clamp(1.0f - (altitude / 100.0f), 0.1f, 1.0f);
@@ -99,12 +116,12 @@ void Weather_System::sun_temperature_update() {
 float Weather_System::get_day_temperature() {
 	int day_of_year = time_system.get_month_days_now() + time_system.get_time().day;
 
-	float min_temp = -40.0f;
-	float max_temp = 40.0f;
+	float min_temp = -19.0f;
+	float max_temp = 30.0f;
 
 	float seasonal_variation = (std::sin(2 * M_PI * (day_of_year - 81) / 365) + 1.0) / 2.0;
 	float day_temp = min_temp + (max_temp - min_temp) * seasonal_variation;
-	day_temp = day_temp * (9 / 5) + 32;
+	day_temp = (day_temp * static_cast<float>(9.0f / 5.0f)) + 32;
 	return day_temp;
 }
 
@@ -130,24 +147,29 @@ void Weather_System::evaporations(float delta) {
 		if (tile.temperature < evaporation_temperature || tile.saturation == 0)
 			continue;
 
-		if (y == 0) continue;
-		Tile& above = world_reference.at(x-1).at(y - 1);
+		// Scan upward to find the first pure air tile
+		for (int dy = 1; dy <= y; ++dy) {
+			Tile& above = world_reference.at(x - 1).at(y - dy);
+			if (above.permeability < 10000 || above.humidity >= 100)
+				continue;
 
-		if (above.permeability < 10000 && above.humidity >= 100) continue;
+			// Compute evaporation as before
+			float temp_factor = std::max(0.0f, (tile.temperature - evaporation_temperature) / 30.0f);
+			float evap_amount = tile.saturation * evaporation_rate * temp_factor * delta;
+			int evap_units = static_cast<int>(evap_amount);
+			if (evap_units <= 0) break;
 
-		float temp_factor = std::max(0.0f, (tile.temperature - evaporation_temperature) / 30.0f);
-		//float permeability_penalty = 1.0f - (tile.permeability / 10000.0f);
-		float evap_amount = tile.saturation * evaporation_rate * temp_factor  * delta;
+			evap_units = std::min(evap_units, static_cast<int>(tile.saturation));
+			int humidity_space = 100 - above.humidity;
+			int humidity_added = std::min(evap_units, humidity_space);
 
-		int evap_units = static_cast<int>(evap_amount);
-		if (evap_units <= 0) continue;
+			if (humidity_added <= 0) break;
 
-		evap_units = std::min(evap_units, static_cast<int>(tile.saturation));
-		int humidity_space = above.max_saturation - above.saturation;
-		int humidity_added = std::min(evap_units, humidity_space);
+			tile.saturation -= humidity_added;
+			above.humidity += humidity_added;
 
-		tile.saturation -= humidity_added;
-		above.humidity += humidity_added;
+			break; // evaporate into only the first valid air tile above
+		}
 	}
 }
 
@@ -174,13 +196,16 @@ void Weather_System::humidity_handling(int x, int y, float delta) {
 }
 
 void Weather_System::humidity_share(Tile& self, Tile& neighbor, float weight) {
-	if (neighbor.max_saturation != 10000 || neighbor.saturation != 0) return;
+	if (neighbor.max_saturation != 10000 || neighbor.saturation != 0) {
+		return;
+	}
 
 	float self_humidity_pct = self.humidity / 100.0f;
 	float neighbor_humidity_pct = neighbor.humidity / 100.0f;
 	float delta_humidity = self_humidity_pct - neighbor_humidity_pct;
+	
 
-	if (std::abs(delta_humidity) > 0.01f) {
+	if (std::abs(delta_humidity) > 0.08f) {
 		int transfer = static_cast<int>(delta_humidity * 100.0f * weight);
 
 		if (transfer > 0) {

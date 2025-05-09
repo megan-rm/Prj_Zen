@@ -67,7 +67,7 @@ public:
 
 		sunrise_pct = sunrise_hour / 24.0f;
 		sunset_pct = sunset_hour / 24.0f;
-
+		midday_pct = (sunrise_pct + sunset_pct) / 2.0f;
 		float daylight_pct = (day_pct - sunrise_pct) / (sunset_pct - sunrise_pct);
 		float peak_y = camera.h * 0.8f;
 

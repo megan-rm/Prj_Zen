@@ -1,8 +1,5 @@
 #pragma once
-#ifdef _DEBUG_
-int drawn_tiles = 0;
-
-#endif
+#include "tile.hpp"
 
 namespace Zen {
 	constexpr int TERRAIN_WIDTH = 10000;

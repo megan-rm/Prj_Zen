@@ -161,8 +161,21 @@ void World_Renderer::render_stars(Time_System& time_system) {
 	auto now = time_system.get_time();
 }
 
-void World_Renderer::render_clouds() {
-
+void World_Renderer::render_clouds(int humidity, SDL_Rect dst) {
+	//float current_time = SDL_GetTicks() / 1000.0f;
+	//cloud_manager->update(current_time);
+	//cloud_manager->draw(current_time);
+	float humidity_pct = (humidity - 80) / 20.0f;
+	humidity_pct = std::clamp(humidity_pct, 0.0f, 1.0f);
+	Uint8 alpha = static_cast<Uint8>(humidity_pct * 200.0f);
+	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), alpha);
+	SDL_Rect src = { 0, 0, 16, 16 };
+	dst.x -= 2;
+	dst.y -= 2;
+	dst.w += 4;
+	dst.h += 4;
+	SDL_RenderCopy(renderer, texture_manager.get_texture("celestial_bodies"), &src, &dst);
+	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), 255);
 }
 
 void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
@@ -207,8 +220,11 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 					SDL_RenderFillRect(renderer, &humidity_mask);
 				}
 			}
-			//normal view
+			//normal view to see water
 			else if (*garden_debug_mode == Zen::DEBUG_MODE::NONE) {
+				if (tile.humidity >= 80) {
+					render_clouds(tile.humidity, dst);
+				}
 				if (tile.max_saturation > 0 && tile.saturation > 10) {
 					float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
 					if (ratio < 0.09f) continue;
@@ -224,26 +240,28 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 
 SDL_Color World_Renderer::get_humidity_color(int humidity) {
 	float humidity_pct = std::clamp(static_cast<float>(humidity) / 100.0f, 0.0f, 1.0f);
-	SDL_Color color;
 
 	SDL_Color dry_color = { 255, 150, 0, 127 };
 	SDL_Color mid_color = { 255, 255, 0, 127 };
-	SDL_Color wet_color = { 0, 150, 255, 127 };
+	SDL_Color green_color = { 0, 255, 100, 127 };
+	SDL_Color wet_color = { 0, 100, 255, 127 };
 
-	if (humidity_pct < 0.5f) {
-		float lower_half = humidity_pct / 0.5f;
-		return Zen::lerp_color(dry_color, mid_color, lower_half * 2.0f);
+	if (humidity_pct <= 0.25f) {
+		return Zen::lerp_color(dry_color, mid_color, humidity_pct * 4.0f);
+	}
+	else if (humidity_pct <= 0.5f) {
+		return Zen::lerp_color(mid_color, green_color, (humidity_pct - 0.25f) * 2.0f);
 	}
 	else {
-		float upper_half = (humidity_pct - 0.5f);
-		return Zen::lerp_color(mid_color, wet_color, upper_half * 2.0f);
+		return Zen::lerp_color(green_color, wet_color, (humidity_pct - 0.5f) * 2.0f);
 	}
 }
 
 SDL_Color World_Renderer::get_heatmap_color(int temperature) {
-	const int min_temp = -50;
-	const int max_temp = 115;
-	float t = std::clamp((temperature - min_temp) / float(max_temp - min_temp), 0.0f, 1.0f);
+	const int min_temp = -19;
+	const int max_temp = 30;
+	const int celsius = static_cast<int>((temperature - 32) * 5.0 / 9.0);
+	float heat_pct = std::clamp((celsius - min_temp) / float(max_temp - min_temp), 0.0f, 1.0f);
 
 	SDL_Color blue = { 0, 255, 255, 128 };
 	SDL_Color green = { 0, 255, 0, 128 };
@@ -252,19 +270,19 @@ SDL_Color World_Renderer::get_heatmap_color(int temperature) {
 	SDL_Color red = { 255, 0, 0, 128 };
 	SDL_Color purple = { 255, 0, 255, 128 };
 
-	if (t < 0.2f) {
-		return Zen::lerp_color(blue, green, t / 0.2f);
+	if (heat_pct < 0.2f) {
+		return Zen::lerp_color(blue, green, heat_pct / 0.2f);
 	}
-	else if (t < 0.4f) {
-		return Zen::lerp_color(green, yellow, (t - 0.2f) / 0.2f);
+	else if (heat_pct < 0.4f) {
+		return Zen::lerp_color(green, yellow, (heat_pct - 0.2f) / 0.2f);
 	}
-	else if (t < 0.6f) {
-		return Zen::lerp_color(yellow, orange, (t - 0.4f) / 0.2f);
+	else if (heat_pct < 0.6f) {
+		return Zen::lerp_color(yellow, orange, (heat_pct - 0.4f) / 0.2f);
 	}
-	else if (t < 0.8f) {
-		return Zen::lerp_color(orange, red, (t - 0.6f) / 0.2f);
+	else if (heat_pct < 0.8f) {
+		return Zen::lerp_color(orange, red, (heat_pct - 0.6f) / 0.2f);
 	}
 	else {
-		return Zen::lerp_color(red, purple, (t - 0.8f) / 0.2f);
+		return Zen::lerp_color(red, purple, (heat_pct - 0.8f) / 0.2f);
 	}
 }

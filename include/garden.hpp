@@ -13,6 +13,7 @@
 #include <SDL.h>
 #include <SDL_image.H>
 
+#include "cloud_manager.hpp"
 #include "garden_generator.hpp"
 #include "texture_manager.hpp"
 #include "tile.hpp"
@@ -20,6 +21,7 @@
 #include "utils.hpp"
 #include "water_system.hpp"
 #include "weather_system.hpp"
+#include "wind_manager.hpp"
 #include "world_renderer.hpp"
 
 
@@ -30,6 +32,7 @@ public:
 	~Garden();
 	void run();
 	void input(float delta);
+	void init();
 	void render(float delta);
 	void update(float delta	);
 	bool load_world();
@@ -49,12 +52,13 @@ private:
 	int screen_width;
 	int screen_height;
 	std::string window_title;
-
-	World_Renderer* world_renderer;
-	Water_System* water_system;
-	Weather_System* weather_system;
-	Time_System time_system;
+	Cloud_Manager* cloud_manager;
 	Texture_Manager* texture_manager;
+	Time_System time_system;
+	Water_System* water_system;
+	Wind_Manager* wind_manager;
+	Weather_System* weather_system;
+	World_Renderer* world_renderer;
 
 	static constexpr float camera_speed = Zen::TERRAIN_WIDTH / 60.0f;
 	Uint64 tick_count;

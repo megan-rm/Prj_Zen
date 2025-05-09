@@ -146,6 +146,7 @@ void Garden::update(float delta) {
 	int tick_val = tick_count % 2; // maybe used to stagger updates between systems
 	water_system->update_saturation(delta);
 	weather_system->update_temperatures(delta);
+	wind_manager->update(delta);
 	if (tick_count % 10 == 0) weather_system->sun_temperature_update();
 	tick_count++; // maybe to stagger updates between systems?
 }
@@ -158,6 +159,7 @@ void Garden::render(float delta) {
 	world_renderer->render_sun(time_system);
 	world_renderer->render_moon(time_system);
 	world_renderer->render_tiles(world);
+	wind_manager->render(renderer);
 	SDL_RenderPresent(renderer);
 }
 
@@ -283,12 +285,11 @@ void Garden::input(float delta) {
 	//world_renderer->register_debug_mode(debug_mode);
 }
 
-void Garden::run()
-{
+void Garden::init() {
 	texture_manager = new Texture_Manager(renderer);
 	texture_manager->load_texture("celestial_bodies");
 	texture_manager->load_texture("sky_gradient");
-	auto last_time = SDL_GetTicks();
+
 	std::ifstream file("world_info/world.zen");
 	if (!file.good()) {
 		Garden_Generator* garden_generator = new Garden_Generator();
@@ -302,17 +303,30 @@ void Garden::run()
 		texture_manager->load_texture("tilemap");
 	}
 	file.close();
+
+
 	world_renderer = new World_Renderer(renderer, *texture_manager, camera);
-	world_renderer->register_debug_mode(debug_mode);
-	//FOR DEBUG PURPOSES:
 	world_renderer->register_debug_mode(debug_mode);
 
 	water_system = new Water_System(world, 80);
-	weather_system = new Weather_System(world, time_system, 80);
 	if (!existing_world) {
 		Uint64 water = water_system->place_water(0.60f);
 	}
+	weather_system = new Weather_System(world, time_system, 80);
+	wind_manager = new Wind_Manager(world);
+	//cloud_manager = new Cloud_Manager(renderer, texture_manager->get_texture("celestial_bodies"));
 
+	//
+	// this is ugly. Garden owns cloud manager, but is binding the two back to itself through this instance.
+	// yuck...
+	//weather_system->register_cloud_manager(cloud_manager);
+	//world_renderer->register_cloud_manager(cloud_manager);
+}
+
+void Garden::run()
+{
+	init();
+	auto last_time = SDL_GetTicks();
 	const int fps = 60;
 	const int frame_delay = 1000 / fps;
 	std::string window_title;
