@@ -22,10 +22,10 @@
 ---
 
 ## Screenshot
-![Alt text](/screenshots/screenshot1.png.jpg?raw=true "Night Time")
-![Alt text](/screenshots/screenshot2.png.jpg?raw=true "Dynamic Humidity Map")
-![Alt text](/screenshots/screenshot3.png.jpg?raw=true "dynamic heat system and heat map")
-![Alt text](/screenshots/screenshot4.png.jpg?raw=true "Evening clouds, pushed by the wind")
+![Alt text](/screenshots/screenshot1.png?raw=true "Night Time")
+![Alt text](/screenshots/screenshot2.png?raw=true "Dynamic Humidity Map")
+![Alt text](/screenshots/screenshot3.png?raw=true "dynamic heat system and heat map")
+![Alt text](/screenshots/screenshot4.png?raw=true "Evening clouds, pushed by the wind")
 
 ---
 
