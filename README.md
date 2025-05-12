@@ -22,8 +22,10 @@
 ---
 
 ## Screenshot
- TBA
-
+![Alt text](/screenshots/screenshot1.png.jpg?raw=true "Night Time")
+![Alt text](/screenshots/screenshot2.png.jpg?raw=true "Dynamic Humidity Map")
+![Alt text](/screenshots/screenshot3.png.jpg?raw=true "dynamic heat system and heat map")
+![Alt text](/screenshots/screenshot4.png.jpg?raw=true "Evening clouds, pushed by the wind")
 
 ---
 
