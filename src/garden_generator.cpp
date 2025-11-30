@@ -417,7 +417,7 @@ bool Garden_Generator::place_mountain(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEIGH
 		}
 	}
 	return place_river(cells, false);
-
+	
 }
 
 bool Garden_Generator::generate_world(SDL_Renderer* renderer) {
@@ -458,4 +458,5 @@ bool Garden_Generator::generate_world(SDL_Renderer* renderer) {
 	}
 	
 	delete[] cells;
+	return true;
 }

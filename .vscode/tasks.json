@@ -1,0 +1,31 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "shell",
+      "label": "build Zen",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-std=c++17",
+        "-Wall",
+        "-g",
+        "-Iinclude",
+        "-I/usr/include/SDL2",
+        "main.cpp",
+        "src/*.cpp",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}",
+        "-lSDL2",
+        "-lSDL2_image"
+      ],
+      "options": {
+        "cwd": "${fileDirname}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}

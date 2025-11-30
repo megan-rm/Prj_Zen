@@ -1,6 +1,6 @@
 #include <iostream>
 #include <SDL.h>
-#include "Garden.hpp"
+#include "include/garden.hpp"
 
 int main(int argc, char* args[])
 {

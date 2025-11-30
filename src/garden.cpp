@@ -18,7 +18,10 @@ Garden::Garden(std::string st, int sw, int sh) {
 	tick_count = 0;
 
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);	
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	SDL_RendererInfo info;
+	SDL_GetRendererInfo(renderer, &info);
+	printf("Renderer Name: %s\n", info.name);
 
 	debug_mode = Zen::DEBUG_MODE::NONE;
 

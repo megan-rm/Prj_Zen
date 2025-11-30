@@ -11,7 +11,7 @@
 #include <sstream>
 
 #include <SDL.h>
-#include <SDL_image.H>
+#include <SDL_image.h>
 
 #include "cloud_manager.hpp"
 #include "garden_generator.hpp"

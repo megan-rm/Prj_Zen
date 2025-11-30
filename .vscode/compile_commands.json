@@ -1,0 +1,104 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++17",
+      "-Wall",
+      "-g",
+      "-Iinclude",
+      "-I/usr/include/SDL2",
+      "-o",
+      "bin/zen",
+      "src/garden.cpp"
+    ],
+    "directory": "/home/megan/dev/Prj_Zen",
+    "file": "/home/megan/dev/Prj_Zen/src/garden.cpp",
+    "output": "/home/megan/dev/Prj_Zen/bin/zen"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++17",
+      "-Wall",
+      "-g",
+      "-Iinclude",
+      "-I/usr/include/SDL2",
+      "-o",
+      "bin/zen",
+      "src/garden_generator.cpp"
+    ],
+    "directory": "/home/megan/dev/Prj_Zen",
+    "file": "/home/megan/dev/Prj_Zen/src/garden_generator.cpp",
+    "output": "/home/megan/dev/Prj_Zen/bin/zen"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++17",
+      "-Wall",
+      "-g",
+      "-Iinclude",
+      "-I/usr/include/SDL2",
+      "-o",
+      "bin/zen",
+      "src/texture_manager.cpp"
+    ],
+    "directory": "/home/megan/dev/Prj_Zen",
+    "file": "/home/megan/dev/Prj_Zen/src/texture_manager.cpp",
+    "output": "/home/megan/dev/Prj_Zen/bin/zen"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++17",
+      "-Wall",
+      "-g",
+      "-Iinclude",
+      "-I/usr/include/SDL2",
+      "-o",
+      "bin/zen",
+      "src/water_system.cpp"
+    ],
+    "directory": "/home/megan/dev/Prj_Zen",
+    "file": "/home/megan/dev/Prj_Zen/src/water_system.cpp",
+    "output": "/home/megan/dev/Prj_Zen/bin/zen"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++17",
+      "-Wall",
+      "-g",
+      "-Iinclude",
+      "-I/usr/include/SDL2",
+      "-o",
+      "bin/zen",
+      "src/weather_system.cpp"
+    ],
+    "directory": "/home/megan/dev/Prj_Zen",
+    "file": "/home/megan/dev/Prj_Zen/src/weather_system.cpp",
+    "output": "/home/megan/dev/Prj_Zen/bin/zen"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-c",
+      "-std=c++17",
+      "-Wall",
+      "-g",
+      "-Iinclude",
+      "-I/usr/include/SDL2",
+      "-o",
+      "bin/zen",
+      "src/world_renderer.cpp"
+    ],
+    "directory": "/home/megan/dev/Prj_Zen",
+    "file": "/home/megan/dev/Prj_Zen/src/world_renderer.cpp",
+    "output": "/home/megan/dev/Prj_Zen/bin/zen"
+  }
+]

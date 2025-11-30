@@ -4,7 +4,7 @@
 #include <iostream>
 #include <random>
 #include <vector>
-
+#include <algorithm>
 class Water_System {
 public:
 	Water_System() = default;

@@ -3,6 +3,8 @@
 
 #include <chrono>
 #include <ctime>
+#include <cmath>
+
 
 enum class Moon_Phase { NEW_MOON, WAXING_CRESCENT, FIRST_QUARTER, WAXING_GIBBOUS, FULL_MOON, WANING_GIBBOUS, LAST_QUARTER, WANING_CRESCENT };
 
@@ -29,7 +31,7 @@ public:
 #ifdef _WIN32
 		localtime_s(&local_tm, &time_now); // damn thread safe bullspit
 #else
-		local_time_r(&time_now, &local_tm);// but i get it, though.
+		localtime_r(&time_now, &local_tm);// but i get it, though.
 #endif
 		current_time.year = local_tm.tm_year + 1900;
 		current_time.month = local_tm.tm_mon + 1;
@@ -46,11 +48,11 @@ public:
 	}
 
 	float get_day_length(float latitude_deg, int day_of_year) {
-		float decline = -23.44f * std::cosf((2.0f * M_PI / 365.0f) * (day_of_year + 10));
+		float decline = -23.44f * cosf((2.0f * M_PI / 365.0f) * (day_of_year + 10));
 		float lat_rad = latitude_deg * M_PI / 180.0f;
 		float decline_radians = decline * M_PI / 180.0f;
 
-		float hour_angle = std::acosf(-std::tan(lat_rad) * std::tan(decline_radians));
+		float hour_angle = acosf(-std::tan(lat_rad) * std::tan(decline_radians));
 		float daylight_hours = (2.0f * hour_angle * 24.0f) / (2.0f * M_PI);
 		return daylight_hours;
 	}
@@ -72,8 +74,8 @@ public:
 		float peak_y = camera.h * 0.8f;
 
 		sun_position.x = daylight_pct * (0.9f * camera.w);
-		sun_position.y = peak_y - std::sinf(daylight_pct * M_PI) * peak_y;
-		sunlight_intensity = std::max(0.0f, std::sinf(daylight_pct * M_PI));
+		sun_position.y = peak_y - sinf(daylight_pct * M_PI) * peak_y;
+		sunlight_intensity = std::max(0.0f, sinf(daylight_pct * M_PI));
 		return sun_position;
 	}
 
@@ -87,7 +89,7 @@ public:
 		float orbit_radius = 0.4f * camera.w;
 
 		moon_position.x = (lunar_pct * orbit_radius) + (camera.w * 0.5f);
-		moon_position.y = (0.5f * camera.h) - std::sinf(lunar_pct * M_PI) * peak_y;
+		moon_position.y = (0.5f * camera.h) - sinf(lunar_pct * M_PI) * peak_y;
 		return moon_position;
 	}
 
