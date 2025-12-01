@@ -27,3 +27,5 @@ test.png
 *.xml
 Project Zen/x64/Debug/CodeAnalysisResultManifest.txt
 zen
+*.data
+*.old
