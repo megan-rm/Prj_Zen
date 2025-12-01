@@ -26,3 +26,4 @@ test.png
 *.sarif
 *.xml
 Project Zen/x64/Debug/CodeAnalysisResultManifest.txt
+zen

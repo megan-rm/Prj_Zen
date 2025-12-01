@@ -21,7 +21,8 @@ Garden::Garden(std::string st, int sw, int sh) {
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	SDL_RendererInfo info;
 	SDL_GetRendererInfo(renderer, &info);
-	printf("Renderer Name: %s\n", info.name);
+	printf("Renderer: %s\n", info.name);
+	SDL_GL_SetSwapInterval(0); // 0 = no vsync
 
 	debug_mode = Zen::DEBUG_MODE::NONE;
 

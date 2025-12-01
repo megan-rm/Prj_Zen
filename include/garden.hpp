@@ -10,8 +10,8 @@
 #include <unordered_map>
 #include <sstream>
 
-#include <SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #include "cloud_manager.hpp"
 #include "garden_generator.hpp"

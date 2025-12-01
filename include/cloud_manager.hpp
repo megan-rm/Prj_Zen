@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 struct Cloud {
 	SDL_Rect dst = { 0,0,0,0 };
