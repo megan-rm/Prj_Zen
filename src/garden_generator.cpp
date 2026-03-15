@@ -128,7 +128,10 @@ bool Garden_Generator::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEI
 		SDL_BlitSurface(i.second->tile, NULL, tilemap, &dst);
 	}
 	//SDL_RenderPresent(renderer);
-	IMG_SavePNG(tilemap, "assets/images/tilemap.png");
+	if (IMG_SavePNG(tilemap, "assets/images/tilemap.png") != 0) {
+    	std::cerr << "Failed to save tilemap.png: " << IMG_GetError() << std::endl;
+	}
+	SDL_SaveBMP(tilemap, "assets/images/tilemap.bmp")
 	file.close();
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);

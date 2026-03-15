@@ -1,6 +1,15 @@
 #include <iostream>
-#include <SDL2/SDL.h>
-#include "garden.hpp"
+#include <SDL.h>
+#include "Garden.hpp"
+#include <unistd.h>
+#include <limits.h>
+
+char cwd[PATH_MAX];
+if (getcwd(cwd, sizeof(cwd)) != nullptr) {
+    std::cout << "Current working directory: " << cwd << std::endl;
+} else {
+    perror("getcwd() error");
+}
 
 int main(int argc, char* args[])
 {

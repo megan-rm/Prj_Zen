@@ -226,7 +226,7 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 				if (tile.max_saturation > 0 && tile.saturation > 10) {
 					float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
 					if (ratio < 0.09f) continue;
-					SDL_Rect water_level{ dst.x, dst.y + tile_size, tile_size, -tile_size * ratio };
+					SDL_Rect water_level{ dst.x, dst.y + tile_size, tile_size, static_cast<int>(-tile_size * ratio) };
 					SDL_RenderFillRect(renderer, &water_level);
 				}
 			}
