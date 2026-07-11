@@ -1,15 +1,18 @@
+#include <SDL.h>
 #include <iostream>
-#include <SDL2/SDL.h>
+
 #include "garden.hpp"
 
-int main(int argc, char* args[])
+int main(int argc, char* argv[])
 {
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-		std::cout << "Danger, will robinson.";
+		std::cout << "Danger, will robinson: " << SDL_GetError() << std::endl;
 		return 1;
 	}
-	Garden* zen;
-	zen = new Garden("Project Zen", 1280, 960);
-	zen->run();
+	{
+		Garden zen("Project Zen", 1280, 960);
+		zen.run();
+	}
+	SDL_Quit();
 	return 0;
 }

@@ -1,63 +1,72 @@
 #pragma once
+#include <SDL.h>
+
+#include <random>
 #include <vector>
 
-#include <SDL2/SDL.h>
+#include "tile.hpp"
+#include "utils.hpp"
 
-struct Cloud {
-	SDL_Rect dst = { 0,0,0,0 };
-	float spawn_time = 0.0f;
-	float life_span = 1.0f;
-	int max_alpha = 220;
+/****************************************************************
+*	Clouds are emergent: any air tile at/above
+*	Zen::CLOUD_TILE_MIN_HUMIDITY is a "cloud tile", and touching
+*	cloud tiles (4-connected) form a cluster. Clusters know their
+*	size and centroid, so:
+*	  - a cluster only rains once it has Zen::RAIN_CLUSTER_TILES
+*	    (~200) connected members
+*	  - each tick a little humidity is pulled toward the cluster's
+*	    core, so clouds are denser in the middle and billow
+*	  - one raindrop = exactly 1 humidity, deposited back into
+*	    tile saturation on impact. Water is conserved.
+****************************************************************/
 
-	float get_alpha(float current_time) {
-		float age = current_time - spawn_time;
-		if (age >= life_span) {
-			return 0.0f;
-		}
-		float pct = 1.0f - (age / life_span);
-		return max_alpha * pct;
-	}
+class Wind_Manager;
+
+struct Raindrop {
+	float x = 0.0f;  // pixel coords
+	float y = 0.0f;
+	float vy = 0.0f;
+};
+
+struct Cloud_Cluster {
+	int size = 0;             // connected cloud tiles
+	long total_humidity = 0;
+	float cx = 0.0f;          // centroid, tile coords
+	float cy = 0.0f;
+	float radius = 1.0f;      // approximate blob radius, tile units
+	bool raining = false;
 };
 
 class Cloud_Manager {
 public:
-	Cloud_Manager(SDL_Renderer* ren, SDL_Texture* texture) : renderer(ren), cloud_texture(texture) {// we're using celestial bodies for now... this probably should change, and the name from celestial bodies to ambient or some such
-		src = { 0, 0, 16, 16 };
-
-	}
+	Cloud_Manager(std::vector<std::vector<Tile>>& world);
 	~Cloud_Manager() = default;
 
-	void add_cloud(int x, int y, float current_time, float life_span, int max_alpha) {
-		Cloud cloud;
-		cloud.dst = { x, y, 12, 12 };
-		cloud.spawn_time = current_time;
-		cloud.life_span = life_span;
-		cloud.max_alpha = max_alpha;
-		clouds.push_back(cloud);
-	}
-	
-	void update(float current_time) {
-		for (int i = 0; i < clouds.size(); i++) {
-			if (current_time - clouds[i].spawn_time >= clouds[i].life_span) {
-				std::swap(clouds[i], clouds.back());
-				clouds.pop_back();
-				i--;
-			}
-		}
-	}
+	void sim_update();              // run once per sim tick: label clusters, condense cores, spawn rain
+	void update_rain(float delta);  // run every frame: advance + deposit raindrops
+	void render(SDL_Renderer* renderer, SDL_Texture* puff_texture, const SDL_Rect& camera,
+	            const std::vector<std::vector<Tile>>& snapshot);
 
-	void draw(float current_time) {
-		for (auto i : clouds) {
-			Uint8 alpha = static_cast<Uint8>(i.get_alpha(current_time));
-			SDL_SetTextureAlphaMod(cloud_texture, alpha);
-			SDL_RenderCopy(renderer, cloud_texture, &src, &i.dst);
-		}
-		SDL_SetTextureAlphaMod(cloud_texture, 255);
-	}
+	int cluster_id_at(int tile_x, int tile_y) const;
+	const std::vector<Cloud_Cluster>& get_clusters() const { return clusters; }
+	Uint64 water_in_flight() const { return static_cast<Uint64>(drops.size()); } // 1 humidity per drop
+	void register_wind(Wind_Manager* wind_mgr) { wind = wind_mgr; } // raindrops slant with the wind
 
 private:
-	std::vector<Cloud> clouds;
-	SDL_Renderer* renderer;
-	SDL_Texture* cloud_texture;
-	SDL_Rect src;
+	std::vector<std::vector<Tile>>& world;
+	int grid_w;
+	int grid_h;
+	std::vector<int> labels;                     // grid_w * grid_h, -1 = not a cloud tile
+	std::vector<Uint8> prev_raining;             // per-tile memory for rain hysteresis across relabeling
+	std::vector<std::vector<int>> cluster_tiles; // flat tile indices per cluster
+	std::vector<Cloud_Cluster> clusters;
+	std::vector<Raindrop> drops;
+	std::mt19937 rng;
+	Wind_Manager* wind = nullptr;
+
+	bool is_cloud_tile(int x, int y) const;
+	void label_clusters();
+	void condense();
+	void spawn_rain();
+	bool deposit(int tile_x, int tile_y); // returns the drop's 1 humidity to the world
 };
