@@ -1,6 +1,5 @@
 #pragma once
-#include <SDL2/SDL.h>
-#include "utils.hpp"
+#include <SDL.h>
 
 struct Tile {
 	Uint16 saturation;

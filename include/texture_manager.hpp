@@ -1,9 +1,11 @@
 #pragma once
 #include <iostream>
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 #include <string>
 #include <unordered_map>
+
+#include "utils.hpp"
 class Texture_Manager {
 public:
 	Texture_Manager(SDL_Renderer* ren) : renderer(ren) {

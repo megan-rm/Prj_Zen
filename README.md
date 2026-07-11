@@ -49,6 +49,31 @@ Zen is currently in **active development**. The simulation engine is functional,
 
 ---
 
+## Building
+
+Zen builds with CMake on macOS, Linux, and Windows.
+
+Install dependencies first:
+macOS `brew install cmake sdl2 sdl2_image`, Linux `sudo apt install cmake build-essential libsdl2-dev libsdl2-image-dev`, Windows `vcpkg install sdl2 sdl2-image` (or use MSYS2's mingw-w64 SDL2 packages).
+
+Then, from the repo root:
+
+```
+cmake -B build
+cmake --build build
+./build/zen
+```
+
+On Windows with vcpkg, add `-DCMAKE_TOOLCHAIN_FILE=<vcpkg>/scripts/buildsystems/vcpkg.cmake` to the first command.
+
+There is also a headless test that verifies the water budget (humidity + saturation + raindrops in flight) is conserved by the simulation:
+
+```
+./build/conservation_test
+```
+
+---
+
 ## Goals
 
 - Emphasize **emergent behavior** from simple rules

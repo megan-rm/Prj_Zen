@@ -1,10 +1,12 @@
 #pragma once
 #include "tile.hpp"
+#include "utils.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <random>
 #include <vector>
-#include <algorithm>
 class Water_System {
 public:
 	Water_System() = default;

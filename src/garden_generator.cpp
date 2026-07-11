@@ -52,7 +52,7 @@ bool Garden_Generator::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEI
 	std::vector<char> buffer;
 	buffer.resize(buffer_size);
 	file.rdbuf()->pubsetbuf(&buffer[0], buffer_size);
-	file.open("world_info/world.zen");
+	file.open(Zen::data_path("world_info/world.zen"));
 	file << "[WORLD_PROPERTIES]" << std::endl;
 	file << Zen::mountain_end_x << "," << Zen::mountain_end_y << std::endl;
 	file << Zen::river_start_x << "," << Zen::river_end_x << std::endl;
@@ -111,7 +111,7 @@ bool Garden_Generator::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEI
 			if (permeability > 0) {
 				permeability += 16;
 			}
-			file << id << "," << permeability << "," << max_saturation << "," << "0" << "|";
+			file << id << "," << permeability << "," << max_saturation << ",0,0" << "|"; // saturation, humidity
 		}
 		file << std::endl;
 	}
@@ -128,10 +128,9 @@ bool Garden_Generator::generate_tilemap(Zen::PIXEL_TYPE cells[][Zen::TERRAIN_HEI
 		SDL_BlitSurface(i.second->tile, NULL, tilemap, &dst);
 	}
 	//SDL_RenderPresent(renderer);
-	if (IMG_SavePNG(tilemap, "assets/images/tilemap.png") != 0) {
-    	std::cerr << "Failed to save tilemap.png: " << IMG_GetError() << std::endl;
+	if (IMG_SavePNG(tilemap, Zen::data_path("assets/images/tilemap.png").c_str()) != 0) {
+		std::cerr << "Failed to save tilemap.png: " << IMG_GetError() << std::endl;
 	}
-	SDL_SaveBMP(tilemap, "assets/images/tilemap.bmp")
 	file.close();
 	SDL_FreeSurface(surface);
 	SDL_DestroyTexture(texture);

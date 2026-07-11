@@ -29,3 +29,4 @@ Project Zen/x64/Debug/CodeAnalysisResultManifest.txt
 zen
 *.data
 *.old
+.DS_Store

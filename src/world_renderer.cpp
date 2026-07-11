@@ -1,9 +1,5 @@
 #include "world_renderer.hpp"
 
-World_Renderer::~World_Renderer() {
-	SDL_DestroyTexture(tile_atlas);
-}
-
 SDL_Rect World_Renderer::tile_src_rect(int tile_id) {
 	int tiles_per_row = tile_atlas_width / tile_size;
 	int x = (tile_id % tiles_per_row) * tile_size;
@@ -158,24 +154,6 @@ void World_Renderer::render_stars(Time_System& time_system) {
 	auto now = time_system.get_time();
 }
 
-void World_Renderer::render_clouds(int humidity, SDL_Rect dst) {
-	//float current_time = SDL_GetTicks() / 1000.0f;
-	//cloud_manager->update(current_time);
-	//cloud_manager->draw(current_time);
-	if (dst.y >= 800) return;
-	float humidity_pct = (humidity - 80) / 20.0f;
-	humidity_pct = std::clamp(humidity_pct, 0.0f, 1.0f);
-	Uint8 alpha = static_cast<Uint8>(humidity_pct * 200.0f);
-	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), alpha);
-	SDL_Rect src = { 0, 0, 16, 16 };
-	dst.x -= 2;
-	dst.y -= 2;
-	dst.w += 4;
-	dst.h += 4;
-	SDL_RenderCopy(renderer, texture_manager.get_texture("celestial_bodies"), &src, &dst);
-	SDL_SetTextureAlphaMod(texture_manager.get_texture("celestial_bodies"), 255);
-}
-
 void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 	SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
 	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
@@ -218,11 +196,8 @@ void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
 					SDL_RenderFillRect(renderer, &humidity_mask);
 				}
 			}
-			//normal view to see water
+			//normal view to see water (clouds are drawn by Cloud_Manager after this pass)
 			else if (*garden_debug_mode == Zen::DEBUG_MODE::NONE) {
-				if (tile.humidity >= 80) {
-					render_clouds(tile.humidity, dst);
-				}
 				if (tile.max_saturation > 0 && tile.saturation > 10) {
 					float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
 					if (ratio < 0.09f) continue;

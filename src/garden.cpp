@@ -16,6 +16,13 @@ Garden::Garden(std::string st, int sw, int sh) {
 	running = true;
 	existing_world = false;
 	tick_count = 0;
+	sim_accumulator = 0.0f;
+	cloud_manager = nullptr;
+	texture_manager = nullptr;
+	water_system = nullptr;
+	wind_manager = nullptr;
+	weather_system = nullptr;
+	world_renderer = nullptr;
 
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);	
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -33,9 +40,12 @@ Garden::Garden(std::string st, int sw, int sh) {
 }
 
 Garden::~Garden() {
-	delete texture_manager;
+	delete cloud_manager;
+	delete weather_system;
+	delete wind_manager;
 	delete water_system;
 	delete world_renderer;
+	delete texture_manager;
 	world.clear();
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
@@ -44,7 +54,7 @@ Garden::~Garden() {
 bool Garden::save_world() {
 	std::cout << "Saving world..." << std::endl;
 	std::ofstream file;
-	file.open("world_info/world.zen");
+	file.open(Zen::data_path("world_info/world.zen"));
 	if (file.is_open()) {
 		file << "[WORLD_PROPERTIES]" << std::endl;
 		file << Zen::mountain_end_x << "," << Zen::mountain_end_y << std::endl;
@@ -74,7 +84,7 @@ bool Garden::load_world() {
 	int x = 0;
 	int y = 0;
 	std::ifstream file;
-	file.open("world_info/world.zen");
+	file.open(Zen::data_path("world_info/world.zen"));
 	if (!file.is_open()) {
 		return false;
 	}
@@ -146,13 +156,32 @@ bool Garden::load_world() {
 	return false;
 }
 
+/****************************************************************
+*	Fixed-timestep sim: each tick is a COMPLETE pass over the
+*	whole world (no more column staggering), and only after the
+*	pass finishes do we copy into the render snapshot. The
+*	renderer never sees a half-updated world.
+****************************************************************/
 void Garden::update(float delta) {
-	int tick_val = tick_count % 2; // maybe used to stagger updates between systems
-	water_system->update_saturation(delta);
-	weather_system->update_temperatures(delta);
-	wind_manager->update(delta);
-	if (tick_count % 10 == 0) weather_system->sun_temperature_update();
-	tick_count++; // maybe to stagger updates between systems?
+	sim_accumulator += delta;
+	if (sim_accumulator > 4.0f * Zen::SIM_DT) sim_accumulator = 4.0f * Zen::SIM_DT; // don't spiral after a hitch
+
+	while (sim_accumulator >= Zen::SIM_DT) {
+		water_system->update_saturation(Zen::SIM_DT);
+		weather_system->update_temperatures(Zen::SIM_DT);
+		wind_manager->update(Zen::SIM_DT);
+		cloud_manager->sim_update();
+		// raining storms splash cold outflow gusts across the surface wind
+		for (const auto& cluster : cloud_manager->get_clusters()) {
+			if (cluster.raining) wind_manager->add_outflow(cluster.cx, cluster.radius, Zen::SIM_DT);
+		}
+		if (tick_count % 10 == 0) weather_system->sun_temperature_update();
+		tick_count++;
+		sim_accumulator -= Zen::SIM_DT;
+	}
+	cloud_manager->update_rain(delta); // raindrops animate every frame for smooth falling
+
+	snapshot = world; // flip: publish the completed state for rendering
 }
 
 void Garden::render(float delta) {
@@ -162,7 +191,8 @@ void Garden::render(float delta) {
 	world_renderer->render_sky(time_system);
 	world_renderer->render_sun(time_system);
 	world_renderer->render_moon(time_system);
-	world_renderer->render_tiles(world);
+	world_renderer->render_tiles(snapshot);
+	cloud_manager->render(renderer, texture_manager->get_texture("celestial_bodies"), camera, snapshot);
 	wind_manager->render(renderer, camera);
 	SDL_RenderPresent(renderer);
 }
@@ -298,11 +328,13 @@ void Garden::input(float delta) {
 }
 
 void Garden::init() {
+	std::filesystem::create_directories(Zen::data_path("world_info"));
+
 	texture_manager = new Texture_Manager(renderer);
 	texture_manager->load_texture("celestial_bodies");
 	texture_manager->load_texture("sky_gradient");
 
-	std::ifstream file("world_info/world.zen");
+	std::ifstream file(Zen::data_path("world_info/world.zen"));
 	if (!file.good()) {
 		Garden_Generator* garden_generator = new Garden_Generator();
 		garden_generator->generate_world(renderer);
@@ -320,19 +352,16 @@ void Garden::init() {
 	world_renderer = new World_Renderer(renderer, *texture_manager, camera);
 	world_renderer->register_debug_mode(debug_mode);
 
-	water_system = new Water_System(world, 80);
+	water_system = new Water_System(world, 1); // mod 1: full pass every sim tick
 	if (!existing_world) {
 		Uint64 water = water_system->place_water(0.60f);
 	}
-	weather_system = new Weather_System(world, time_system, 80);
+	weather_system = new Weather_System(world, time_system);
 	wind_manager = new Wind_Manager(world);
-	//cloud_manager = new Cloud_Manager(renderer, texture_manager->get_texture("celestial_bodies"));
+	cloud_manager = new Cloud_Manager(world);
+	cloud_manager->register_wind(wind_manager);
 
-	//
-	// this is ugly. Garden owns cloud manager, but is binding the two back to itself through this instance.
-	// yuck...
-	//weather_system->register_cloud_manager(cloud_manager);
-	//world_renderer->register_cloud_manager(cloud_manager);
+	snapshot = world; // prime the render buffer before the first frame
 }
 
 void Garden::run()
@@ -352,8 +381,9 @@ void Garden::run()
 		auto tick_time = SDL_GetTicks() - last_time;
 		window_title = "Project Zen: " + std::to_string(tick_time);
 		SDL_SetWindowTitle(window, window_title.c_str());
-		if (tick_time > 16) tick_time = 15;
-		SDL_Delay(frame_delay - tick_time);
+		if (tick_time < frame_delay) {
+			SDL_Delay(frame_delay - tick_time); // no more unsigned underflow when a frame runs long
+		}
 	}
 	save_world();
 }

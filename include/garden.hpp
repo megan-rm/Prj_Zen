@@ -10,8 +10,8 @@
 #include <unordered_map>
 #include <sstream>
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL.h>
+#include <SDL_image.h>
 
 #include "cloud_manager.hpp"
 #include "garden_generator.hpp"
@@ -44,8 +44,8 @@ private:
 	SDL_Event events;
 	SDL_Rect camera;
 
-	std::vector<std::vector<Tile>> world; // 2d array of 8x8px 'blocks' in the garden
-	std::vector<std::vector<Tile>> buffer; // I don't quite like how we have Tiles as buffers for just properly reading saturation states between updates.
+	std::vector<std::vector<Tile>> world;    // sim state: systems mutate this
+	std::vector<std::vector<Tile>> snapshot; // render state: complete copy taken after the full sim pass (double buffer)
 	bool running;
 	bool existing_world;
 	bool up_key, down_key, left_key, right_key, h_key, t_key, left_mouse;
@@ -62,5 +62,6 @@ private:
 
 	static constexpr float camera_speed = Zen::TERRAIN_WIDTH / 60.0f;
 	Uint64 tick_count;
+	float sim_accumulator;
 	Zen::DEBUG_MODE debug_mode;
 };
