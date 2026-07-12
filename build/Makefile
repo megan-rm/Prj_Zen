@@ -142,6 +142,30 @@ conservation_test/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/conservation_test.dir/build.make CMakeFiles/conservation_test.dir/build
 .PHONY : conservation_test/fast
 
+src/chronicle.o: src/chronicle.cpp.o
+.PHONY : src/chronicle.o
+
+# target to build an object file
+src/chronicle.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zen.dir/build.make CMakeFiles/zen.dir/src/chronicle.cpp.o
+.PHONY : src/chronicle.cpp.o
+
+src/chronicle.i: src/chronicle.cpp.i
+.PHONY : src/chronicle.i
+
+# target to preprocess a source file
+src/chronicle.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zen.dir/build.make CMakeFiles/zen.dir/src/chronicle.cpp.i
+.PHONY : src/chronicle.cpp.i
+
+src/chronicle.s: src/chronicle.cpp.s
+.PHONY : src/chronicle.s
+
+# target to generate assembly for a file
+src/chronicle.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zen.dir/build.make CMakeFiles/zen.dir/src/chronicle.cpp.s
+.PHONY : src/chronicle.cpp.s
+
 src/cloud_manager.o: src/cloud_manager.cpp.o
 .PHONY : src/cloud_manager.o
 
@@ -216,6 +240,30 @@ src/garden_generator.s: src/garden_generator.cpp.s
 src/garden_generator.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zen.dir/build.make CMakeFiles/zen.dir/src/garden_generator.cpp.s
 .PHONY : src/garden_generator.cpp.s
+
+src/life_system.o: src/life_system.cpp.o
+.PHONY : src/life_system.o
+
+# target to build an object file
+src/life_system.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zen.dir/build.make CMakeFiles/zen.dir/src/life_system.cpp.o
+.PHONY : src/life_system.cpp.o
+
+src/life_system.i: src/life_system.cpp.i
+.PHONY : src/life_system.i
+
+# target to preprocess a source file
+src/life_system.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zen.dir/build.make CMakeFiles/zen.dir/src/life_system.cpp.i
+.PHONY : src/life_system.cpp.i
+
+src/life_system.s: src/life_system.cpp.s
+.PHONY : src/life_system.s
+
+# target to generate assembly for a file
+src/life_system.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zen.dir/build.make CMakeFiles/zen.dir/src/life_system.cpp.s
+.PHONY : src/life_system.cpp.s
 
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
@@ -377,6 +425,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... conservation_test"
 	@echo "... zen"
+	@echo "... src/chronicle.o"
+	@echo "... src/chronicle.i"
+	@echo "... src/chronicle.s"
 	@echo "... src/cloud_manager.o"
 	@echo "... src/cloud_manager.i"
 	@echo "... src/cloud_manager.s"
@@ -386,6 +437,9 @@ help:
 	@echo "... src/garden_generator.o"
 	@echo "... src/garden_generator.i"
 	@echo "... src/garden_generator.s"
+	@echo "... src/life_system.o"
+	@echo "... src/life_system.i"
+	@echo "... src/life_system.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

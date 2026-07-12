@@ -17,7 +17,9 @@ Garden::Garden(std::string st, int sw, int sh) {
 	existing_world = false;
 	tick_count = 0;
 	sim_accumulator = 0.0f;
+	chronicle = nullptr;
 	cloud_manager = nullptr;
+	life_system = nullptr;
 	texture_manager = nullptr;
 	water_system = nullptr;
 	wind_manager = nullptr;
@@ -25,7 +27,7 @@ Garden::Garden(std::string st, int sw, int sh) {
 	world_renderer = nullptr;
 
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);	
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	SDL_RendererInfo info;
 	SDL_GetRendererInfo(renderer, &info);
 	printf("Renderer: %s\n", info.name);
@@ -40,7 +42,9 @@ Garden::Garden(std::string st, int sw, int sh) {
 }
 
 Garden::~Garden() {
+	delete chronicle;
 	delete cloud_manager;
+	delete life_system;
 	delete weather_system;
 	delete wind_manager;
 	delete water_system;
@@ -53,6 +57,11 @@ Garden::~Garden() {
 
 bool Garden::save_world() {
 	std::cout << "Saving world..." << std::endl;
+	if (chronicle) chronicle->record_save(); // stamp the moment we stopped simulating
+	if (life_system) {
+		life_system->return_water_to_soil(); // world.zen alone carries the whole budget
+		life_system->save_life();            // flora.zen: structure only (re-drinks on load)
+	}
 	std::ofstream file;
 	file.open(Zen::data_path("world_info/world.zen"));
 	if (file.is_open()) {
@@ -138,7 +147,7 @@ bool Garden::load_world() {
 					world.at(x).at(y).permeability = permeability;
 					world.at(x).at(y).max_saturation = max_saturation;
 					world.at(x).at(y).saturation = saturation;
-					world.at(x).at(y).temperature = -20;
+					world.at(x).at(y).temperature = 45; // mild default; the sun cycle takes over within minutes
 					world.at(x).at(y).humidity = humidity;
 					x++;
 					if (x >= Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) {
@@ -162,24 +171,30 @@ bool Garden::load_world() {
 *	pass finishes do we copy into the render snapshot. The
 *	renderer never sees a half-updated world.
 ****************************************************************/
+void Garden::run_sim_tick() {
+	water_system->update_saturation(Zen::SIM_DT);
+	weather_system->update_temperatures(Zen::SIM_DT);
+	wind_manager->update(Zen::SIM_DT);
+	cloud_manager->sim_update();
+	// raining storms splash cold outflow gusts across the surface wind
+	for (const auto& cluster : cloud_manager->get_clusters()) {
+		if (cluster.raining) wind_manager->add_outflow(cluster.cx, cluster.radius, Zen::SIM_DT);
+	}
+	if (tick_count % 10 == 0) weather_system->sun_temperature_update();
+	life_system->update(Zen::SIM_DT);
+	tick_count++;
+}
+
 void Garden::update(float delta) {
 	sim_accumulator += delta;
 	if (sim_accumulator > 4.0f * Zen::SIM_DT) sim_accumulator = 4.0f * Zen::SIM_DT; // don't spiral after a hitch
 
 	while (sim_accumulator >= Zen::SIM_DT) {
-		water_system->update_saturation(Zen::SIM_DT);
-		weather_system->update_temperatures(Zen::SIM_DT);
-		wind_manager->update(Zen::SIM_DT);
-		cloud_manager->sim_update();
-		// raining storms splash cold outflow gusts across the surface wind
-		for (const auto& cluster : cloud_manager->get_clusters()) {
-			if (cluster.raining) wind_manager->add_outflow(cluster.cx, cluster.radius, Zen::SIM_DT);
-		}
-		if (tick_count % 10 == 0) weather_system->sun_temperature_update();
-		tick_count++;
+		run_sim_tick();
 		sim_accumulator -= Zen::SIM_DT;
 	}
 	cloud_manager->update_rain(delta); // raindrops animate every frame for smooth falling
+	life_system->update_motion(delta); // bugs glide smoothly between sim ticks
 
 	snapshot = world; // flip: publish the completed state for rendering
 }
@@ -192,6 +207,7 @@ void Garden::render(float delta) {
 	world_renderer->render_sun(time_system);
 	world_renderer->render_moon(time_system);
 	world_renderer->render_tiles(snapshot);
+	life_system->render(renderer, camera);
 	cloud_manager->render(renderer, texture_manager->get_texture("celestial_bodies"), camera, snapshot);
 	wind_manager->render(renderer, camera);
 	SDL_RenderPresent(renderer);
@@ -351,6 +367,7 @@ void Garden::init() {
 
 	world_renderer = new World_Renderer(renderer, *texture_manager, camera);
 	world_renderer->register_debug_mode(debug_mode);
+	world_renderer->bake_terrain(world); // one-time: terrain is static at runtime
 
 	water_system = new Water_System(world, 1); // mod 1: full pass every sim tick
 	if (!existing_world) {
@@ -360,6 +377,24 @@ void Garden::init() {
 	wind_manager = new Wind_Manager(world);
 	cloud_manager = new Cloud_Manager(world);
 	cloud_manager->register_wind(wind_manager);
+
+	life_system = new Life_System(world);
+	bool had_life = life_system->load_life(); // restore flora/fauna before offline catch-up
+
+	// offline time: pseudo-simulate whatever happened while the app was closed
+	chronicle = new Chronicle();
+	long gap = chronicle->load();
+	if (existing_world && gap > 0) {
+		int replay_ticks = chronicle->catch_up(world, life_system, gap);
+		for (int i = 0; i < replay_ticks; i++) {
+			run_sim_tick();
+		}
+	}
+
+	weather_system->sun_temperature_update(); // warm the surface BEFORE seeding
+	if (!had_life) {
+		life_system->scatter_seeds(400); // virgin world: first colonization
+	}
 
 	snapshot = world; // prime the render buffer before the first frame
 }

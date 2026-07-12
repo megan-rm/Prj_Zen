@@ -64,6 +64,10 @@ namespace Zen {
 	constexpr int CLOUD_TOP_ROW = 12;
 	constexpr int CLOUD_BASE_ROW = 60;
 	constexpr int CLOUD_CONDENSE_RATE = 2;   // humidity pulled toward a cluster's core per tick
+	// only clusters this big condense a core. smaller clouds stay diffuse so
+	// they keep their tile count, drift, and MERGE into rain-worthy systems —
+	// condensing small clouds shrinks them below the rain threshold forever
+	constexpr int CLOUD_CONDENSE_MIN_TILES = 150;
 	// convective lift: humidity/second carried straight up per column by
 	// thermals, regardless of gradient (diffusion alone can never reach the
 	// deck — the share deadband caps climb at ~12 tiles above the surface)
@@ -73,6 +77,10 @@ namespace Zen {
 	constexpr int RAIN_MAX_DROPS_PER_TICK = 256;
 	constexpr float RAIN_GRAVITY = 380.0f;   // px/s^2
 	constexpr float RAIN_MAX_FALL = 240.0f;  // px/s terminal velocity
+	// raindrops have inertia: they feel only a fraction of the wind, capped —
+	// full coupling funneled every drop into wind-convergence columns
+	constexpr float RAIN_WIND_COUPLING = 0.3f;
+	constexpr float RAIN_DRIFT_MAX = 35.0f;  // px/s max horizontal drift
 
 	/****************************************************************
 	*	Wind: emergent from horizontal temperature/humidity
@@ -82,7 +90,7 @@ namespace Zen {
 	****************************************************************/
 	constexpr float WIND_COUPLING = 40.0f;   // px/s^2 of acceleration per unit of pressure gradient
 	constexpr float WIND_DRAG = 0.15f;       // 1/s, friction; terminal wind ~= accel / drag
-	constexpr float WIND_PREVAILING = 3.0f;  // px/s constant "planetary rotation" drift
+	constexpr float WIND_PREVAILING = 8.0f;  // px/s constant "planetary rotation" drift (~1 tile/s: decks visibly migrate)
 	constexpr float WIND_MAX = 90.0f;        // px/s hard clamp
 	constexpr float OUTFLOW_STRENGTH = 20.0f;// px/s/s kick from a raining storm's cold downdraft
 

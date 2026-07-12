@@ -10,8 +10,10 @@ set(CMAKE_FIND_FRAMEWORK LAST)
 
 add_executable(zen
     src/main.cpp
+    src/chronicle.cpp
     src/garden.cpp
     src/garden_generator.cpp
+    src/life_system.cpp
     src/texture_manager.cpp
     src/water_system.cpp
     src/weather_system.cpp

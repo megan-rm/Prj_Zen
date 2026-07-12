@@ -111,7 +111,10 @@ void Cloud_Manager::label_clusters() {
 void Cloud_Manager::condense() {
 	for (size_t id = 0; id < clusters.size(); id++) {
 		const Cloud_Cluster& cluster = clusters[id];
-		if (cluster.size < 4) continue;
+		// small clouds must NOT condense: concentrating into fewer, fuller
+		// tiles shrinks their connected count below the rain threshold and
+		// strands them forever. let them stay wide, drift, and merge.
+		if (cluster.size < Zen::CLOUD_CONDENSE_MIN_TILES) continue;
 
 		for (int flat : cluster_tiles[id]) {
 			const int x = flat / grid_h;
@@ -163,23 +166,35 @@ void Cloud_Manager::spawn_rain() {
 		int drops_wanted = std::min(Zen::RAIN_MAX_DROPS_PER_TICK, cluster.size / 16);
 		if (drops_wanted <= 0) drops_wanted = 1;
 
-		// candidates: bottom half of the cluster, within the core radius
+		/****************************************************************
+		*	Candidates: EVERY bottom-half cloud tile, weighted by its
+		*	spare humidity. The dense core rains hardest but the whole
+		*	cloud base drips — no more single-column waterspout where
+		*	condensation + a centroid-radius filter funneled every
+		*	drop through the same few tiles.
+		****************************************************************/
 		std::vector<int> candidates;
+		std::vector<int> cumulative; // running weight for O(log n) weighted picks
 		candidates.reserve(cluster_tiles[id].size() / 2);
+		cumulative.reserve(cluster_tiles[id].size() / 2);
+		int total_weight = 0;
 		for (int flat : cluster_tiles[id]) {
-			const int x = flat / grid_h;
 			const int y = flat % grid_h;
 			if (static_cast<float>(y) < cluster.cy) continue; // upper half doesn't drip
-			if (std::abs(static_cast<float>(x) - cluster.cx) > cluster.radius) continue;
-			if (world.at(x).at(y).humidity <= Zen::CLOUD_TILE_MIN_HUMIDITY) continue;
+			const int x = flat / grid_h;
+			const int spare = static_cast<int>(world.at(x).at(y).humidity) - Zen::CLOUD_TILE_MIN_HUMIDITY;
+			if (spare <= 0) continue;
+			total_weight += spare;
 			candidates.push_back(flat);
+			cumulative.push_back(total_weight);
 		}
 		if (candidates.empty()) continue;
 
-		std::uniform_int_distribution<size_t> pick(0, candidates.size() - 1);
+		std::uniform_int_distribution<int> pick(1, total_weight);
 		std::uniform_real_distribution<float> jitter(0.0f, static_cast<float>(Zen::TILE_SIZE));
 		for (int d = 0; d < drops_wanted; d++) {
-			const int flat = candidates[pick(rng)];
+			const auto it = std::lower_bound(cumulative.begin(), cumulative.end(), pick(rng));
+			const int flat = candidates[static_cast<size_t>(it - cumulative.begin())];
 			const int x = flat / grid_h;
 			const int y = flat % grid_h;
 			Tile& tile = world.at(x).at(y);
@@ -202,9 +217,11 @@ void Cloud_Manager::update_rain(float delta) {
 		drop.vy = std::min(drop.vy + Zen::RAIN_GRAVITY * delta, Zen::RAIN_MAX_FALL);
 		drop.y += drop.vy * delta;
 		if (wind) {
-			// drops ride the wind — rain visibly slants in a storm's outflow
-			drop.x += wind->wind_at(static_cast<int>(drop.x) / Zen::TILE_SIZE,
-			                        static_cast<int>(drop.y) / Zen::TILE_SIZE) * delta;
+			// drops ride a FRACTION of the wind (inertia) — slant without funneling
+			float drift = wind->wind_at(static_cast<int>(drop.x) / Zen::TILE_SIZE,
+			                            static_cast<int>(drop.y) / Zen::TILE_SIZE) * Zen::RAIN_WIND_COUPLING;
+			drift = std::clamp(drift, -Zen::RAIN_DRIFT_MAX, Zen::RAIN_DRIFT_MAX);
+			drop.x += drift * delta;
 			if (drop.x < 0.0f) drop.x += world_px;      // cylinder world:
 			if (drop.x >= world_px) drop.x -= world_px; // drops wrap too
 		}
