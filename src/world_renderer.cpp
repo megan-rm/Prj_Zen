@@ -256,10 +256,23 @@ void World_Renderer::update_overlay(const std::vector<std::vector<Tile>>& world,
 					r = c.r; g = c.g; b = c.b; a = c.a;
 				}
 			}
+			else if (tile.snow > 0) {
+				// snowpack sits on top of everything: near-white, deeper = more opaque
+				r = 236; g = 240; b = 250;
+				a = static_cast<Uint8>(std::clamp(120 + tile.snow / 4, 0, 245));
+			}
 			else {
-				if (Zen::is_air(tile) && tile.saturation > 0) {
-					// standing water: lake, river, ponded rain
-					r = 24; g = 110; b = 220;
+				if (Zen::is_frozen(tile)) {
+					// ice: pale blue-white sheen over the water
+					r = 200; g = 224; b = 235;
+					a = 205;
+				}
+				else if (Zen::is_air(tile) && tile.saturation > 0) {
+					// standing water: blue when clear, tinting green as algae builds up
+					const float alg = std::clamp(tile.algae / static_cast<float>(Zen::ALGAE_MAX), 0.0f, 1.0f);
+					r = static_cast<Uint8>(24 + alg * 22);
+					g = static_cast<Uint8>(110 + alg * 90);
+					b = static_cast<Uint8>(220 - alg * 135);
 					a = 190;
 				}
 				else if (tile.max_saturation > 0 && tile.saturation > 10) {

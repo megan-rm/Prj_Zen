@@ -27,6 +27,7 @@ static Uint64 total_water(const std::vector<std::vector<Tile>>& world, const Clo
 		for (const auto& tile : column) {
 			total += tile.saturation;
 			total += tile.humidity;
+			total += tile.snow;
 		}
 	}
 	total += clouds.water_in_flight();

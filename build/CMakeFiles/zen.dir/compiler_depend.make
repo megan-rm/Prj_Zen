@@ -2788,6 +2788,7 @@ CMakeFiles/zen.dir/src/garden.cpp.o: /Users/meganmiller/Documents/Documents\ -\ 
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/cloud_manager.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/garden.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/garden_generator.hpp \
+  /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/hud.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/life_system.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/texture_manager.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/tile.hpp \
@@ -5671,6 +5672,7 @@ CMakeFiles/zen.dir/src/main.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Me
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/cloud_manager.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/garden.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/garden_generator.hpp \
+  /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/hud.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/life_system.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/texture_manager.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/tile.hpp \
@@ -9409,6 +9411,8 @@ CMakeFiles/zen.dir/src/world_renderer.cpp.o: /Users/meganmiller/Documents/Docume
 /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/water_system.cpp:
 
 /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/main.cpp:
+
+/Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/hud.hpp:
 
 /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/garden_generator.hpp:
 

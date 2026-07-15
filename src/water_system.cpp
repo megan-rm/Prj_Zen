@@ -7,6 +7,9 @@ void Water_System::update_saturation(float delta) {
 			if (self.saturation == 0) {
 				continue;
 			}
+			if (Zen::is_frozen(self)) {
+				continue; // ice is locked: no flow until it thaws
+			}
 			Tile* left, *right, *down;
 			left = nullptr;
 			right = nullptr;
@@ -43,6 +46,7 @@ void Water_System::update_saturation(float delta) {
 }
 
 void Water_System::calculate_flow(Tile& self, Tile& tile, float delta, bool downward) {
+	if (Zen::is_frozen(tile)) return; // can't push water into a frozen tile
 	//delta = 16.0/1000.0f;
 	int saturation_difference = self.saturation - tile.saturation; /// what if we didn't abs, and just kept it as potential negative and had 2 variables; 1 to add into from, 1 to add into dest.
 	if (saturation_difference <= 0 && downward == false) {
@@ -142,11 +146,20 @@ Uint64 Water_System::place_water(float relative_pct) {
 			total_water += world_reference.at(x).at(y).saturation;
 		}
 	}
-	//lake fill
-	for (int x = (Zen::lake_start_x / Zen::TILE_SIZE); x < (Zen::lake_end_x / Zen::TILE_SIZE); x++) {
-		for (int y = (Zen::mountain_end_y / Zen::TILE_SIZE) + 1; y < Zen::TERRAIN_HEIGHT / Zen::TILE_SIZE; y++) {
-			world_reference.at(x).at(y).saturation = world_reference.at(x).at(y).max_saturation;
-			total_water += world_reference.at(x).at(y).saturation;
+	//lake fill — every basin the generator dug, filled from its surface down
+	const int cols = static_cast<int>(world_reference.size());
+	const int rows = cols > 0 ? static_cast<int>(world_reference.front().size()) : 0;
+	for (const auto& lake : Zen::lakes) {
+		const int x0 = std::clamp(lake.start_x / Zen::TILE_SIZE, 0, cols - 1);
+		const int x1 = std::clamp(lake.end_x / Zen::TILE_SIZE, 0, cols);
+		const int y0 = std::clamp(lake.surface_y / Zen::TILE_SIZE, 0, rows - 1);
+		for (int x = x0; x < x1; x++) {
+			for (int y = y0; y < rows; y++) {
+				Tile& t = world_reference.at(x).at(y);
+				if (!Zen::is_air(t)) break; // reached the basin floor — don't flood the soil column below
+				total_water += (t.max_saturation - t.saturation);
+				t.saturation = t.max_saturation; // standing water in the dug basin only
+			}
 		}
 	}
 	Zen::water_budget = total_water;

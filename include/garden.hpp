@@ -16,6 +16,7 @@
 #include "chronicle.hpp"
 #include "cloud_manager.hpp"
 #include "garden_generator.hpp"
+#include "hud.hpp"
 #include "life_system.hpp"
 #include "texture_manager.hpp"
 #include "tile.hpp"
@@ -38,6 +39,7 @@ public:
 	void render(float delta);
 	void update(float delta	);
 	void run_sim_tick(); // one complete fixed-timestep pass over every system
+	std::vector<std::string> build_hud_lines(); // assembles the on-screen stat readout
 	bool load_world();
 	bool save_world();
 	void mouse_click(int x, int y);
@@ -69,4 +71,6 @@ private:
 	Uint64 tick_count;
 	float sim_accumulator;
 	Zen::DEBUG_MODE debug_mode;
+	Hud hud;
+	bool show_hud;
 };

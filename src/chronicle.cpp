@@ -246,6 +246,22 @@ void Chronicle::bulk_hours(std::vector<std::vector<Tile>>& world, Life_System* l
 		}
 		if (run_length >= STORM_MIN_COLUMNS) storm_count++;
 
+		// snowmelt / accumulation for the hour
+		for (int x = 0; x < grid_w; x++) {
+			const int sy = find_surface(world, x);
+			Tile& surface = world.at(x).at(sy);
+			if (surface.snow == 0) continue;
+			if (temp > Zen::FREEZE_TEMP) {
+				long melt = static_cast<long>(surface.snow * std::min(1.0f, Zen::SNOW_MELT_RATE * (temp - Zen::FREEZE_TEMP) / 10.0f * chunk));
+				melt = std::min<long>(melt, surface.snow);
+				const long room = surface.max_saturation - surface.saturation;
+				const long soaked = std::min(melt, room);
+				surface.snow -= static_cast<Uint16>(melt);
+				surface.saturation += static_cast<Uint16>(soaked);
+				surface.snow += static_cast<Uint16>(melt - soaked); // no room: stays snow
+			}
+		}
+
 		percolate(world, 2);
 
 		// life lives through the same hour, at the same temperature
