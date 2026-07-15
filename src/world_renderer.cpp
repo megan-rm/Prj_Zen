@@ -1,5 +1,49 @@
 #include "world_renderer.hpp"
 
+World_Renderer::~World_Renderer() {
+	for (auto* chunk : terrain_chunks) SDL_DestroyTexture(chunk);
+	if (overlay) SDL_DestroyTexture(overlay);
+}
+
+/****************************************************************
+*	One-time bake: draw every tile of the (static) terrain into
+*	big chunk textures so the per-frame cost is a few copies.
+****************************************************************/
+void World_Renderer::bake_terrain(const std::vector<std::vector<Tile>>& world) {
+	const int grid_w = static_cast<int>(world.size());
+	const int grid_h = grid_w > 0 ? static_cast<int>(world.front().size()) : 0;
+
+	overlay_w = grid_w;
+	overlay_h = grid_h;
+	overlay = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING, overlay_w, overlay_h);
+	SDL_SetTextureBlendMode(overlay, SDL_BLENDMODE_BLEND);
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+	SDL_SetTextureScaleMode(overlay, SDL_ScaleModeNearest); // crisp 8x pixels, no smearing
+#endif
+
+	const int chunk_count = (grid_w + CHUNK_TILES - 1) / CHUNK_TILES;
+	for (int c = 0; c < chunk_count; c++) {
+		const int w_tiles = std::min(CHUNK_TILES, grid_w - c * CHUNK_TILES);
+		SDL_Texture* chunk = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_TARGET,
+			w_tiles * tile_size, grid_h * tile_size);
+		SDL_SetTextureBlendMode(chunk, SDL_BLENDMODE_BLEND);
+		SDL_SetRenderTarget(renderer, chunk);
+		SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+		SDL_RenderClear(renderer);
+		for (int x = 0; x < w_tiles; x++) {
+			for (int y = 0; y < grid_h; y++) {
+				SDL_Rect src = tile_src_rect(world.at(c * CHUNK_TILES + x).at(y).img_id);
+				SDL_Rect dst{ x * tile_size, y * tile_size, tile_size, tile_size };
+				SDL_RenderCopy(renderer, tile_atlas, &src, &dst);
+			}
+		}
+		terrain_chunks.push_back(chunk);
+	}
+	SDL_SetRenderTarget(renderer, nullptr);
+	std::cout << "terrain baked into " << chunk_count << " chunk textures" << std::endl;
+}
+
 SDL_Rect World_Renderer::tile_src_rect(int tile_id) {
 	int tiles_per_row = tile_atlas_width / tile_size;
 	int x = (tile_id % tiles_per_row) * tile_size;
@@ -142,7 +186,7 @@ void World_Renderer::render_moon(Time_System& time_system) {
 		flip = SDL_FLIP_NONE;
 	}
 	else if (moon_phase == Moon_Phase::WANING_CRESCENT) {
-		src.x = 16;
+		src.x = 48; // crescent sprite (16 was the gibbous — waning crescent rendered as gibbous)
 		src.y = 0;
 		flip = SDL_FLIP_NONE;
 	}
@@ -155,60 +199,96 @@ void World_Renderer::render_stars(Time_System& time_system) {
 }
 
 void World_Renderer::render_tiles(const std::vector<std::vector<Tile>>& world) {
-	SDL_SetRenderDrawColor(renderer, 0, 80, 200, 125);
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_MUL);
-	int tile_start_x = camera.x / Zen::TILE_SIZE;
-	int tile_start_y = camera.y / Zen::TILE_SIZE;
-	int tile_end_x = (camera.x + camera.w) / Zen::TILE_SIZE + 1;
-	int tile_end_y = (camera.y + camera.h) / Zen::TILE_SIZE + 1;
+	// --- terrain: a few chunk copies instead of ~19k per-tile draws --------
+	for (size_t c = 0; c < terrain_chunks.size(); c++) {
+		const int chunk_px = static_cast<int>(c) * CHUNK_TILES * tile_size;
+		int chunk_w_px;
+		SDL_QueryTexture(terrain_chunks[c], nullptr, nullptr, &chunk_w_px, nullptr);
+		const int inter_start = std::max(camera.x, chunk_px);
+		const int inter_end = std::min(camera.x + camera.w, chunk_px + chunk_w_px);
+		if (inter_start >= inter_end) continue;
+		SDL_Rect src{ inter_start - chunk_px, camera.y, inter_end - inter_start, camera.h };
+		SDL_Rect dst{ inter_start - camera.x, 0, src.w, src.h };
+		SDL_RenderCopy(renderer, terrain_chunks[c], &src, &dst);
+	}
 
-	tile_start_x = std::max(0, tile_start_x);
-	tile_start_y = std::max(0, tile_start_y);
-	tile_end_x = std::min(Zen::TERRAIN_WIDTH/Zen::TILE_SIZE, tile_end_x);
-	tile_end_y = std::min(Zen::TERRAIN_HEIGHT/Zen::TILE_SIZE, tile_end_y);
+	// --- water / debug overlays: one streamed texture, scaled 8x -----------
+	int tile_start_x = std::max(0, camera.x / Zen::TILE_SIZE);
+	int tile_start_y = std::max(0, camera.y / Zen::TILE_SIZE);
+	int tile_end_x = std::min(overlay_w, (camera.x + camera.w) / Zen::TILE_SIZE + 1);
+	int tile_end_y = std::min(overlay_h, (camera.y + camera.h) / Zen::TILE_SIZE + 1);
+	if (tile_end_x <= tile_start_x || tile_end_y <= tile_start_y || !overlay) return;
 
-	for (int y = tile_start_y; y < tile_end_y; y++){
-		for (int x = tile_start_x; x < tile_end_x; x++) {
-			auto tile = world.at(x).at(y);
-			SDL_Rect src = tile_src_rect(tile.img_id);
-			SDL_Rect dst{ x * Zen::TILE_SIZE - camera.x,
-						  y * Zen::TILE_SIZE - camera.y,
-				          tile_size, tile_size
-			};
-			
-			SDL_RenderCopy(renderer, tile_atlas, &src, &dst);
-			//temperature view
-			if (*garden_debug_mode == Zen::DEBUG_MODE::TEMPERATURE) {
-				SDL_Color heat_mask_color;
-				SDL_Rect temp_mask{ dst.x + 1, dst.y + 1, tile_size - 2, tile_size - 2};
-				heat_mask_color = get_heatmap_color(tile.temperature);
-				SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-				SDL_SetRenderDrawColor(renderer, heat_mask_color.r, heat_mask_color.g, heat_mask_color.b, heat_mask_color.a);
-				SDL_RenderFillRect(renderer, &temp_mask);
+	update_overlay(world, tile_start_x, tile_start_y, tile_end_x, tile_end_y);
+
+	SDL_Rect src{ tile_start_x, tile_start_y, tile_end_x - tile_start_x, tile_end_y - tile_start_y };
+	SDL_Rect dst{ tile_start_x * tile_size - camera.x, tile_start_y * tile_size - camera.y,
+	              src.w * tile_size, src.h * tile_size };
+	SDL_RenderCopy(renderer, overlay, &src, &dst);
+}
+
+/****************************************************************
+*	Fill the visible region of the overlay, 1 texel per tile.
+*	Normal view: standing water solid, soil saturation as an
+*	alpha gradient (the water table reads as darkening ground).
+*	t/h debug views reuse the same texture.
+****************************************************************/
+void World_Renderer::update_overlay(const std::vector<std::vector<Tile>>& world, int start_x, int start_y, int end_x, int end_y) {
+	SDL_Rect lock_rect{ start_x, start_y, end_x - start_x, end_y - start_y };
+	void* raw = nullptr;
+	int pitch = 0;
+	if (SDL_LockTexture(overlay, &lock_rect, &raw, &pitch) != 0) return;
+
+	const Zen::DEBUG_MODE mode = *garden_debug_mode;
+	for (int y = start_y; y < end_y; y++) {
+		Uint8* p = static_cast<Uint8*>(raw) + static_cast<size_t>(y - start_y) * pitch;
+		for (int x = start_x; x < end_x; x++, p += 4) {
+			const Tile& tile = world.at(x).at(y);
+			Uint8 r = 0, g = 0, b = 0, a = 0;
+
+			if (mode == Zen::DEBUG_MODE::TEMPERATURE) {
+				SDL_Color c = get_heatmap_color(tile.temperature);
+				r = c.r; g = c.g; b = c.b; a = c.a;
 			}
-			else if (*garden_debug_mode == Zen::DEBUG_MODE::HUMIDITY) {
+			else if (mode == Zen::DEBUG_MODE::HUMIDITY) {
 				if (tile.humidity > 0) {
-					SDL_Color humidity_mask_color;
-					SDL_Rect humidity_mask{ dst.x + 1, dst.y + 1, tile_size - 2, tile_size - 2 };
-					humidity_mask_color = get_humidity_color(tile.humidity);
-					SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
-					SDL_SetRenderDrawColor(renderer, humidity_mask_color.r, humidity_mask_color.g, humidity_mask_color.b, humidity_mask_color.a);
-					SDL_RenderFillRect(renderer, &humidity_mask);
+					SDL_Color c = get_humidity_color(tile.humidity);
+					r = c.r; g = c.g; b = c.b; a = c.a;
 				}
 			}
-			//normal view to see water (clouds are drawn by Cloud_Manager after this pass)
-			else if (*garden_debug_mode == Zen::DEBUG_MODE::NONE) {
-				if (tile.max_saturation > 0 && tile.saturation > 10) {
-					float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
-					if (ratio < 0.09f) continue;
-					SDL_Rect water_level{ dst.x, dst.y + tile_size, tile_size, static_cast<int>(-tile_size * ratio) };
-					SDL_RenderFillRect(renderer, &water_level);
+			else if (tile.snow > 0) {
+				// snowpack sits on top of everything: near-white, deeper = more opaque
+				r = 236; g = 240; b = 250;
+				a = static_cast<Uint8>(std::clamp(120 + tile.snow / 4, 0, 245));
+			}
+			else {
+				if (Zen::is_frozen(tile)) {
+					// ice: pale blue-white sheen over the water
+					r = 200; g = 224; b = 235;
+					a = 205;
+				}
+				else if (Zen::is_air(tile) && tile.saturation > 0) {
+					// standing water: blue when clear, tinting green as algae builds up
+					const float alg = std::clamp(tile.algae / static_cast<float>(Zen::ALGAE_MAX), 0.0f, 1.0f);
+					r = static_cast<Uint8>(24 + alg * 22);
+					g = static_cast<Uint8>(110 + alg * 90);
+					b = static_cast<Uint8>(220 - alg * 135);
+					a = 190;
+				}
+				else if (tile.max_saturation > 0 && tile.saturation > 10) {
+					const float ratio = static_cast<float>(tile.saturation) / tile.max_saturation;
+					if (ratio >= 0.09f) {
+						// soil moisture: alpha gradient so the water table
+						// shows as ground darkening with depth
+						r = 10; g = 70; b = 190;
+						a = static_cast<Uint8>(std::clamp(20.0f + 130.0f * ratio, 0.0f, 170.0f));
+					}
 				}
 			}
+			p[0] = r; p[1] = g; p[2] = b; p[3] = a;
 		}
 	}
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_NONE);
+	SDL_UnlockTexture(overlay);
 }
 
 SDL_Color World_Renderer::get_humidity_color(int humidity) {

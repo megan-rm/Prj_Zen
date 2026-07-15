@@ -79,13 +79,54 @@ void Weather_System::update_temperatures(float delta) {
 		}
 	}
 	evaporations(delta);
+	melt_snow(delta);
+}
+
+/****************************************************************
+*	Snowmelt: above freezing, snowpack thaws into the soil it
+*	rests on (spring melt feeding the water table). Below
+*	freezing it just sits — mountain snowpack persisting through
+*	winter. Stochastic rounding keeps slow melt alive; exact.
+****************************************************************/
+void Weather_System::melt_snow(float delta) {
+	std::uniform_real_distribution<float> unit_dist(0.0f, 1.0f);
+	for (auto& s : surface_tiles) {
+		Tile& tile = world_reference.at(s.x).at(s.y);
+		if (tile.snow == 0 || tile.temperature <= Zen::FREEZE_TEMP) continue;
+
+		float melt = Zen::SNOW_MELT_RATE * (tile.temperature - Zen::FREEZE_TEMP) / 10.0f * delta;
+		int units = static_cast<int>(melt);
+		if (unit_dist(rand) < (melt - units)) units += 1;
+		units = std::min(units, static_cast<int>(tile.snow));
+		if (units <= 0) continue;
+
+		int room = tile.max_saturation - tile.saturation;
+		int soaked = std::min(units, room);
+		tile.snow -= static_cast<Uint16>(units);
+		tile.saturation += static_cast<Uint16>(soaked);
+		// no room below (rare): melt runs off to the tile's air as humidity
+		int runoff = units - soaked;
+		if (runoff > 0 && s.y > 0) {
+			Tile& above = world_reference.at(s.x).at(s.y - 1);
+			if (Zen::is_air(above) && above.saturation == 0) {
+				int put = std::min(runoff, Zen::HUMIDITY_MAX - static_cast<int>(above.humidity));
+				above.humidity += static_cast<Uint16>(put);
+				runoff -= put;
+			}
+			tile.snow += static_cast<Uint16>(runoff); // still nowhere to go: stays snow
+		}
+		else {
+			tile.snow += static_cast<Uint16>(runoff);
+		}
+	}
 }
 
 Uint64 Weather_System::water_check() {
 	Uint64 total_water = 0;
 	for (size_t x = 0; x < world_reference.size(); x++) {
 		for (size_t y = 0; y < world_reference.at(x).size(); y++) {
-			total_water += world_reference.at(x).at(y).humidity + world_reference.at(x).at(y).saturation;
+			const Tile& t = world_reference.at(x).at(y);
+			total_water += t.humidity + t.saturation + t.snow;
 		}
 	}
 	return total_water;

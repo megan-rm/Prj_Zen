@@ -28,6 +28,7 @@ private:
 
 	float get_day_temperature();
 	void evaporations(float delta);
+	void melt_snow(float delta);
 	void humidity_handling(int x, int y, float delta);
 	void humidity_share(Tile& self, Tile& neighbor, float weight);
 	void update_forecasts(); // called in constructor, handles week.forecast and month.forecast

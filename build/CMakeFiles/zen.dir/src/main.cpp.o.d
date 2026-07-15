@@ -953,10 +953,13 @@ CMakeFiles/zen.dir/src/main.cpp.o: \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/__filesystem/u8path.h \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/sstream \
   /opt/homebrew/include/SDL2/SDL_image.h \
-  /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/cloud_manager.hpp \
+  /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/chronicle.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/tile.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/utils.hpp \
+  /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/cloud_manager.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/garden_generator.hpp \
+  /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/hud.hpp \
+  /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/life_system.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/texture_manager.hpp \
   /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/include/time_system.hpp \
   /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/c++/v1/chrono \

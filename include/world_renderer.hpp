@@ -11,9 +11,20 @@
 #include <cmath>
 #include <iostream>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
+/****************************************************************
+*	Rendering strategy (performance):
+*	- terrain never changes at runtime, so it's baked ONCE into
+*	  a few large chunk textures; drawing the world is a handful
+*	  of texture copies instead of ~19k per-tile RenderCopies
+*	- water/saturation (and the t/h debug views) render through
+*	  a streaming overlay texture at 1 px per tile, scaled up 8x
+*	  with nearest sampling — one texture update + one copy
+*	  replaces thousands of per-tile FillRects. Soil alpha is
+*	  proportional to saturation, so the water table reads as a
+*	  gradient in the ground; standing water draws solid.
+****************************************************************/
 class World_Renderer {
 public:
 	World_Renderer(SDL_Renderer* ren, Texture_Manager& tm, SDL_Rect& cam) : renderer(ren), texture_manager(tm), camera(cam) {
@@ -24,7 +35,8 @@ public:
 		celestial_bodies = texture_manager.get_texture("celestial_bodies");
 	};
 
-	~World_Renderer() = default; // textures are owned (and destroyed) by Texture_Manager
+	~World_Renderer();
+	void bake_terrain(const std::vector<std::vector<Tile>>& world); // call once after world load
 	void render_sky(Time_System& ts);
 	void render_tiles(const std::vector<std::vector<Tile>>& world); // reads the completed sim snapshot
 	void render_sun(Time_System& ts);
@@ -45,9 +57,16 @@ private:
 	SDL_Texture* sky_gradient;
 	SDL_Texture* celestial_bodies;
 
+	std::vector<SDL_Texture*> terrain_chunks; // owned here (baked at init)
+	SDL_Texture* overlay = nullptr;           // owned here (1 px per tile, streaming)
+	int overlay_w = 0;
+	int overlay_h = 0;
+	static constexpr int CHUNK_TILES = 256;   // chunk width: 256 tiles = 2048 px
+
 	Zen::DEBUG_MODE* garden_debug_mode;
 	int tile_atlas_width;
 	int tile_atlas_height;
 	int tile_size;
 	SDL_Rect tile_src_rect(int tile_id);
+	void update_overlay(const std::vector<std::vector<Tile>>& world, int start_x, int start_y, int end_x, int end_y);
 };

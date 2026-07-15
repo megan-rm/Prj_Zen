@@ -13,8 +13,11 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
+#include "chronicle.hpp"
 #include "cloud_manager.hpp"
 #include "garden_generator.hpp"
+#include "hud.hpp"
+#include "life_system.hpp"
 #include "texture_manager.hpp"
 #include "tile.hpp"
 #include "time_system.hpp"
@@ -35,6 +38,8 @@ public:
 	void init();
 	void render(float delta);
 	void update(float delta	);
+	void run_sim_tick(); // one complete fixed-timestep pass over every system
+	std::vector<std::string> build_hud_lines(); // assembles the on-screen stat readout
 	bool load_world();
 	bool save_world();
 	void mouse_click(int x, int y);
@@ -52,7 +57,9 @@ private:
 	int screen_width;
 	int screen_height;
 	std::string window_title;
+	Chronicle* chronicle;
 	Cloud_Manager* cloud_manager;
+	Life_System* life_system;
 	Texture_Manager* texture_manager;
 	Time_System time_system;
 	Water_System* water_system;
@@ -64,4 +71,6 @@ private:
 	Uint64 tick_count;
 	float sim_accumulator;
 	Zen::DEBUG_MODE debug_mode;
+	Hud hud;
+	bool show_hud;
 };

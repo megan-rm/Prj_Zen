@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <string>
+#include <vector>
 
 #include "tile.hpp"
 
@@ -19,6 +20,23 @@ namespace Zen {
 
 	constexpr int LAKE_WIDTH = 600;
 	constexpr int LAKE_DEPTH = 120;
+
+	/****************************************************************
+	*	Worldgen variety: the mountain spawns at a random x, and
+	*	sheds a riverbed down whichever flanks have room, each
+	*	ending in its own lake. River length and lake size vary
+	*	+/- a percentage so no two worlds share a layout.
+	****************************************************************/
+	constexpr int RIVER_BASE_LENGTH = 1000;   // px, before variation
+	constexpr int RIVER_VARIATION_PCT = 20;   // +/- this percent
+	constexpr int LAKE_VARIATION_PCT = 20;    // +/- this percent (applied to LAKE_WIDTH/DEPTH)
+	constexpr int MOUNTAIN_EDGE_MARGIN = 40;  // px kept clear of the world edges
+
+	struct Lake_Region {
+		int start_x = 0;   // px
+		int end_x = 0;     // px
+		int surface_y = 0; // px, top of the standing water
+	};
 
 	//using ints below to prevent water loss with rounding errors in floats
 	constexpr int DIRT_PERMIABILITY = 65; // divide by 100 aka 0.65;
@@ -64,6 +82,10 @@ namespace Zen {
 	constexpr int CLOUD_TOP_ROW = 12;
 	constexpr int CLOUD_BASE_ROW = 60;
 	constexpr int CLOUD_CONDENSE_RATE = 2;   // humidity pulled toward a cluster's core per tick
+	// only clusters this big condense a core. smaller clouds stay diffuse so
+	// they keep their tile count, drift, and MERGE into rain-worthy systems —
+	// condensing small clouds shrinks them below the rain threshold forever
+	constexpr int CLOUD_CONDENSE_MIN_TILES = 150;
 	// convective lift: humidity/second carried straight up per column by
 	// thermals, regardless of gradient (diffusion alone can never reach the
 	// deck — the share deadband caps climb at ~12 tiles above the surface)
@@ -73,6 +95,10 @@ namespace Zen {
 	constexpr int RAIN_MAX_DROPS_PER_TICK = 256;
 	constexpr float RAIN_GRAVITY = 380.0f;   // px/s^2
 	constexpr float RAIN_MAX_FALL = 240.0f;  // px/s terminal velocity
+	// raindrops have inertia: they feel only a fraction of the wind, capped —
+	// full coupling funneled every drop into wind-convergence columns
+	constexpr float RAIN_WIND_COUPLING = 0.3f;
+	constexpr float RAIN_DRIFT_MAX = 35.0f;  // px/s max horizontal drift
 
 	/****************************************************************
 	*	Wind: emergent from horizontal temperature/humidity
@@ -82,7 +108,7 @@ namespace Zen {
 	****************************************************************/
 	constexpr float WIND_COUPLING = 40.0f;   // px/s^2 of acceleration per unit of pressure gradient
 	constexpr float WIND_DRAG = 0.15f;       // 1/s, friction; terminal wind ~= accel / drag
-	constexpr float WIND_PREVAILING = 3.0f;  // px/s constant "planetary rotation" drift
+	constexpr float WIND_PREVAILING = 8.0f;  // px/s constant "planetary rotation" drift (~1 tile/s: decks visibly migrate)
 	constexpr float WIND_MAX = 90.0f;        // px/s hard clamp
 	constexpr float OUTFLOW_STRENGTH = 20.0f;// px/s/s kick from a raining storm's cold downdraft
 
@@ -91,19 +117,39 @@ namespace Zen {
 	constexpr float LAND_HEAT_RATE = 0.35f;
 	constexpr float WATER_HEAT_RATE = 0.03f;
 
+	/****************************************************************
+	*	Snow & ice — a fifth water pool. Raindrops falling through
+	*	freezing air land as snow (snow-water-equivalent) instead of
+	*	saturation; snow melts back into the soil when warm. Standing
+	*	water below freezing is ice: locked (no flow, no evaporation)
+	*	and rendered pale. All still exactly 1 unit = 1 water.
+	****************************************************************/
+	constexpr Sint8 FREEZE_TEMP = 32;         // degrees F
+	constexpr float SNOW_MELT_RATE = 0.4f;    // snow-water melted per second per tile when above freezing
+
+	// algae: aquatic food that grows in sunlit, unfrozen, shallow water and
+	// feeds the fish. A property of the water, not a separate organism.
+	constexpr int ALGAE_MAX = 200;            // per-tile cap
+	constexpr int ALGAE_LIGHT_DEPTH = 14;     // tiles below the water surface where light runs out
+
 	inline bool is_air(const Tile& t) {
 		return t.permeability == AIR_PERMEABILITY;
 	}
 
-	inline int mountain_start_x = 0;
-	inline int mountain_end_x = 0;
-	inline int mountain_end_y = 0; // for river formation, we only need the intercept at the end
+	// standing water (a filled air tile) that has dropped below freezing
+	inline bool is_frozen(const Tile& t) {
+		return is_air(t) && t.saturation > 0 && t.temperature <= FREEZE_TEMP;
+	}
+
+	inline int mountain_peak_x = 0; // px, horizontal center of the mountain
+	inline int mountain_end_x = 0;  // legacy/right-foot, kept for save compatibility
+	inline int mountain_end_y = 0;
 
 	inline int river_start_x = 0;
 	inline int river_end_x = 0;
 
-	inline int lake_start_x = 0;
-	inline int lake_end_x = 0;
+	// one entry per lake (a central mountain yields two; a corner one yields one)
+	inline std::vector<Lake_Region> lakes;
 
 	inline Uint64 water_update_total = 0;
 	inline Uint64 water_budget = 0;

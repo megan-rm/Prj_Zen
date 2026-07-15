@@ -79,9 +79,23 @@ public:
 		return sun_position;
 	}
 
+	/****************************************************************
+	*	Moon age anchored to a REAL new moon (2025-04-27 19:31 UTC)
+	*	via absolute time — continuous across year boundaries and
+	*	matches the actual sky. The old day-of-year modulo drifted
+	*	and reset every January 1st.
+	****************************************************************/
+	float get_lunar_age() {
+		const std::time_t reference_new_moon = 1745782260; // 2025-04-27 19:31 UTC
+		const double days = (std::time(nullptr) - reference_new_moon) / 86400.0;
+		double age = std::fmod(days, static_cast<double>(lunar_length));
+		if (age < 0) age += lunar_length;
+		return static_cast<float>(age);
+	}
+
 	Zen::Vector2D get_moon_pos(SDL_Rect& camera) {
 		update_time();
-		lunar_day = std::fmod((current_time.day + month_days_now + 1), lunar_length);
+		lunar_day = get_lunar_age();
 		lunar_pct = lunar_day / lunar_length;
 		current_lunar_phase = (lunar_pct - 0.5f) * 2.0f; // we got two phases of moon to chew through
 
@@ -115,6 +129,7 @@ public:
 
 	Moon_Phase get_moon_phase() {
 		update_time();
+		lunar_day = get_lunar_age(); // don't rely on get_moon_pos having run first
 		if (lunar_day < 1)			moon_phase = Moon_Phase::NEW_MOON;
 		else if (lunar_day < 7)		moon_phase = Moon_Phase::WAXING_CRESCENT;
 		else if (lunar_day < 9)		moon_phase = Moon_Phase::FIRST_QUARTER;
@@ -130,8 +145,7 @@ public:
 private:
 	Zen::Vector2D sun_position;
 	Zen::Vector2D moon_position;
-	const int reference_new_moon_day = 117; // April 27th 2025 of this year happened to be a new moon
-	const float lunar_length = 29.530575f; // idk i just googled lunar length and this is what came up, don't hurt me
+	const float lunar_length = 29.530589f; // mean synodic month, days
 	Time current_time;
 	Moon_Phase moon_phase;
 	float day_pct;

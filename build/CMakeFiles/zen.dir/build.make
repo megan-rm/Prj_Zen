@@ -86,10 +86,24 @@ CMakeFiles/zen.dir/src/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zen.dir/src/main.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/main.cpp" -o CMakeFiles/zen.dir/src/main.cpp.s
 
+CMakeFiles/zen.dir/src/chronicle.cpp.o: CMakeFiles/zen.dir/flags.make
+CMakeFiles/zen.dir/src/chronicle.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/chronicle.cpp
+CMakeFiles/zen.dir/src/chronicle.cpp.o: CMakeFiles/zen.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/zen.dir/src/chronicle.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/zen.dir/src/chronicle.cpp.o -MF CMakeFiles/zen.dir/src/chronicle.cpp.o.d -o CMakeFiles/zen.dir/src/chronicle.cpp.o -c "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/chronicle.cpp"
+
+CMakeFiles/zen.dir/src/chronicle.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zen.dir/src/chronicle.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/chronicle.cpp" > CMakeFiles/zen.dir/src/chronicle.cpp.i
+
+CMakeFiles/zen.dir/src/chronicle.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zen.dir/src/chronicle.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/chronicle.cpp" -o CMakeFiles/zen.dir/src/chronicle.cpp.s
+
 CMakeFiles/zen.dir/src/garden.cpp.o: CMakeFiles/zen.dir/flags.make
 CMakeFiles/zen.dir/src/garden.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/garden.cpp
 CMakeFiles/zen.dir/src/garden.cpp.o: CMakeFiles/zen.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/zen.dir/src/garden.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/zen.dir/src/garden.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/zen.dir/src/garden.cpp.o -MF CMakeFiles/zen.dir/src/garden.cpp.o.d -o CMakeFiles/zen.dir/src/garden.cpp.o -c "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/garden.cpp"
 
 CMakeFiles/zen.dir/src/garden.cpp.i: cmake_force
@@ -103,7 +117,7 @@ CMakeFiles/zen.dir/src/garden.cpp.s: cmake_force
 CMakeFiles/zen.dir/src/garden_generator.cpp.o: CMakeFiles/zen.dir/flags.make
 CMakeFiles/zen.dir/src/garden_generator.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/garden_generator.cpp
 CMakeFiles/zen.dir/src/garden_generator.cpp.o: CMakeFiles/zen.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/zen.dir/src/garden_generator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/zen.dir/src/garden_generator.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/zen.dir/src/garden_generator.cpp.o -MF CMakeFiles/zen.dir/src/garden_generator.cpp.o.d -o CMakeFiles/zen.dir/src/garden_generator.cpp.o -c "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/garden_generator.cpp"
 
 CMakeFiles/zen.dir/src/garden_generator.cpp.i: cmake_force
@@ -114,10 +128,24 @@ CMakeFiles/zen.dir/src/garden_generator.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zen.dir/src/garden_generator.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/garden_generator.cpp" -o CMakeFiles/zen.dir/src/garden_generator.cpp.s
 
+CMakeFiles/zen.dir/src/life_system.cpp.o: CMakeFiles/zen.dir/flags.make
+CMakeFiles/zen.dir/src/life_system.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/life_system.cpp
+CMakeFiles/zen.dir/src/life_system.cpp.o: CMakeFiles/zen.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/zen.dir/src/life_system.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/zen.dir/src/life_system.cpp.o -MF CMakeFiles/zen.dir/src/life_system.cpp.o.d -o CMakeFiles/zen.dir/src/life_system.cpp.o -c "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/life_system.cpp"
+
+CMakeFiles/zen.dir/src/life_system.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/zen.dir/src/life_system.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/life_system.cpp" > CMakeFiles/zen.dir/src/life_system.cpp.i
+
+CMakeFiles/zen.dir/src/life_system.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/zen.dir/src/life_system.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/life_system.cpp" -o CMakeFiles/zen.dir/src/life_system.cpp.s
+
 CMakeFiles/zen.dir/src/texture_manager.cpp.o: CMakeFiles/zen.dir/flags.make
 CMakeFiles/zen.dir/src/texture_manager.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/texture_manager.cpp
 CMakeFiles/zen.dir/src/texture_manager.cpp.o: CMakeFiles/zen.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/zen.dir/src/texture_manager.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/zen.dir/src/texture_manager.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/zen.dir/src/texture_manager.cpp.o -MF CMakeFiles/zen.dir/src/texture_manager.cpp.o.d -o CMakeFiles/zen.dir/src/texture_manager.cpp.o -c "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/texture_manager.cpp"
 
 CMakeFiles/zen.dir/src/texture_manager.cpp.i: cmake_force
@@ -131,7 +159,7 @@ CMakeFiles/zen.dir/src/texture_manager.cpp.s: cmake_force
 CMakeFiles/zen.dir/src/water_system.cpp.o: CMakeFiles/zen.dir/flags.make
 CMakeFiles/zen.dir/src/water_system.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/water_system.cpp
 CMakeFiles/zen.dir/src/water_system.cpp.o: CMakeFiles/zen.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/zen.dir/src/water_system.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/zen.dir/src/water_system.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/zen.dir/src/water_system.cpp.o -MF CMakeFiles/zen.dir/src/water_system.cpp.o.d -o CMakeFiles/zen.dir/src/water_system.cpp.o -c "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/water_system.cpp"
 
 CMakeFiles/zen.dir/src/water_system.cpp.i: cmake_force
@@ -145,7 +173,7 @@ CMakeFiles/zen.dir/src/water_system.cpp.s: cmake_force
 CMakeFiles/zen.dir/src/weather_system.cpp.o: CMakeFiles/zen.dir/flags.make
 CMakeFiles/zen.dir/src/weather_system.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/weather_system.cpp
 CMakeFiles/zen.dir/src/weather_system.cpp.o: CMakeFiles/zen.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/zen.dir/src/weather_system.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/zen.dir/src/weather_system.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/zen.dir/src/weather_system.cpp.o -MF CMakeFiles/zen.dir/src/weather_system.cpp.o.d -o CMakeFiles/zen.dir/src/weather_system.cpp.o -c "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/weather_system.cpp"
 
 CMakeFiles/zen.dir/src/weather_system.cpp.i: cmake_force
@@ -159,7 +187,7 @@ CMakeFiles/zen.dir/src/weather_system.cpp.s: cmake_force
 CMakeFiles/zen.dir/src/world_renderer.cpp.o: CMakeFiles/zen.dir/flags.make
 CMakeFiles/zen.dir/src/world_renderer.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/world_renderer.cpp
 CMakeFiles/zen.dir/src/world_renderer.cpp.o: CMakeFiles/zen.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/zen.dir/src/world_renderer.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/zen.dir/src/world_renderer.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/zen.dir/src/world_renderer.cpp.o -MF CMakeFiles/zen.dir/src/world_renderer.cpp.o.d -o CMakeFiles/zen.dir/src/world_renderer.cpp.o -c "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/world_renderer.cpp"
 
 CMakeFiles/zen.dir/src/world_renderer.cpp.i: cmake_force
@@ -173,7 +201,7 @@ CMakeFiles/zen.dir/src/world_renderer.cpp.s: cmake_force
 CMakeFiles/zen.dir/src/cloud_manager.cpp.o: CMakeFiles/zen.dir/flags.make
 CMakeFiles/zen.dir/src/cloud_manager.cpp.o: /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/src/cloud_manager.cpp
 CMakeFiles/zen.dir/src/cloud_manager.cpp.o: CMakeFiles/zen.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/zen.dir/src/cloud_manager.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/zen.dir/src/cloud_manager.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/zen.dir/src/cloud_manager.cpp.o -MF CMakeFiles/zen.dir/src/cloud_manager.cpp.o.d -o CMakeFiles/zen.dir/src/cloud_manager.cpp.o -c "/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/src/cloud_manager.cpp"
 
 CMakeFiles/zen.dir/src/cloud_manager.cpp.i: cmake_force
@@ -187,8 +215,10 @@ CMakeFiles/zen.dir/src/cloud_manager.cpp.s: cmake_force
 # Object files for target zen
 zen_OBJECTS = \
 "CMakeFiles/zen.dir/src/main.cpp.o" \
+"CMakeFiles/zen.dir/src/chronicle.cpp.o" \
 "CMakeFiles/zen.dir/src/garden.cpp.o" \
 "CMakeFiles/zen.dir/src/garden_generator.cpp.o" \
+"CMakeFiles/zen.dir/src/life_system.cpp.o" \
 "CMakeFiles/zen.dir/src/texture_manager.cpp.o" \
 "CMakeFiles/zen.dir/src/water_system.cpp.o" \
 "CMakeFiles/zen.dir/src/weather_system.cpp.o" \
@@ -199,8 +229,10 @@ zen_OBJECTS = \
 zen_EXTERNAL_OBJECTS =
 
 zen: CMakeFiles/zen.dir/src/main.cpp.o
+zen: CMakeFiles/zen.dir/src/chronicle.cpp.o
 zen: CMakeFiles/zen.dir/src/garden.cpp.o
 zen: CMakeFiles/zen.dir/src/garden_generator.cpp.o
+zen: CMakeFiles/zen.dir/src/life_system.cpp.o
 zen: CMakeFiles/zen.dir/src/texture_manager.cpp.o
 zen: CMakeFiles/zen.dir/src/water_system.cpp.o
 zen: CMakeFiles/zen.dir/src/weather_system.cpp.o
@@ -211,7 +243,7 @@ zen: /opt/homebrew/lib/libSDL2-2.0.0.dylib
 zen: /opt/homebrew/lib/libSDL2main.a
 zen: /opt/homebrew/Cellar/sdl2_image/2.8.12_1/lib/libSDL2_image.dylib
 zen: CMakeFiles/zen.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable zen"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir="/Users/meganmiller/Documents/Documents - Megan’s MacBook Air/Prj_Zen/build/CMakeFiles" --progress-num=$(CMAKE_PROGRESS_11) "Linking CXX executable zen"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/zen.dir/link.txt --verbose=$(VERBOSE)
 	/opt/homebrew/bin/cmake -E copy_directory /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/assets /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/build/assets
 	/opt/homebrew/bin/cmake -E make_directory /Users/meganmiller/Documents/Documents\ -\ Megan’s\ MacBook\ Air/Prj_Zen/build/world_info

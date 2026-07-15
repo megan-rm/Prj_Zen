@@ -17,7 +17,9 @@ Garden::Garden(std::string st, int sw, int sh) {
 	existing_world = false;
 	tick_count = 0;
 	sim_accumulator = 0.0f;
+	chronicle = nullptr;
 	cloud_manager = nullptr;
+	life_system = nullptr;
 	texture_manager = nullptr;
 	water_system = nullptr;
 	wind_manager = nullptr;
@@ -25,13 +27,14 @@ Garden::Garden(std::string st, int sw, int sh) {
 	world_renderer = nullptr;
 
 	window = SDL_CreateWindow(window_title.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, screen_width, screen_height, SDL_WINDOW_SHOWN);	
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_TARGETTEXTURE);
 	SDL_RendererInfo info;
 	SDL_GetRendererInfo(renderer, &info);
 	printf("Renderer: %s\n", info.name);
 	SDL_GL_SetSwapInterval(0); // 0 = no vsync
 
 	debug_mode = Zen::DEBUG_MODE::NONE;
+	show_hud = true;
 
 	world.resize(Zen::TERRAIN_WIDTH / Zen::TILE_SIZE);
 	for (int i = 0; i < Zen::TERRAIN_WIDTH / Zen::TILE_SIZE; i++) {
@@ -40,7 +43,9 @@ Garden::Garden(std::string st, int sw, int sh) {
 }
 
 Garden::~Garden() {
+	delete chronicle;
 	delete cloud_manager;
+	delete life_system;
 	delete weather_system;
 	delete wind_manager;
 	delete water_system;
@@ -53,23 +58,26 @@ Garden::~Garden() {
 
 bool Garden::save_world() {
 	std::cout << "Saving world..." << std::endl;
+	if (chronicle) chronicle->record_save(); // stamp the moment we stopped simulating
+	if (life_system) {
+		life_system->return_water_to_soil(); // world.zen alone carries the whole budget
+		life_system->save_life();            // flora.zen: structure only (re-drinks on load)
+	}
 	std::ofstream file;
 	file.open(Zen::data_path("world_info/world.zen"));
 	if (file.is_open()) {
 		file << "[WORLD_PROPERTIES]" << std::endl;
-		file << Zen::mountain_end_x << "," << Zen::mountain_end_y << std::endl;
-		file << Zen::river_start_x << "," << Zen::river_end_x << std::endl;
-		file << Zen::lake_start_x << "," << Zen::lake_end_x << std::endl;
+		file << Zen::mountain_peak_x << "," << Zen::mountain_end_y << std::endl;
+		file << "LAKES," << Zen::lakes.size() << std::endl;
+		for (const auto& L : Zen::lakes) {
+			file << L.start_x << "," << L.end_x << "," << L.surface_y << std::endl;
+		}
 		file << "[WORLD_TILES]" << std::endl;
 		for (int y = 0; y < world.at(0).size(); y++) {
 			for (int x = 0; x < world.size(); x++) {
-				int img_id, permeability, saturation, max_saturation, humidity;
-				img_id = world.at(x).at(y).img_id;
-				permeability = world.at(x).at(y).permeability;
-				max_saturation = world.at(x).at(y).max_saturation;
-				saturation = world.at(x).at(y).saturation;
-				humidity = world.at(x).at(y).humidity;
-				file << img_id << "," << permeability << "," << max_saturation << "," << saturation << "," << humidity << "|";
+				const Tile& t = world.at(x).at(y);
+				file << t.img_id << "," << t.permeability << "," << t.max_saturation << ","
+				     << t.saturation << "," << t.humidity << "," << t.snow << "|";
 			}
 			file << std::endl;
 		}
@@ -92,29 +100,36 @@ bool Garden::load_world() {
 		std::string line;
 		std::getline(file, line);
 		if (line == "[WORLD_PROPERTIES]") {
+			// line 1: mountain peak x, mountain foot y
 			std::getline(file, line);
 			std::stringstream property_stream(line);
-			//MOUNTAIN LOADING
 			std::getline(property_stream, line, ',');
-			Zen::mountain_end_x = std::stoi(line);
+			try { Zen::mountain_peak_x = std::stoi(line); } catch (...) {}
 			std::getline(property_stream, line, ',');
-			Zen::mountain_end_y = std::stoi(line);
-			//RIVER LOADING
+			try { Zen::mountain_end_y = std::stoi(line); } catch (...) {}
+			// line 2: "LAKES,<count>" then <count> lines of start,end,surface_y
 			std::getline(file, line);
 			property_stream.clear();
 			property_stream.str(line);
-			std::getline(property_stream, line, ',');
-			Zen::river_start_x = std::stoi(line);
-			std::getline(property_stream, line, ',');
-			Zen::river_end_x = std::stoi(line);
-			//LAKE LOADING
-			std::getline(file, line);
-			property_stream.clear();
-			property_stream.str(line);
-			std::getline(property_stream, line, ',');
-			Zen::lake_start_x = std::stoi(line);
-			std::getline(property_stream, line, ',');
-			Zen::lake_end_x = std::stoi(line);
+			std::string tag;
+			std::getline(property_stream, tag, ',');
+			int lake_count = 0;
+			if (tag == "LAKES") { // tolerate pre-multi-lake save files
+				std::getline(property_stream, line, ',');
+				try { lake_count = std::stoi(line); } catch (...) { lake_count = 0; }
+			}
+			Zen::lakes.clear();
+			for (int i = 0; i < lake_count; i++) {
+				std::getline(file, line);
+				std::stringstream ls(line);
+				Zen::Lake_Region L;
+				try {
+					std::getline(ls, line, ','); L.start_x = std::stoi(line);
+					std::getline(ls, line, ','); L.end_x = std::stoi(line);
+					std::getline(ls, line, ','); L.surface_y = std::stoi(line);
+					Zen::lakes.push_back(L);
+				} catch (...) {}
+			}
 		}
 		else if (line == "[WORLD_TILES]") {
 			std::getline(file, line);
@@ -134,12 +149,17 @@ bool Garden::load_world() {
 					int saturation = std::stoi(line);
 					std::getline(tile_stream, line, ',');
 					int humidity = std::stoi(line);
+					int snow = 0; // optional 6th field: tolerate worlds saved before snow existed
+					if (std::getline(tile_stream, line, ',')) {
+						try { snow = std::stoi(line); } catch (...) { snow = 0; }
+					}
 					world.at(x).at(y).img_id = tile_id;
 					world.at(x).at(y).permeability = permeability;
 					world.at(x).at(y).max_saturation = max_saturation;
 					world.at(x).at(y).saturation = saturation;
-					world.at(x).at(y).temperature = -20;
+					world.at(x).at(y).temperature = 45; // mild default; the sun cycle takes over within minutes
 					world.at(x).at(y).humidity = humidity;
+					world.at(x).at(y).snow = static_cast<Uint16>(snow);
 					x++;
 					if (x >= Zen::TERRAIN_WIDTH / Zen::TILE_SIZE) {
 						x = 0;
@@ -162,24 +182,30 @@ bool Garden::load_world() {
 *	pass finishes do we copy into the render snapshot. The
 *	renderer never sees a half-updated world.
 ****************************************************************/
+void Garden::run_sim_tick() {
+	water_system->update_saturation(Zen::SIM_DT);
+	weather_system->update_temperatures(Zen::SIM_DT);
+	wind_manager->update(Zen::SIM_DT);
+	cloud_manager->sim_update();
+	// raining storms splash cold outflow gusts across the surface wind
+	for (const auto& cluster : cloud_manager->get_clusters()) {
+		if (cluster.raining) wind_manager->add_outflow(cluster.cx, cluster.radius, Zen::SIM_DT);
+	}
+	if (tick_count % 10 == 0) weather_system->sun_temperature_update();
+	life_system->update(Zen::SIM_DT);
+	tick_count++;
+}
+
 void Garden::update(float delta) {
 	sim_accumulator += delta;
 	if (sim_accumulator > 4.0f * Zen::SIM_DT) sim_accumulator = 4.0f * Zen::SIM_DT; // don't spiral after a hitch
 
 	while (sim_accumulator >= Zen::SIM_DT) {
-		water_system->update_saturation(Zen::SIM_DT);
-		weather_system->update_temperatures(Zen::SIM_DT);
-		wind_manager->update(Zen::SIM_DT);
-		cloud_manager->sim_update();
-		// raining storms splash cold outflow gusts across the surface wind
-		for (const auto& cluster : cloud_manager->get_clusters()) {
-			if (cluster.raining) wind_manager->add_outflow(cluster.cx, cluster.radius, Zen::SIM_DT);
-		}
-		if (tick_count % 10 == 0) weather_system->sun_temperature_update();
-		tick_count++;
+		run_sim_tick();
 		sim_accumulator -= Zen::SIM_DT;
 	}
 	cloud_manager->update_rain(delta); // raindrops animate every frame for smooth falling
+	life_system->update_motion(delta); // bugs glide smoothly between sim ticks
 
 	snapshot = world; // flip: publish the completed state for rendering
 }
@@ -192,9 +218,51 @@ void Garden::render(float delta) {
 	world_renderer->render_sun(time_system);
 	world_renderer->render_moon(time_system);
 	world_renderer->render_tiles(snapshot);
+	life_system->render(renderer, camera);
 	cloud_manager->render(renderer, texture_manager->get_texture("celestial_bodies"), camera, snapshot);
 	wind_manager->render(renderer, camera);
+	if (show_hud) hud.panel(renderer, 8, 8, 2, build_hud_lines());
 	SDL_RenderPresent(renderer);
+}
+
+std::vector<std::string> Garden::build_hud_lines() {
+	auto pad2 = [](int v) {
+		std::string s = std::to_string(v);
+		return s.size() < 2 ? "0" + s : s;
+	};
+	Time now = time_system.get_time();
+
+	// northern-hemisphere season by month (Dec-Feb winter ... Sep-Nov autumn)
+	static const char* season_by_month[] = { "WINTER","WINTER","SPRING","SPRING","SPRING","SUMMER",
+	                                         "SUMMER","SUMMER","AUTUMN","AUTUMN","AUTUMN","WINTER" };
+	const char* season = season_by_month[std::clamp(now.month - 1, 0, 11)];
+
+	// sample surface temperature at the middle of the view
+	int sample_x = std::clamp((camera.x + camera.w / 2) / Zen::TILE_SIZE, 0, static_cast<int>(snapshot.size()) - 1);
+	int surface_temp = 0;
+	for (int yy = 0; yy < static_cast<int>(snapshot.at(sample_x).size()); yy++) {
+		const Tile& t = snapshot.at(sample_x).at(yy);
+		if (!Zen::is_air(t) || t.saturation > 0) { surface_temp = t.temperature; break; }
+	}
+
+	int raining = 0, clouds = 0;
+	for (const auto& c : cloud_manager->get_clusters()) {
+		clouds++;
+		if (c.raining) raining++;
+	}
+
+	std::vector<std::string> lines;
+	lines.push_back(std::to_string(now.year) + "-" + pad2(now.month) + "-" + pad2(now.day)
+		+ " " + pad2(now.hour) + ":" + pad2(now.minute));
+	lines.push_back(std::string("SEASON: ") + season);
+	lines.push_back("TEMP: " + std::to_string(surface_temp) + "F");
+	lines.push_back("PLANTS: " + std::to_string(life_system->plant_count())
+		+ " FISH: " + std::to_string(life_system->fish_count()));
+	lines.push_back("BUGS: " + std::to_string(life_system->bug_count())
+		+ " BIRDS: " + std::to_string(life_system->predator_count()));
+	lines.push_back("CLOUDS: " + std::to_string(clouds)
+		+ (raining > 0 ? "  RAINING" : ""));
+	return lines;
 }
 
 void Garden::mouse_click(int x, int y) {
@@ -226,6 +294,9 @@ void Garden::input(float delta) {
 				running = false;
 				break;
 			case SDLK_SPACE:
+				break;
+			case SDLK_i:
+				show_hud = !show_hud; // toggle the stats readout
 				break;
 			case SDLK_END:
 				camera.x = Zen::TERRAIN_WIDTH - camera.w;
@@ -351,6 +422,7 @@ void Garden::init() {
 
 	world_renderer = new World_Renderer(renderer, *texture_manager, camera);
 	world_renderer->register_debug_mode(debug_mode);
+	world_renderer->bake_terrain(world); // one-time: terrain is static at runtime
 
 	water_system = new Water_System(world, 1); // mod 1: full pass every sim tick
 	if (!existing_world) {
@@ -360,6 +432,52 @@ void Garden::init() {
 	wind_manager = new Wind_Manager(world);
 	cloud_manager = new Cloud_Manager(world);
 	cloud_manager->register_wind(wind_manager);
+
+	life_system = new Life_System(world);
+	bool had_life = life_system->load_life(); // restore flora/fauna before offline catch-up
+
+	// offline time: pseudo-simulate whatever happened while the app was closed
+	chronicle = new Chronicle();
+	long gap = chronicle->load();
+	if (existing_world && gap > 0) {
+		int replay_ticks = chronicle->catch_up(world, life_system, gap);
+		for (int i = 0; i < replay_ticks; i++) {
+			run_sim_tick();
+		}
+	}
+
+	weather_system->sun_temperature_update(); // warm the surface BEFORE seeding
+	if (!had_life) {
+		life_system->scatter_seeds(400); // virgin world: first colonization
+		life_system->scatter_fish(80);   // stock the lakes/rivers/ponds with fish
+		// birds are NOT seeded here — there's no prey yet. They migrate in on
+		// their own once plants mature and a bug population establishes.
+	}
+
+	// --- diagnostic: report the world's true horizontal extent -------------
+	// if 'surfaced cols' is far below 'columns', terrain generated short and
+	// that's why the scroll range feels tiny. Reads out in the terminal.
+	{
+		int leftmost = -1, rightmost = -1, surfaced = 0;
+		for (int x = 0; x < static_cast<int>(world.size()); x++) {
+			for (int y = 0; y < static_cast<int>(world.at(x).size()); y++) {
+				const Tile& t = world.at(x).at(y);
+				if (!Zen::is_air(t) || t.saturation > 0) {
+					if (leftmost < 0) leftmost = x;
+					rightmost = x;
+					surfaced++;
+					break;
+				}
+			}
+		}
+		std::cout << "[world] columns=" << world.size()
+		          << " (" << world.size() * Zen::TILE_SIZE << "px wide)"
+		          << ", terrain in cols " << leftmost << ".." << rightmost
+		          << ", surfaced=" << surfaced
+		          << ", camera max_x=" << (Zen::TERRAIN_WIDTH - camera.w)
+		          << ", peak_x=" << Zen::mountain_peak_x
+		          << ", lakes=" << Zen::lakes.size() << std::endl;
+	}
 
 	snapshot = world; // prime the render buffer before the first frame
 }
